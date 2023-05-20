@@ -1,0 +1,88 @@
+{
+  "project_info": {
+    "project_number": "245333633905",
+    "project_id": "motiv8-cfcf1",
+    "storage_bucket": "motiv8-cfcf1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245333633905:android:522904f8b0f20ed53ca4d0",
+        "android_client_info": {
+          "package_name": "com.example.motiv8"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "245333633905-qetvn2t3jjbcti556o0psovduolui528.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4TQv65JAhaRa5dPLQjJ_2QyBhlQLyjSg"
+        },
+        {
+          "current_key": "AIzaSyA7C3VQTW7pyFeoCKYSikWbS3gsLmnm3Sg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "245333633905-9clqtocn4oqbmn5fc1pg91pvfqdlsc1n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "245333633905-a2su7c1s2e8d7pn7650sr8pjdm6km5jt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ezanatesfaye.motiv8"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245333633905:android:8e7b34dfac0f997c3ca4d0",
+        "android_client_info": {
+          "package_name": "com.example.motiv8_ai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "245333633905-qetvn2t3jjbcti556o0psovduolui528.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4TQv65JAhaRa5dPLQjJ_2QyBhlQLyjSg"
+        },
+        {
+          "current_key": "AIzaSyA7C3VQTW7pyFeoCKYSikWbS3gsLmnm3Sg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "245333633905-9clqtocn4oqbmn5fc1pg91pvfqdlsc1n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "245333633905-a2su7c1s2e8d7pn7650sr8pjdm6km5jt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ezanatesfaye.motiv8"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
