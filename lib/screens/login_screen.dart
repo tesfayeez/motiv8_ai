@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
 import 'package:motiv8_ai/commons/loader.dart';
@@ -9,6 +10,9 @@ import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
+import 'package:motiv8_ai/widgets/custom_button.dart';
+import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
+import 'package:motiv8_ai/widgets/social_login_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -62,23 +66,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider);
     return Scaffold(
+      backgroundColor: Colors.white,
       body: isLoading
           ? const Loader()
-          : Center(
+          : SafeArea(
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     children: [
-                      const Text(
-                        'Login',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 25),
+                      const SizedBox(
+                        height: 60,
+                      ),
+                      Text(
+                        'Sign In to Your Account',
+                        style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.normal,
+                            fontSize: 28),
                       ),
                       const SizedBox(
-                        height: 20,
+                        height: 10,
+                      ),
+                      Text(
+                        'Welcome back to you\'ve been missed',
+                        style: GoogleFonts.poppins(
+                            fontSize: 14, color: Pallete.greyColor),
+                      ),
+                      const SizedBox(
+                        height: 100,
                       ),
                       AuthTextField(
+                        leftIcon: const Icon(Icons.mail_rounded),
                         controller: emailController,
                         hintText: 'Email',
                         errorText: emailError,
@@ -87,6 +106,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: 25,
                       ),
                       AuthTextField(
+                        leftIcon: const Icon(Icons.lock),
                         isObescure: true,
                         controller: passwordController,
                         hintText: 'Password',
@@ -96,20 +116,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: 40,
                       ),
                       Align(
-                        alignment: Alignment.topRight,
-                        child: ElevatedButton(
-                          onPressed: onLogin,
-                          child: const Text('Login'),
-                        ),
+                        alignment: Alignment.center,
+                        child: CustomButton(text: 'Login', onPressed: onLogin),
                         // RoundedSmallButton(onTap: onLogin, label: 'Done'),
                       ),
                       const SizedBox(
-                        height: 20,
+                        height: 30,
                       ),
-                      ElevatedButton.icon(
+                      const LineWithText(
+                        text: 'or',
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      SocialLoginButton(
+                        text: 'Sign in With Google',
                         onPressed: onLoginWithGoogle,
-                        icon: const Icon(Icons.login),
-                        label: const Text('Continue with Google'),
+                        leadingIcon: const Icon(Icons.abc),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      SocialLoginButton(
+                        text: 'Sign in With Apple',
+                        onPressed: () {},
+                        leadingIcon: const Icon(Icons.apple),
+                      ),
+                      const SizedBox(
+                        height: 55,
                       ),
                       const SizedBox(
                         height: 40,
@@ -118,12 +152,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         text: TextSpan(
                           text: 'Don\'t have an account?',
                           style: const TextStyle(
-                              fontSize: 16, color: Pallete.greyColor),
+                            fontSize: 16,
+                            color: Pallete.greyColor,
+                          ),
                           children: [
                             TextSpan(
                               text: ' Sign up',
                               style: const TextStyle(
-                                  color: Pallete.blueColor, fontSize: 16),
+                                  color: Colors.purple, fontSize: 16),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   Navigator.push(
