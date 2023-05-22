@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
+import 'package:motiv8_ai/widgets/custom_appbar.dart';
 
 class GenerateAI extends ConsumerWidget {
   GenerateAI({Key? key}) : super(key: key);
@@ -21,10 +22,7 @@ Overall, Motiv8-AI is a powerful tool for young adults and professionals who are
   Widget build(BuildContext context, WidgetRef ref) {
     ThemeData themeData = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Chat Motiv8-AI', style: themeData.textTheme.titleLarge),
-        backgroundColor: themeData.primaryColor,
-      ),
+      appBar: CustomAppBar(title: 'Chat Motiv8-AI'),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

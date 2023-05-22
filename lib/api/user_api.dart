@@ -14,6 +14,7 @@ abstract class IUserAPI {
   FutureEither<void> deleteUser(String userId);
   FutureEither<void> updateUser(UserModel user);
   Stream<QuerySnapshot<Map<String, dynamic>>> usersStream();
+  Future<bool> userExists(String uid);
 }
 
 class UserAPI implements IUserAPI {
@@ -24,6 +25,14 @@ class UserAPI implements IUserAPI {
   }) : _db = db;
 
   late final _usersCollection = _db.collection('users');
+
+  @override
+  Future<bool> userExists(String uid) async {
+    DocumentSnapshot userSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+    return userSnapshot.exists;
+  }
 
   @override
   FutureEither<UserModel> createUser(UserModel user) async {

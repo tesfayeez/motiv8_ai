@@ -1,0 +1,16 @@
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/api/auth_api.dart';
+import 'package:motiv8_ai/commons/auth_text_field.dart';
+import 'package:motiv8_ai/commons/loader.dart';
+import 'package:motiv8_ai/commons/pallete_colors.dart';
+import 'package:motiv8_ai/commons/validators.dart';
+import 'package:motiv8_ai/controllers/auth_controllers.dart';
+import 'package:motiv8_ai/screens/homeview_screen.dart';
+import 'package:motiv8_ai/screens/login_screen.dart';
+import 'package:motiv8_ai/screens/signup_screen.dart';
+import 'package:motiv8_ai/widgets/custom_button.dart';
+import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
+import 'package:motiv8_ai/widgets/social_login_button.dart';

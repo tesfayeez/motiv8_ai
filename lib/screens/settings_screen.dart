@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
+import 'package:motiv8_ai/screens/account_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -44,7 +45,7 @@ class SettingsScreen extends ConsumerWidget {
             : const Icon(Icons.person),
         title: const Text('Account'),
         onTap: () {
-          // TODO: Navigate to account screen
+          Navigator.of(context).push(AccountScreen.route());
         },
       ),
       ListTile(

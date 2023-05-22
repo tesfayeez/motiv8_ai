@@ -1,81 +1,144 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
+import 'package:motiv8_ai/widgets/circular_progress.dart';
 import 'package:motiv8_ai/widgets/task_panel_wiget.dart';
 
+import 'package:flutter/material.dart';
+
 class GoalCard extends StatelessWidget {
-  final Goal goal;
-  const GoalCard({super.key, required this.goal});
+  final String title;
+  final String description;
+  final DateTime goalDate;
+  final String alarmTime;
+  final String currentTime;
+  final double percentage;
+
+  GoalCard(
+      {required this.title,
+      required this.description,
+      required this.goalDate,
+      required this.alarmTime,
+      required this.currentTime,
+      required this.percentage});
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context); // Accessing the ThemeData
+    double width = MediaQuery.of(context).size.width * 0.93;
+    double height = MediaQuery.of(context).size.height * 0.15;
+
     return Card(
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        side: const BorderSide(color: Colors.grey, width: 0.5), // Grey border
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(
+            10.0), // Adjust the radius to suit your needs.
       ),
-      elevation: 0.3,
-      color:
-          themeData.colorScheme.surface, // Using surface color from ThemeData
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
+      child: Container(
+        width: width,
+        height: height,
+        padding: EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  capitalize(goal.name),
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    color: themeData.colorScheme
-                        .onSurface, // Using onSurface color from ThemeData
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      description,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                      ),
+                    ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      'Goal Date: ${DateFormat.yMMMd().format(goalDate)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.delete,
-                    color: Colors.red,
-                  ),
+                SizedBox(
+                  height: 60,
+                  width: 60,
+                  child: CircleProgress(percent: percentage),
                 )
               ],
             ),
-            const SizedBox(height: 8.0),
-            Text(
-              goal.description,
-              style: TextStyle(
-                  fontSize: 16.0,
-                  color: themeData.colorScheme
-                      .onSurface), // Using onSurface color from ThemeData
+            Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  height: 30.0, // Set the height
+                  width: 90.0, // Set the width
+                  child: ElevatedButton(
+                      onPressed: () {
+                        // Handle reschedule goal
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(Colors.blue),
+                        shape: MaterialStateProperty.all(
+                          const StadiumBorder(),
+                        ),
+                        padding: MaterialStateProperty.all(const EdgeInsets.all(
+                            0)), // remove padding to reduce the size of the button
+                      ),
+                      child: Text(
+                        'Reschedule',
+                        style: GoogleFonts.poppins(
+                            fontSize: 11, fontWeight: FontWeight.w500),
+                      )),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.alarm,
+                      color: Colors.blue,
+                      size: 18,
+                    ),
+                    const SizedBox(
+                      width: 2,
+                    ),
+                    Text(
+                      alarmTime,
+                      style:
+                          GoogleFonts.poppins(fontSize: 10, color: Colors.grey),
+                    ),
+                    const SizedBox(width: 8.0),
+                    const Icon(
+                      Icons.access_time,
+                      color: Colors.blue,
+                      size: 18,
+                    ),
+                    SizedBox(
+                      width: 2,
+                    ),
+                    Text(
+                      currentTime,
+                      style:
+                          GoogleFonts.poppins(fontSize: 10, color: Colors.grey),
+                    ),
+                  ],
+                )
+              ],
             ),
-            const SizedBox(height: 8.0),
-            Text(
-              'Start Date: ${goal.startDate?.toIso8601String()}',
-              style: TextStyle(
-                  fontSize: 14.0,
-                  color: themeData.colorScheme
-                      .onSurface), // Using onSurface color from ThemeData
-            ),
-            Text(
-              'End Date: ${goal.endDate?.toIso8601String()}',
-              style: TextStyle(
-                  fontSize: 14.0,
-                  color: themeData.colorScheme
-                      .onSurface), // Using onSurface color from ThemeData
-            ),
-            Text(
-              'Reminder Frequency: ${goal.reminderFrequency}',
-              style: TextStyle(
-                  fontSize: 14.0,
-                  color: themeData.colorScheme
-                      .onSurface), // Using onSurface color from ThemeData
-            ),
-            const SizedBox(height: 8.0),
-            TaskPanel(tasks: goal.tasks ?? [])
           ],
         ),
       ),

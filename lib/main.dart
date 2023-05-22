@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:motiv8_ai/commons/global_providers.dart';
 import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/add_goals_screen.dart';
+import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/screens/onboarding_screen.dart';
@@ -22,6 +24,8 @@ void main() async {
   await container.read(firebaseInitializerProvider);
 
   tz.initializeTimeZones();
+  FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
   // FirebaseMessaging.instance.getToken().then((String? token) {
   //   assert(token != null);
   //   print("FCM Registration Token: $token");
@@ -44,7 +48,7 @@ void main() async {
     UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
-        home: isFirstTime ? OnboardingScreen() : const MyApp(),
+        home: isFirstTime ? const OnboardingScreen() : const MyApp(),
       ),
     ),
   );
@@ -65,7 +69,7 @@ class MyApp extends ConsumerWidget {
               if (user != null) {
                 return const HomeViewScreen();
               }
-              return const LoginScreen();
+              return const GeneralLoginScreen();
             },
             error: (error, st) => ErrorText(error: error.toString()),
             loading: () => const LoadingPage(),

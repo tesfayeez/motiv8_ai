@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SocialLoginButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  final Icon leadingIcon;
+  final String svgAssetName;
 
   const SocialLoginButton({
     Key? key,
     required this.text,
     required this.onPressed,
-    required this.leadingIcon,
+    required this.svgAssetName,
   }) : super(key: key);
 
   @override
@@ -40,7 +41,11 @@ class SocialLoginButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            leadingIcon,
+            SvgPicture.asset(
+              svgAssetName,
+              height: 24, // Adjust the size as needed
+              width: 24, // Adjust the size as needed
+            ),
             const SizedBox(width: 10),
             Text(
               text,

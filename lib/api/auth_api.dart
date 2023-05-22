@@ -14,7 +14,10 @@ final authAPIProvider = Provider((ref) {
 });
 
 abstract class IAuthAPI {
-  FutureEither signup({required String email, required String password});
+  FutureEither signup(
+      {required String email,
+      required String password,
+      required String username});
 
   FutureEither<UserCredential> login(
       {required String email, required String password});
@@ -66,17 +69,23 @@ class AuthAPI implements IAuthAPI {
   //   }
   // }
   @override
-  FutureEither<User> signup(
-      {required String email, required String password}) async {
+  FutureEither<User> signup({
+    required String email,
+    required String password,
+    required String username,
+  }) async {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
-      await _userApi.createUser(UserModel(
-          id: userCredential.user!.uid,
-          name: '', // You'll need to get the name from somewhere
-          email: email,
-          interests: [] // You'll need to get the interests from somewhere
-          ));
+      if (!(await _userApi.userExists(userCredential.user!.uid))) {
+        await _userApi.createUser(UserModel(
+            id: userCredential.user!.uid,
+            name: username, // You'll need to get the name from somewhere
+            email: email,
+            interests: [] // You'll need to get the interests from somewhere
+            ));
+      }
+      ;
       return right(userCredential.user!);
     } on FirebaseAuthException catch (e, stackTrace) {
       print('Error creating user with email and password: $e');
@@ -150,12 +159,14 @@ class AuthAPI implements IAuthAPI {
       final googleAuthCredential = await _getGoogleAuthCredential(googleUser);
       final userCredential =
           await _auth.signInWithCredential(googleAuthCredential);
-      await _userApi.createUser(UserModel(
-          id: userCredential.user!.uid,
-          name: userCredential.user!.displayName ?? '',
-          email: userCredential.user!.email ?? '',
-          interests: [] // You'll need to get the interests from somewhere
-          ));
+      if (!(await _userApi.userExists(userCredential.user!.uid))) {
+        await _userApi.createUser(UserModel(
+            id: userCredential.user!.uid,
+            name: userCredential.user!.displayName ?? '',
+            email: userCredential.user!.email ?? '',
+            interests: [] // You'll need to get the interests from somewhere
+            ));
+      }
       return right(userCredential);
     } catch (e, stackTrace) {
       return left(Failure(e.toString(), stackTrace));

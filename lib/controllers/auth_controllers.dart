@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/main.dart';
+import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 
@@ -33,10 +34,12 @@ class AuthController extends StateNotifier<bool> {
   void signUp({
     required String email,
     required String password,
+    required String username,
     required BuildContext context,
   }) async {
     state = true;
-    final res = await _authAPI.signup(email: email, password: password);
+    final res = await _authAPI.signup(
+        email: email, password: password, username: username);
     state = false;
     res.fold(
       (l) {
@@ -77,7 +80,7 @@ class AuthController extends StateNotifier<bool> {
     res.fold((l) => null, (r) {
       Navigator.pushAndRemoveUntil(
         context,
-        LoginScreen.route(),
+        GeneralLoginScreen.route(),
         (route) => false,
       );
     });

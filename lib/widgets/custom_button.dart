@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final void Function()? onPressed;
 
   const CustomButton({
     Key? key,
