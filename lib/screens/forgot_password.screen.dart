@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
 import 'package:motiv8_ai/commons/pallete_colors.dart';
+import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
@@ -79,10 +81,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         const SizedBox(
                           height: 25,
                         ),
-                        CustomButton(
-                          text: 'Continue',
-                          onPressed: () {
-                            Navigator.of(context).push(LoginScreen.route());
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final authController =
+                                ref.watch(authControllerProvider.notifier);
+                            return CustomButton(
+                              text: 'Continue',
+                              onPressed: () {
+                                authController.resetPassword(
+                                    email: emailTextController.text);
+                                // Consider showing a success message to the user, indicating that the reset password email has been sent
+                                // Navigate to the login screen
+                                showSnackBar(
+                                    "Password reset email has been sent to $emailTextController.text. Please check your inbox.");
+                                Navigator.of(context).push(LoginScreen.route());
+                              },
+                            );
                           },
                         ),
                         const SizedBox(

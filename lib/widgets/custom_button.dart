@@ -22,7 +22,7 @@ class CustomButton extends StatelessWidget {
         style: ButtonStyle(
           elevation: MaterialStateProperty.all(1), // light grey shadow
           backgroundColor:
-              MaterialStateProperty.all(Colors.deepPurple), // button color
+              MaterialStateProperty.all(Colors.blue), // button color
           shape: MaterialStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(

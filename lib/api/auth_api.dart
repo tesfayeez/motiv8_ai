@@ -26,11 +26,12 @@ abstract class IAuthAPI {
 
   FutureEither<void> signoutUser();
 
-  User? getCurrentUser();
-
   FutureEither<UserCredential> signInWithGoogle();
+  FutureEither<void> resetPassword(String email);
 
   // FutureEither<UserCredential> signInWithApple();
+  // Future<UserModel?> getCurrentUser();
+  User? getCurrentUser();
 }
 
 class AuthAPI implements IAuthAPI {
@@ -51,23 +52,15 @@ class AuthAPI implements IAuthAPI {
   }
 
   // @override
-  // FutureEither<User> signup(
-  //     {required String email, required String password}) async {
-  //   try {
-  //     final userCredential = await _auth.createUserWithEmailAndPassword(
-  //         email: email, password: password);
-  //     return right(userCredential.user!);
-  //   } on FirebaseAuthException catch (e, stackTrace) {
-  //     print('Error creating user with email and password: $e');
-  //     return left(
-  //       Failure(e.message ?? 'Some unexpected error occurred', stackTrace),
-  //     );
-  //   } catch (e, stackTrace) {
-  //     return left(
-  //       Failure(e.toString(), stackTrace),
-  //     );
+  // Future<UserModel?> getCurrentUser() async {
+  //   final firebaseUser = _auth.currentUser;
+  //   if (firebaseUser != null) {
+  //     print('firebaseuser ${firebaseUser.uid}');
+  //     return await _userApi.getUser(firebaseUser.uid);
   //   }
+  //   return null;
   // }
+
   @override
   FutureEither<User> signup({
     required String email,
@@ -77,15 +70,12 @@ class AuthAPI implements IAuthAPI {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
-      if (!(await _userApi.userExists(userCredential.user!.uid))) {
-        await _userApi.createUser(UserModel(
-            id: userCredential.user!.uid,
-            name: username, // You'll need to get the name from somewhere
-            email: email,
-            interests: [] // You'll need to get the interests from somewhere
-            ));
-      }
-      ;
+      await _userApi.createUser(UserModel(
+          id: userCredential.user!.uid,
+          name: username, // You'll need to get the name from somewhere
+          email: email,
+          interests: [] // You'll need to get the interests from somewhere
+          ));
       return right(userCredential.user!);
     } on FirebaseAuthException catch (e, stackTrace) {
       print('Error creating user with email and password: $e');
@@ -159,47 +149,33 @@ class AuthAPI implements IAuthAPI {
       final googleAuthCredential = await _getGoogleAuthCredential(googleUser);
       final userCredential =
           await _auth.signInWithCredential(googleAuthCredential);
-      if (!(await _userApi.userExists(userCredential.user!.uid))) {
-        await _userApi.createUser(UserModel(
-            id: userCredential.user!.uid,
-            name: userCredential.user!.displayName ?? '',
-            email: userCredential.user!.email ?? '',
-            interests: [] // You'll need to get the interests from somewhere
-            ));
-      }
+      await _userApi.createUser(UserModel(
+          id: userCredential.user!.uid,
+          name: userCredential.user!.displayName ?? '',
+          email: userCredential.user!.email ?? '',
+          interests: [] // You'll need to get the interests from somewhere
+          ));
       return right(userCredential);
     } catch (e, stackTrace) {
       return left(Failure(e.toString(), stackTrace));
     }
   }
 
-  // @override
-  // FutureEither<UserCredential> signInWithApple() async {
-  //   try {
-  //     final oauthCred = await SignInWithApple.getAppleIDCredential(
-  //       scopes: [
-  //         AppleIDAuthorizationScopes.email,
-  //         AppleIDAuthorizationScopes.fullName,
-  //       ],
-  //     );
-
-  //     final credential = OAuthProvider("apple.com").credential(
-  //       idToken: oauthCred.identityToken,
-  //       accessToken: oauthCred.authorizationCode,
-  //     );
-
-  //     final userCredential = await _auth.signInWithCredential(credential);
-  //     await _userApi.createUser(UserModel(
-  //         id: userCredential.user!.uid,
-  //         name: userCredential.user!.displayName ?? '',
-  //         email: userCredential.user!.email ?? '',
-  //         interests: [] // You'll need to get the interests from somewhere
-  //         ));
-  //     return right(userCredential);
-  //   } catch (e, stackTrace) {
-  //     return left(Failure(e.toString(), stackTrace));
-  //   }
-  // }
+  @override
+  FutureEither<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      return right(null);
+    } on FirebaseAuthException catch (e, stackTrace) {
+      return left(
+        Failure(e.message ?? 'Some unexpected error occurred', stackTrace),
+      );
+    } catch (e, stackTrace) {
+      return left(
+        Failure(e.toString(), stackTrace),
+      );
+    }
+  }
 }
 
 class Failure {

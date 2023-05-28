@@ -2,18 +2,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
-import 'package:uuid/uuid.dart';
+import 'package:motiv8_ai/widgets/add_goals_text_field.dart';
+import 'package:motiv8_ai/widgets/custom_appbar.dart';
+import 'package:motiv8_ai/widgets/custom_button.dart';
+import 'package:motiv8_ai/widgets/custom_date_picker.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class AddGoalScreen extends ConsumerStatefulWidget {
-  const AddGoalScreen({super.key});
-
   static Route route() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) =>
@@ -34,55 +37,75 @@ class AddGoalScreen extends ConsumerStatefulWidget {
     );
   }
 
+  const AddGoalScreen({Key? key}) : super(key: key);
+
   @override
   _AddGoalScreenState createState() => _AddGoalScreenState();
 }
 
 class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController timeController = TextEditingController();
+  final TextEditingController targetDateController = TextEditingController();
+  final TextEditingController startingDateController = TextEditingController();
+  AsyncValue<List<String>>? taskListAsyncValue;
   DateTime? startDate;
   DateTime? endDate;
   Goal? currentGoal;
   User? currentUser;
-  bool isTitleFilled = false;
-  bool isDescriptionFilled = false;
-  bool isStartDateSelected = false;
-  bool isEndDateSelected = false;
-  AsyncValue<List<String>>? taskListAsyncValue;
 
-  Future<DateTime?> _selectDate(
-      BuildContext context, DateTime initialDate) async {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      DateTime? pickedDate;
-      await showCupertinoModalPopup(
-        context: context,
-        builder: (context) => SizedBox(
-          height: 200,
-          child: CupertinoDatePicker(
-            mode: CupertinoDatePickerMode.date,
-            initialDateTime: initialDate,
-            minimumDate: initialDate,
-            onDateTimeChanged: (DateTime newDate) {
-              pickedDate = newDate;
-            },
-          ),
-        ),
-      );
-      return pickedDate;
-    } else {
-      return await showDatePicker(
-        context: context,
-        initialDate: initialDate,
-        firstDate: initialDate,
-        lastDate: DateTime(2101),
-      );
+  final TextStyle textStyle = GoogleFonts.poppins(
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
+  );
+  DateTime? parseDate(String dateString) {
+    final DateFormat format = DateFormat('EEEE | MMM d, yyyy');
+    try {
+      return format.parse(dateString);
+    } catch (e) {
+      print('Invalid date format: $dateString');
+      return null;
     }
+  }
+
+  bool _checkFieldsFilled() {
+    bool isFilled = true;
+
+    if (titleController.text.isEmpty) {
+      isFilled = false;
+      // titleController.clear();
+      // titleController.text = 'Please enter Goal name';
+    }
+
+    if (descriptionController.text.isEmpty) {
+      isFilled = false;
+      // descriptionController.clear();
+      // descriptionController.text = 'Please enter Description';
+    }
+
+    if (timeController.text.isEmpty) {
+      isFilled = false;
+      // timeController.clear();
+      // timeController.text = 'Please select Time';
+    }
+
+    if (targetDateController.text.isEmpty) {
+      isFilled = false;
+    } else {
+      endDate = parseDate(targetDateController.text);
+    }
+
+    if (startingDateController.text.isEmpty) {
+      isFilled = false;
+    } else {
+      startDate = parseDate(startingDateController.text);
+    }
+    return isFilled;
   }
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
     if (ref.watch(currentUserProvider) != null) {
       currentUser = ref.watch(currentUserProvider);
     }
@@ -90,216 +113,152 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
       taskListAsyncValue =
           ref.watch(generateGoalTasksControllerProvider(currentGoal!));
     }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Your Goals!', style: themeData.textTheme.titleLarge),
-        backgroundColor: Colors.transparent,
-        elevation: 0.0, // to remove the shadow under the AppBar
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.close, color: themeData.primaryIconTheme.color),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
+      appBar: CustomAppBar(
+        title: 'Add Goal',
+        isCenterTitle: true,
       ),
       body: SafeArea(
         child: ListView(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          children: <Widget>[
-            // Your widgets go here...
-            const SizedBox(
-              height: 20,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          children: [
+            SectionWidget(
+              title: 'Name',
+              controller: titleController,
+              hintText: 'Enter Goal name',
             ),
-
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                onChanged: (value) => isTitleFilled = value.isNotEmpty,
-                controller: titleController,
-                decoration: InputDecoration(
-                  labelStyle: themeData.textTheme.bodyLarge,
-                  labelText: 'Goal Title',
-                  border: const OutlineInputBorder(),
-                ),
-              ),
+            SectionWidget(
+              title: 'Description',
+              controller: descriptionController,
+              hintText: 'Enter Description',
+              isHeightGrow: true,
             ),
-            const SizedBox(height: 16.0),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                onChanged: (value) => isDescriptionFilled = value.isNotEmpty,
-                controller: descriptionController,
-                decoration: InputDecoration(
-                  labelStyle: themeData.textTheme.bodyLarge,
-                  labelText: 'Description',
-                  border: const OutlineInputBorder(),
-                ),
-              ),
+            SectionWidget(
+              title: 'Time',
+              controller: timeController,
+              hintText: 'Time',
+              hasSuffixIcon: true,
+              isDate: false,
+              isDatePicker: true,
             ),
-            const SizedBox(height: 16.0),
-            //  date pickers
-
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0, right: 20, top: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  InkWell(
-                    onTap: () async {
-                      DateTime? pickedDate =
-                          await _selectDate(context, DateTime.now());
-                      if (pickedDate != null) {
-                        setState(() {
-                          isStartDateSelected = true;
-                          startDate = pickedDate;
-                        });
-                      }
+            SectionWidget(
+              title: 'Target Date',
+              controller: targetDateController,
+              hintText: 'No due date',
+              hasSuffixIcon: true,
+              isDatePicker: true,
+            ),
+            SectionWidget(
+              title: 'Starting Date',
+              controller: startingDateController,
+              hintText: 'No due date',
+              hasSuffixIcon: true,
+              isDatePicker: true,
+            ),
+            CustomButton(
+              text: 'Create',
+              onPressed: () {
+                if (_checkFieldsFilled()) {
+                  print("startDate");
+                  print(startDate);
+                  print(endDate);
+                  print(currentUser!.uid);
+                  ref.read(goalControllerProvider.notifier).createGoal(
+                        name: titleController.text,
+                        reminderFrequency: '',
+                        description: descriptionController.text,
+                        startDate: startDate,
+                        endDate: endDate,
+                        tasks: [],
+                        context: context,
+                        userID: currentUser!.uid,
+                      );
+                  Navigator.of(context).pop();
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CupertinoAlertDialog(
+                        title: Text('Incomplete Fields'),
+                        content:
+                            Text('Please fill in all the required fields.'),
+                        actions: [
+                          TextButton(
+                            child: Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
                     },
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    child: Text(startDate == null
-                        ? 'Select Start Date'
-                        : '${startDate!.toLocal()}'.split(' ')[0]),
-                  ),
-                  const Icon(Icons.arrow_forward),
-                  Theme(
-                    data: themeData,
-                    child: InkWell(
-                      onTap: () async {
-                        DateTime? pickedDate =
-                            await _selectDate(context, DateTime.now());
-                        if (pickedDate != null) {
-                          setState(() {
-                            isEndDateSelected = true;
-                            endDate = pickedDate;
-                          });
-                        }
-                      },
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      child: Text(
-                        endDate == null
-                            ? 'Select End Date'
-                            : '${endDate!.toLocal()}'.split(' ')[0],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(45.0),
-              child: TextButton(
-                onPressed: isTitleFilled &&
-                        isDescriptionFilled &&
-                        isStartDateSelected &&
-                        isEndDateSelected
-                    ? () async {
-                        currentGoal = Goal(
-                          id: const Uuid().v4(),
-                          userID: currentUser!.uid,
-                          name: titleController.text,
-                          description: descriptionController.text,
-                          startDate: startDate,
-                          endDate: endDate,
-                        );
-                        taskListAsyncValue = ref.watch(
-                            generateGoalTasksControllerProvider(currentGoal!));
-                      }
-                    : null,
-                child: const Text('Generate AI TASK'),
-              ),
-            ),
-            if (taskListAsyncValue != null)
-              taskListAsyncValue!.when(
-                data: (tasks) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: tasks
-                          .map((task) => Card(
-                                color: Colors.white70,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    task,
-                                    style: const TextStyle(color: Colors.black),
-                                  ),
-                                ),
-                              ))
-                          .toList(),
-                    ),
                   );
-                },
-                loading: () => const CupertinoActivityIndicator(
-                  radius: 14,
-                  color: Colors.amber,
-                ),
-                error: (_, __) => const Text('An error occurred'),
-              ),
-            const SizedBox(
-              height: 5,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(45.0),
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                    (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.pressed)) {
-                        return themeData.primaryColorLight;
-                      }
-                      return themeData.colorScheme
-                          .background; // Use the component's default.
-                    },
-                  ),
-                  foregroundColor: MaterialStateProperty.all<Color?>(
-                      themeData.buttonTheme.colorScheme?.onPrimary),
-                ),
-                onPressed: isTitleFilled &&
-                        isDescriptionFilled &&
-                        isStartDateSelected &&
-                        isEndDateSelected
-                    // (taskListAsyncValue?.when(
-                    //       data: (tasks) => tasks.isNotEmpty,
-                    //       loading: () => false,
-                    //       error: (_, __) => false,
-                    //     ) ??
-                    //     false)
-                    ? () {
-                        taskListAsyncValue?.when(
-                          data: (tasks) {
-                            ref
-                                .read(goalControllerProvider.notifier)
-                                .createGoal(
-                                  name: titleController.text,
-                                  reminderFrequency: '',
-                                  description: descriptionController.text,
-                                  startDate: startDate,
-                                  endDate: endDate,
-                                  tasks: tasks,
-                                  context: context,
-                                  userID: currentUser!.uid,
-                                );
-                            Navigator.of(context).pop();
-                          },
-                          loading: () => const Loader(),
-                          error: (error, stackTrace) {
-                            // handle the error state if necessary
-                          },
-                        );
-                      }
-                    : null,
-                child: const Text('Submit Goal'),
-              ),
+                }
+              },
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class SectionWidget extends StatelessWidget {
+  final String title;
+  final TextEditingController controller;
+  final String hintText;
+  final bool isHeightGrow;
+  final bool hasSuffixIcon;
+  final bool isDatePicker;
+  final bool isDate;
+
+  const SectionWidget({
+    required this.title,
+    required this.controller,
+    required this.hintText,
+    this.isHeightGrow = false,
+    this.hasSuffixIcon = false,
+    this.isDatePicker = false,
+    this.isDate = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style:
+                GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 10),
+        if (isDatePicker)
+          SizedBox(
+            child: CustomDatePicker(
+              controller: controller,
+              showDate: isDate,
+              title: title,
+            ),
+          )
+        else if (isHeightGrow)
+          SizedBox(
+            child: GoalsTextField(
+              controller: controller,
+              hasSuffixIcon: hasSuffixIcon,
+              hintText: hintText,
+              isHeightGrow: true,
+            ),
+          )
+        else
+          SizedBox(
+            child: GoalsTextField(
+              controller: controller,
+              hasSuffixIcon: hasSuffixIcon,
+              hintText: hintText,
+            ),
+          ),
+        const SizedBox(height: 15),
+      ],
     );
   }
 }

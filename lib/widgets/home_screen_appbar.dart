@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/screens/add_goals_screen.dart';
 
 class CustomHomeScreenAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -11,23 +12,18 @@ class CustomHomeScreenAppBar extends StatelessWidget
       {required this.name, required this.subtitle, required this.message});
 
   @override
-  Size get preferredSize => Size.fromHeight(80.0);
+  Size get preferredSize => Size.fromHeight(100.0);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
+      automaticallyImplyLeading: false,
       title: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
-            const CircleAvatar(
-              radius: 25, // Reduced the radius
-              // Add your avatar image here
-              backgroundColor: Colors.grey,
-            ),
-            SizedBox(width: 10),
             Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,29 +57,15 @@ class CustomHomeScreenAppBar extends StatelessWidget
           ],
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(
-            Icons.settings,
-            color: Colors.grey,
-            size: 24,
-          ),
-          onPressed: () {
-            // Handle your button onTap here
-            print('Settings button tapped');
-          },
+      actions: const [
+        CircleAvatar(
+          radius: 25, // Reduced the radius
+          // Add your avatar image here
+          backgroundColor: Colors.grey,
         ),
-        IconButton(
-          icon: const Icon(
-            Icons.add,
-            color: Colors.grey,
-            size: 24,
-          ),
-          onPressed: () {
-            // Handle your button onTap here
-            print('Add button tapped');
-          },
-        )
+        SizedBox(
+          width: 5,
+        ),
       ],
     );
   }

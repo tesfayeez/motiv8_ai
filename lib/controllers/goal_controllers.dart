@@ -17,7 +17,8 @@ final goalControllerProvider =
 final getGoalsStreamProvider =
     StreamProvider.autoDispose.family<List<Goal>, String>((ref, userID) {
   final goalController = ref.watch(goalControllerProvider.notifier);
-  final selectedDate = ref.watch(selectedDayProvider);
+  final selectedDate = ref.watch(calendarStateProvider).selectedDay;
+  print("Selected date $selectedDate");
   return goalController.getGoalsStream(userID, selectedDate);
 });
 
@@ -88,11 +89,27 @@ class GoalController extends StateNotifier<bool> {
   }
 
   Stream<List<Goal>> getGoalsStream(String userID, DateTime? selectedDate) {
-    print(userID);
-    print(selectedDate);
-    return _goalAPI.goalsStream(userID).map((snapshot) => snapshot.docs
-        .map((doc) => Goal.fromMap(doc.data()..['id'] = doc.id))
-        .where((goal) => isSameDay(goal.startDate, selectedDate))
-        .toList());
+    print("here at getGoalsStream $userID");
+    print("here at getGoalsStream $selectedDate");
+
+    return _goalAPI.goalsStream(userID).map((snapshot) {
+      List<Goal> goals = snapshot.docs
+          .map((doc) => Goal.fromMap(doc.data()..['id'] = doc.id))
+          .where((goal) {
+        if (selectedDate != null) {
+          return goal.startDate?.day == selectedDate.day &&
+              goal.startDate?.month == selectedDate.month &&
+              goal.startDate?.year == selectedDate.year;
+        } else {
+          // Handle the case when selectedDate is null
+          // For example, you can choose to include all goals
+          return true;
+        }
+      }).toList();
+
+      goals.forEach((goal) => print(goal)); // Print each goal
+
+      return goals;
+    });
   }
 }

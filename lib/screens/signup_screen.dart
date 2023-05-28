@@ -10,6 +10,7 @@ import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
+import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/social_login_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -96,10 +97,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                if (isLoading)
-                  const CircularProgressIndicator(
-                    color: Colors.purple,
-                  ),
+                if (isLoading) CustomProgressIndicator(),
                 const SizedBox(
                   height: 10,
                 ),
@@ -134,7 +132,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     scale: 1.2, // Adjust the scale to make checkbox bigger
                     child: Checkbox(
                       checkColor: Colors.white,
-                      activeColor: Colors.purple,
+                      activeColor: Colors.blue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                             3), // Adjust the border radius to make checkbox rounded
@@ -237,8 +235,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     children: [
                       TextSpan(
                         text: ' Login',
-                        style:
-                            const TextStyle(color: Colors.purple, fontSize: 16),
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontSize: 16,
+                        ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.push(

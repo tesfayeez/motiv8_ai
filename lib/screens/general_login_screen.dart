@@ -142,7 +142,9 @@ class _GeneralLoginScreenState extends ConsumerState<GeneralLoginScreen> {
                             TextSpan(
                               text: ' Sign up',
                               style: const TextStyle(
-                                  color: Colors.purple, fontSize: 16),
+                                color: Colors.blue,
+                                fontSize: 16,
+                              ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   Navigator.push(

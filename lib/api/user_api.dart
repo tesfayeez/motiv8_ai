@@ -15,6 +15,7 @@ abstract class IUserAPI {
   FutureEither<void> updateUser(UserModel user);
   Stream<QuerySnapshot<Map<String, dynamic>>> usersStream();
   Future<bool> userExists(String uid);
+  Future<UserModel> getUser(String uid);
 }
 
 class UserAPI implements IUserAPI {
@@ -70,5 +71,14 @@ class UserAPI implements IUserAPI {
   @override
   Stream<QuerySnapshot<Map<String, dynamic>>> usersStream() {
     return _usersCollection.snapshots();
+  }
+
+  Future<UserModel> getUser(String uid) async {
+    final userSnapshot = await _usersCollection.doc(uid).get();
+    if (userSnapshot.exists) {
+      return UserModel.fromMap(userSnapshot.data()!..['id'] = userSnapshot.id);
+    } else {
+      throw Exception('User not found');
+    }
   }
 }

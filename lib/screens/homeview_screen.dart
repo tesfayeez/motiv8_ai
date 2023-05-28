@@ -39,25 +39,25 @@ class _HomeViewScreenState extends State<HomeViewScreen> {
           BottomNavigationBarItem(
             icon: Icon(
               _page == 0 ? Icons.home_filled : Icons.home_outlined,
-              color: themeData.primaryIconTheme.color,
+              color: Colors.blue,
             ),
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.search,
-              color: themeData.primaryIconTheme.color,
+              color: Colors.blue,
             ),
           ),
           BottomNavigationBarItem(
             icon: Icon(
               _page == 2 ? Icons.analytics : Icons.analytics_outlined,
-              color: themeData.primaryIconTheme.color,
+              color: Colors.blue,
             ),
           ),
           BottomNavigationBarItem(
             icon: Icon(
               _page == 3 ? Icons.settings : Icons.settings_applications_sharp,
-              color: themeData.primaryIconTheme.color,
+              color: Colors.blue,
             ),
           )
         ],

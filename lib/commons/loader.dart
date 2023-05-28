@@ -10,7 +10,9 @@ class Loader extends StatelessWidget {
 
     return Center(
       child: platform == TargetPlatform.iOS || platform == TargetPlatform.macOS
-          ? const CupertinoActivityIndicator()
+          ? const CupertinoActivityIndicator(
+              color: Colors.blue,
+            )
           : const CircularProgressIndicator(),
     );
   }

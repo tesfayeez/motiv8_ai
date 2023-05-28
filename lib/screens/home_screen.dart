@@ -11,10 +11,13 @@ import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/main.dart';
+import 'package:motiv8_ai/models/goals_model.dart';
+import 'package:motiv8_ai/models/user_model.dart';
 import 'package:motiv8_ai/screens/add_goals_screen.dart';
 import 'package:motiv8_ai/widgets/caledarView_widget.dart';
 import 'package:motiv8_ai/widgets/goal_card_widget.dart';
 import 'package:motiv8_ai/widgets/home_screen_appbar.dart';
+import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 
 final notificationButtonProvider = Provider<Function>((ref) {
   final notificationService = ref.read(notificationServiceProvider);
@@ -41,127 +44,191 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   User? currentUser;
 
-  List<Widget> generateRandomGoalCards(int count) {
-    List<Widget> cards = [];
+  List<Goal> generateRandomGoals(int count) {
+    List<Goal> goals = [];
     Random random = Random();
 
     for (int i = 0; i < count; i++) {
       int randomHour = random.nextInt(24);
       int randomMinute = random.nextInt(60);
-      double percentage = random.nextDouble();
+      int percentage = random.nextInt(10);
       String title = "Goal ${i + 1}";
       String description = "Description for Goal ${i + 1}";
       DateTime goalDate = DateTime.now().add(Duration(days: i));
       String alarmTime = "${randomHour}:${randomMinute} pm";
       String currentTime = "${DateTime.now().hour}:${DateTime.now().minute} pm";
 
-      cards.add(GoalCard(
-        title: title,
+      goals.add(Goal(
+        id: i.toString(),
+        userID: '',
+        name: title,
         description: description,
-        goalDate: goalDate,
-        alarmTime: alarmTime,
-        currentTime: currentTime,
-        percentage: percentage,
+        startDate: goalDate,
+        endDate: goalDate,
       ));
     }
 
-    return cards;
+    return goals;
   }
 
   @override
   Widget build(BuildContext context) {
     final showNotificationOnClick = ref.read(notificationButtonProvider);
+
     if (ref.watch(currentUserProvider) != null) {
       currentUser = ref.watch(currentUserProvider);
     }
+
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Add your onPressed code here!
+          print("Floating Action Button pressed");
+
+          Navigator.of(context).push(
+            AddGoalScreen.route(),
+          );
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(
+          Icons.add,
+          size: 30,
+        ),
+      ),
       backgroundColor: Colors.white,
       appBar: CustomHomeScreenAppBar(
-          name: "Ezana",
-          subtitle: DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now()),
-          message: 'Have a nice day!'),
-      // floatingActionButton: SizedBox(
-      //   height: 50.0, // Specify the height of the button
-      //   width: 50.0, // Specify the width of the button
-      //   child: FittedBox(
-      //     child: FloatingActionButton(
-      //       onPressed: () => Navigator.of(context).push(AddGoalScreen.route()),
-      //       // Set the shape of the button to be square
-      //       shape:
-      //           RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      //       child: const Icon(
-      //         Icons.add,
-      //         color: Colors.blue,
-      //       ),
-      //     ),
-      //   ),
-      // ),
+        name: 'Ezana',
+        subtitle: DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now()),
+        message: 'Have a nice day!',
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Padding(
+              //   padding: const EdgeInsets.all(16.0),
+              //   child: Text(
+              //     'Create and check daily goals',
+              //     style: GoogleFonts.poppins(
+              //       fontSize: 28,
+              //       fontWeight: FontWeight.w500,
+              //     ),
+              //   ),
+              // ),
               Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Create and check daily goals',
-                  style: GoogleFonts.poppins(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w500,
-                  ),
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.format_quote_sharp,
+                      size: 25,
+                    ),
+                    const SizedBox(height: 5.0),
+                    Text(
+                      '\"Dream big,work hard,stay focused and surround your self with positive people who belive in you',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.black,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                child: Divider(
+                  thickness: 0.9,
+                  color: Colors.black54,
                 ),
               ),
               const SizedBox(height: 10.0),
               CalendarView(key: widget.key),
-              const SizedBox(height: 16.0),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Divider(
-                  thickness: 0.9,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 10.0),
               Column(
-                children: generateRandomGoalCards(10),
-              )
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'My Goals',
+                      style: GoogleFonts.poppins(
+                        fontSize: 25,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  // Padding(
+                  //   padding: EdgeInsets.zero,
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: List.generate(
+                  //       10, // Number of goals
+                  //       (index) {
+                  //         Goal goal = generateRandomGoals(10)[index];
+                  //         Random random = Random();
+                  //         int randomHour = random.nextInt(24);
+                  //         int randomMinute = random.nextInt(60);
+                  //         String alarmTime = "${randomHour}:${randomMinute} pm";
+                  //         String currentTime =
+                  //             "${DateTime.now().hour}:${DateTime.now().minute} pm";
+                  //         return GoalCard(
+                  //           goalModel: goal,
+                  //           goalDate: goal.startDate!,
+                  //           alarmTime: alarmTime, // Set your alarm time here
+                  //           currentTime:
+                  //               currentTime, // Set your current time here
+                  //           percentage: 10, // Set your percentage here
+                  //         );
+                  //       },
+                  //     ),
+                  //   ),
+                  // ),
 
-              // Card(
-              //   elevation: 1.0,
-              //   child: Padding(
-              //     padding: const EdgeInsets.all(16.0),
-              //     child: Column(
-              //       crossAxisAlignment: CrossAxisAlignment.start,
-              //       children: [
-              //         const Text(
-              //           'Tasks for the day',
-              //           style: TextStyle(
-              //             fontSize: 18,
-              //             fontWeight: FontWeight.bold,
-              //           ),
-              //         ),
-              //         const SizedBox(
-              //           height: 10,
-              //         ),
-              //         // List your goals for the day here
-              //         ref.watch(getGoalsStreamProvider(currentUser!.uid)).when(
-              //               data: (goals) {
-              //                 return ListView.builder(
-              //                   shrinkWrap: true,
-              //                   itemCount: goals.length,
-              //                   itemBuilder: (context, index) {
-              //                     final goal = goals[index];
+                  // List your goals for the day here
+                  ref.watch(getGoalsStreamProvider(currentUser!.uid)).when(
+                        data: (goals) {
+                          if (goals != null) {
+                            print(goals);
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: goals.length,
+                              itemBuilder: (context, index) {
+                                final goal = goals[index];
+                                Random random = Random();
+                                int randomHour = random.nextInt(24);
+                                int randomMinute = random.nextInt(60);
+                                int percentage = random.nextInt(10);
+                                DateTime goalDate = DateTime.now()
+                                    .add(Duration(days: goals.length));
+                                String alarmTime =
+                                    "${randomHour}:${randomMinute} pm";
+                                String currentTime =
+                                    "${DateTime.now().hour}:${DateTime.now().minute} pm";
 
-              //                     return GoalCard(goal: goal);
-              //                   },
-              //                 );
-              //               },
-              //               loading: () => const CircularProgressIndicator(),
-              //               error: (error, _) => Text('Error: $error'),
-              //             ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
+                                return GoalCard(
+                                  goalModel: goal,
+                                  goalDate: goalDate,
+                                  alarmTime: alarmTime,
+                                  currentTime: currentTime,
+                                  percentage: 100,
+                                );
+                              },
+                            );
+                          } else {
+                            return Center(child: Text('No goals available'));
+                          }
+                        },
+                        loading: () => Center(child: CustomProgressIndicator()),
+                        error: (error, _) => Text('Errorrrr: $error'),
+                      ),
+                ],
+              ),
             ],
           ),
         ),

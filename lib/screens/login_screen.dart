@@ -15,6 +15,7 @@ import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
+import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/social_login_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -37,7 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     }, (user) {
       // handle successful login
-      Navigator.of(context).push(HomeViewScreen.route());
+      Navigator.of(context).pushReplacement(HomeViewScreen.route());
     });
   }
 
@@ -106,11 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(
                   height: 25,
                 ),
-                if (isLoading)
-                  const CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.purple,
-                  ),
+                if (isLoading) CustomProgressIndicator(),
                 const SizedBox(
                   height: 65,
                 ),
@@ -149,7 +146,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           'Forgot Password?',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.purple,
+                            color: Colors.blue,
                           ),
                         )),
                   ],
@@ -161,7 +158,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   alignment: Alignment.center,
                   child: CustomButton(
                     text: 'Login',
-                    onPressed: checkIfValid() ? onLogin : null,
+                    onPressed: onLogin,
                   ),
                   // RoundedSmallButton(onTap: onLogin, label: 'Done'),
                 ),
@@ -201,7 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextSpan(
                         text: ' Sign up',
                         style:
-                            const TextStyle(color: Colors.purple, fontSize: 16),
+                            const TextStyle(color: Colors.blue, fontSize: 16),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.push(
