@@ -18,6 +18,7 @@ import 'package:motiv8_ai/widgets/caledarView_widget.dart';
 import 'package:motiv8_ai/widgets/goal_card_widget.dart';
 import 'package:motiv8_ai/widgets/home_screen_appbar.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
+import 'package:path_provider/path_provider.dart';
 
 final notificationButtonProvider = Provider<Function>((ref) {
   final notificationService = ref.read(notificationServiceProvider);
@@ -163,38 +164,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(
                     height: 10,
                   ),
-                  // Padding(
-                  //   padding: EdgeInsets.zero,
-                  //   child: Column(
-                  //     crossAxisAlignment: CrossAxisAlignment.start,
-                  //     children: List.generate(
-                  //       10, // Number of goals
-                  //       (index) {
-                  //         Goal goal = generateRandomGoals(10)[index];
-                  //         Random random = Random();
-                  //         int randomHour = random.nextInt(24);
-                  //         int randomMinute = random.nextInt(60);
-                  //         String alarmTime = "${randomHour}:${randomMinute} pm";
-                  //         String currentTime =
-                  //             "${DateTime.now().hour}:${DateTime.now().minute} pm";
-                  //         return GoalCard(
-                  //           goalModel: goal,
-                  //           goalDate: goal.startDate!,
-                  //           alarmTime: alarmTime, // Set your alarm time here
-                  //           currentTime:
-                  //               currentTime, // Set your current time here
-                  //           percentage: 10, // Set your percentage here
-                  //         );
-                  //       },
-                  //     ),
-                  //   ),
-                  // ),
 
                   // List your goals for the day here
-                  ref.watch(getGoalsStreamProvider(currentUser!.uid)).when(
+                  // ref.watch(getGoalsStreamProvider(currentUser!.uid)).when(
+                  //       data: (goals) {
+                  //         if (goals != null) {
+                  //           print(goals);
+                  //           return ListView.builder(
+                  //             shrinkWrap: true,
+                  //             itemCount: goals.length,
+                  //             itemBuilder: (context, index) {
+                  //               final goal = goals[index];
+                  //               Random random = Random();
+                  //               int randomHour = random.nextInt(24);
+                  //               int randomMinute = random.nextInt(60);
+                  //               int percentage = random.nextInt(10);
+                  //               DateTime goalDate = DateTime.now()
+                  //                   .add(Duration(days: goals.length));
+                  //               String alarmTime =
+                  //                   "${randomHour}:${randomMinute} pm";
+                  //               String currentTime =
+                  //                   "${DateTime.now().hour}:${DateTime.now().minute} pm";
+
+                  //               return GoalCard(
+                  //                 goalModel: goal,
+                  //                 goalDate: goalDate,
+                  //                 alarmTime: alarmTime,
+                  //                 currentTime: currentTime,
+                  //                 percentage: 100,
+                  //               );
+                  //             },
+                  //           );
+                  //         } else {
+                  //           return Center(child: Text('No goals available'));
+                  //         }
+                  //       },
+                  //       loading: () => Center(child: CustomProgressIndicator()),
+                  //       error: (error, _) => Text('Errorrrr: $error'),
+                  //     ),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final goalsAsyncValue = ref.watch(goalsProvider);
+                      return goalsAsyncValue.when(
                         data: (goals) {
-                          if (goals != null) {
-                            print(goals);
+                          print("goals from home");
+                          print(goals);
+                          if (goals.isNotEmpty) {
                             return ListView.builder(
                               shrinkWrap: true,
                               itemCount: goals.length,
@@ -218,6 +233,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   currentTime: currentTime,
                                   percentage: 100,
                                 );
+                                // ... code for building the GoalCard
                               },
                             );
                           } else {
@@ -225,8 +241,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           }
                         },
                         loading: () => Center(child: CustomProgressIndicator()),
-                        error: (error, _) => Text('Errorrrr: $error'),
-                      ),
+                        error: (error, _) => Text('Error: $error'),
+                      );
+                    },
+                  )
                 ],
               ),
             ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
@@ -6,6 +7,7 @@ import 'package:motiv8_ai/widgets/custom_checkbox.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
+import 'package:vibration/vibration.dart';
 
 class GoalCard extends StatefulWidget {
   final Goal goalModel;
@@ -52,6 +54,75 @@ class _GoalCardState extends State<GoalCard> {
     return path;
   }
 
+  Future<void> showDialogForEditingGoal() {
+    return showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.7),
+      builder: (context) {
+        return SimpleDialog(
+          title: Text('Options'),
+          children: [
+            SimpleDialogOption(
+              onPressed: () {
+                // Edit goal
+                // Perform the action for editing the goal here
+              },
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Edit goal'),
+                  Icon(Icons.edit),
+                ],
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                // Duplicate goal
+                // Perform the action for duplicating the goal here
+              },
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Duplicate goal'),
+                  Icon(Icons.content_copy),
+                ],
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                // Complete goal
+                // Perform the action for completing the goal here
+              },
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Complete goal'),
+                  Icon(Icons.check_circle),
+                ],
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                // Delete goal
+                // Perform the action for deleting the goal here
+              },
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    'Delete goal',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  Icon(Icons.delete, color: Colors.red),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width * 0.93;
@@ -64,7 +135,14 @@ class _GoalCardState extends State<GoalCard> {
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: GestureDetector(
+        onLongPress: () {
+          // Vibration.vibrate();
+          HapticFeedback.heavyImpact();
+          showDialogForEditingGoal();
+        },
         onTap: () {
+          HapticFeedback.lightImpact();
+
           print("Clicked ${widget.goalModel.name}");
         },
         child: SizedBox(
@@ -208,75 +286,7 @@ class _GoalCardState extends State<GoalCard> {
                 top: -8,
                 child: IconButton(
                   icon: Icon(Icons.more_horiz),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      barrierColor: Colors.black.withOpacity(0.7),
-                      builder: (context) {
-                        return SimpleDialog(
-                          title: Text('Options'),
-                          children: [
-                            SimpleDialogOption(
-                              onPressed: () {
-                                // edit goal
-                              },
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text('Edit goal'),
-                                  Icon(Icons.edit),
-                                ],
-                              ),
-                            ),
-                            SimpleDialogOption(
-                              onPressed: () {
-                                // duplicate goal
-                              },
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text('Duplicate goal'),
-                                  Icon(Icons.content_copy),
-                                ],
-                              ),
-                            ),
-                            SimpleDialogOption(
-                              onPressed: () {
-                                // complete goal
-                              },
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text('Complete goal'),
-                                  Icon(Icons.check_circle),
-                                ],
-                              ),
-                            ),
-                            SimpleDialogOption(
-                              onPressed: () {
-                                // delete goal
-                              },
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text(
-                                    'Delete goal',
-                                    style:
-                                        GoogleFonts.poppins(color: Colors.red),
-                                  ),
-                                  Icon(Icons.delete, color: Colors.red),
-                                ],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
+                  onPressed: () {},
                 ),
               ),
             ],

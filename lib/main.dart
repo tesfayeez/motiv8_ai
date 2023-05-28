@@ -12,6 +12,7 @@ import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/screens/onboarding_screen.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -77,6 +78,37 @@ class MyApp extends ConsumerWidget {
     );
   }
 }
+
+// class MyApp extends ConsumerWidget {
+//   const MyApp({Key? key}) : super(key: key);
+
+//   Future<String> getDatabaseFilePath() async {
+//     final directory = await getApplicationDocumentsDirectory();
+//     final path = directory.path;
+//     return path;
+//   }
+
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+
+//     return MaterialApp(
+//       scaffoldMessengerKey: scaffoldMessengerKey,
+//       navigatorKey: navigatorKey,
+//       theme: themeData,
+//       title: 'Motiv8',
+//       home: ref.watch(currentUserProviderStream).when(
+//             data: (user) {
+//               if (user != null) {
+//                 return const HomeViewScreen();
+//               }
+//               return const GeneralLoginScreen();
+//             },
+//             error: (error, st) => ErrorText(error: error.toString()),
+//             loading: () => const LoadingPage(),
+//           ),
+//     );
+//   }
+// }
 
 class ErrorText extends StatelessWidget {
   final String error;
