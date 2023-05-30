@@ -7,6 +7,7 @@ import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/commons/pallete_colors.dart';
 import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
+import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
@@ -67,6 +68,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final navigatorKey = ref.read(navigatorKeyProvider);
     final isLoading = ref.watch(authControllerProvider);
     return Scaffold(
       backgroundColor: Colors.white,
@@ -119,7 +121,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 ),
                 CustomTextField(
                   leftIcon: const Icon(Icons.lock),
-                  isObescure: true,
+                  isObscure: true,
                   controller: passwordController,
                   hintText: 'Password',
                   errorText: passwordError,
@@ -241,8 +243,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            Navigator.push(
-                              context,
+                            navigatorKey.currentState!.push(
                               LoginScreen.route(),
                             );
                           },

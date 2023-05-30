@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/account_screen.dart';
+import 'package:motiv8_ai/widgets/custom_appbar.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -15,23 +16,11 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
-    Widget appBar = AppBar(
-      title: const Text('Settings'),
-    );
-
-    if (isIOS) {
-      appBar = const CupertinoNavigationBar(
-        automaticallyImplyLeading: false,
-        middle: Text('Settings'),
-        backgroundColor: Colors.transparent,
-        border: null,
-      );
-    }
-
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: appBar,
+      appBar: CustomAppBar(
+        isCenterTitle: true,
+        title: 'Settings',
+        isBottomLinePresent: true,
       ),
       body: _buildSettingsList(context, isIOS, ref),
     );

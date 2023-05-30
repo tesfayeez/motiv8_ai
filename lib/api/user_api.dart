@@ -15,11 +15,12 @@ abstract class IUserAPI {
   FutureEither<void> updateUser(UserModel user);
   Stream<QuerySnapshot<Map<String, dynamic>>> usersStream();
   Future<bool> userExists(String uid);
-  Future<UserModel> getUser(String uid);
+  Stream<UserModel> getUser(String uid);
 }
 
 class UserAPI implements IUserAPI {
   final FirebaseFirestore _db;
+  final Map<String, Stream<UserModel>> _cache = {};
 
   UserAPI({
     required FirebaseFirestore db,
@@ -35,10 +36,24 @@ class UserAPI implements IUserAPI {
     return userSnapshot.exists;
   }
 
+  // @override
+  // FutureEither<UserModel> createUser(UserModel user) async {
+  //   try {
+  //     final userDocument = await _usersCollection.add(user.toMap());
+  //     final userSnapshot = await userDocument.get();
+  //     final createdUser =
+  //         UserModel.fromMap(userSnapshot.data()!..['id'] = userSnapshot.id);
+  //     return right(createdUser);
+  //   } catch (e, st) {
+  //     return left(Failure(e.toString(), st));
+  //   }
+  // }
   @override
   FutureEither<UserModel> createUser(UserModel user) async {
     try {
-      final userDocument = await _usersCollection.add(user.toMap());
+      final userDocument =
+          _usersCollection.doc(user.id); // Use user.id as the document ID
+      await userDocument.set(user.toMap()); // Set the document data
       final userSnapshot = await userDocument.get();
       final createdUser =
           UserModel.fromMap(userSnapshot.data()!..['id'] = userSnapshot.id);
@@ -73,12 +88,21 @@ class UserAPI implements IUserAPI {
     return _usersCollection.snapshots();
   }
 
-  Future<UserModel> getUser(String uid) async {
-    final userSnapshot = await _usersCollection.doc(uid).get();
-    if (userSnapshot.exists) {
-      return UserModel.fromMap(userSnapshot.data()!..['id'] = userSnapshot.id);
+  Stream<UserModel> getUser(String uid) {
+    print("user id is $uid");
+    if (_cache.containsKey(uid)) {
+      return _cache[uid]!;
     } else {
-      throw Exception('User not found');
+      final userStream = _usersCollection.doc(uid).snapshots().map((snapshot) {
+        if (snapshot.exists) {
+          return UserModel.fromMap(snapshot.data()!..['id'] = snapshot.id);
+        } else {
+          throw Exception('User not found');
+        }
+      });
+
+      _cache[uid] = userStream;
+      return userStream;
     }
   }
 }

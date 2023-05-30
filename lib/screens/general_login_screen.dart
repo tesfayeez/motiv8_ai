@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
@@ -70,10 +71,8 @@ class _GeneralLoginScreenState extends ConsumerState<GeneralLoginScreen> {
                       const SizedBox(
                         height: 20,
                       ),
-                      Image.asset(
-                        'assets/login.png',
-                        height: 300,
-                      ),
+                      SvgPicture.asset('assets/signin.svg',
+                          semanticsLabel: 'Acme Logo'),
                       const SizedBox(
                         height: 20,
                       ),

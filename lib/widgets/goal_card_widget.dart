@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
+import 'package:motiv8_ai/controllers/auth_controllers.dart';
+import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/widgets/custom_checkbox.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -9,7 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
 import 'package:vibration/vibration.dart';
 
-class GoalCard extends StatefulWidget {
+class GoalCard extends ConsumerStatefulWidget {
   final Goal goalModel;
   final DateTime goalDate;
   final String alarmTime;
@@ -28,7 +31,7 @@ class GoalCard extends StatefulWidget {
   _GoalCardState createState() => _GoalCardState();
 }
 
-class _GoalCardState extends State<GoalCard> {
+class _GoalCardState extends ConsumerState<GoalCard> {
   late ConfettiController _confettiController;
   bool _isSelected = false;
 
@@ -79,6 +82,16 @@ class _GoalCardState extends State<GoalCard> {
               onPressed: () {
                 // Duplicate goal
                 // Perform the action for duplicating the goal here
+                ref.watch(goalControllerProvider.notifier).createGoal(
+                    name: "${widget.goalModel.name} Duplicate",
+                    description: widget.goalModel.description,
+                    startDate: widget.goalModel.startDate,
+                    endDate: widget.goalModel.endDate,
+                    reminderFrequency: '',
+                    tasks: [],
+                    context: context,
+                    userID: ref.watch(currentUserProvider)!.uid);
+                Navigator.of(context).pop();
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,6 +118,10 @@ class _GoalCardState extends State<GoalCard> {
               onPressed: () {
                 // Delete goal
                 // Perform the action for deleting the goal here
+                ref
+                    .watch(goalControllerProvider.notifier)
+                    .deleteGoal(goalId: widget.goalModel.id, context: context);
+                Navigator.of(context).pop();
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,7 +143,6 @@ class _GoalCardState extends State<GoalCard> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width * 0.93;
-    double height = MediaQuery.of(context).size.height * 0.15;
 
     if (widget.percentage == 100) {
       _confettiController.play();
@@ -147,13 +163,21 @@ class _GoalCardState extends State<GoalCard> {
         },
         child: SizedBox(
           width: width,
-          height: height,
           child: Stack(
             children: [
-              Card(
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+              Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 3,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
@@ -173,33 +197,35 @@ class _GoalCardState extends State<GoalCard> {
                             },
                           ),
                           const SizedBox(width: 5.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 2.0),
-                              Text(
-                                capitalize(widget.goalModel.name),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 2.0),
+                                Text(
+                                  capitalize(widget.goalModel.name),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 5.0),
-                              Text(
-                                capitalize(widget.goalModel.description),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
+                                const SizedBox(height: 5.0),
+                                Text(
+                                  capitalize(widget.goalModel.description),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 5.0),
-                              Text(
-                                'Goal Date: ${DateFormat.yMMMd().format(widget.goalDate)}',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: Colors.black54,
+                                const SizedBox(height: 5.0),
+                                Text(
+                                  'Goal Date: ${DateFormat.yMMMd().format(widget.goalDate)}',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.black54,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           const SizedBox(
                             width: 30,
@@ -282,11 +308,11 @@ class _GoalCardState extends State<GoalCard> {
                   ),
                 ),
               Positioned(
-                right: 1,
-                top: -8,
-                child: IconButton(
-                  icon: Icon(Icons.more_horiz),
-                  onPressed: () {},
+                right: 15,
+                top: 5,
+                child: GestureDetector(
+                  onTap: showDialogForEditingGoal,
+                  child: const Icon(Icons.more_horiz),
                 ),
               ),
             ],

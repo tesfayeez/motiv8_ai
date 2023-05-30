@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+import '../main.dart';
+
+class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
   final Color backgroundColor;
   final bool isBackPresent;
+  final bool isClosePresent;
   final bool isCenterTitle;
   final bool isBottomLinePresent;
 
@@ -12,12 +16,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.backgroundColor = Colors.white,
     this.isBackPresent = true,
+    this.isClosePresent = false,
     this.isCenterTitle = false,
     this.isBottomLinePresent = false,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final navigatorKey = ref.watch(navigatorKeyProvider);
     return AppBar(
       backgroundColor: backgroundColor,
       elevation: 0.0,
@@ -28,9 +34,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 color: Colors.black,
                 size: 25,
               ),
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => navigatorKey.currentState!.pop(),
             )
-          : null,
+          : isClosePresent
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.close,
+                    color: Colors.black,
+                    size: 25,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : null,
       title: Text(
         title,
         style: GoogleFonts.poppins(

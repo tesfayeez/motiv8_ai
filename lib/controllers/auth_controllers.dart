@@ -10,7 +10,10 @@ import 'package:motiv8_ai/screens/login_screen.dart';
 
 final authControllerProvider =
     StateNotifierProvider<AuthController, bool>((ref) {
-  return AuthController(authAPI: ref.watch(authAPIProvider));
+  return AuthController(
+    authAPI: ref.watch(authAPIProvider),
+    scaffoldMessengerKey: ref.watch(scaffoldMessengerKeyProvider),
+  );
 });
 
 final currentUserProviderStream = StreamProvider((ref) {
@@ -29,8 +32,12 @@ final currentUserProvider = Provider<User?>((ref) {
 
 class AuthController extends StateNotifier<bool> {
   final AuthAPI _authAPI;
-  AuthController({required AuthAPI authAPI})
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey;
+  AuthController(
+      {required AuthAPI authAPI,
+      required GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey})
       : _authAPI = authAPI,
+        _scaffoldMessengerKey = scaffoldMessengerKey,
         super(false);
 
   User? getCurrentUser() => _authAPI.getCurrentUser();
@@ -92,7 +99,8 @@ class AuthController extends StateNotifier<bool> {
     });
   }
 
-  void resetPassword({required String email}) async {
+  void resetPassword(
+      {required BuildContext context, required String email}) async {
     final res = await _authAPI.resetPassword(email);
     res.fold(
       (l) {
@@ -100,14 +108,16 @@ class AuthController extends StateNotifier<bool> {
         showSnackBar(l.message);
       },
       (r) {
+        showSnackBar(
+            "Password reset email has been sent to $email.text. Please check your inbox.");
         print("Password reset email sent");
         // Navigate to login screen or show a dialog notifying the user about the password reset email
       },
     );
   }
-}
 
-void showSnackBar(String message) {
-  final snackBar = SnackBar(content: Text(message));
-  scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
+  void showSnackBar(String message) {
+    final snackBar = SnackBar(content: Text(message));
+    _scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
+  }
 }

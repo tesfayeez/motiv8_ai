@@ -1,4 +1,3 @@
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +15,8 @@ import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/social_login_button.dart';
+
+import '../main.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -37,7 +38,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     }, (user) {
       // handle successful login
-      Navigator.of(context).pushReplacement(HomeViewScreen.route());
+      final navigatorKey = ref.read(navigatorKeyProvider);
+      navigatorKey.currentState!.pushReplacement(HomeViewScreen.route());
     });
   }
 
@@ -76,6 +78,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final navigatorKey = ref.read(navigatorKeyProvider);
     final isLoading = ref.watch(authControllerProvider);
     return Scaffold(
       backgroundColor: Colors.white,
@@ -121,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 CustomTextField(
                   leftIcon: const Icon(Icons.lock),
-                  isObescure: true,
+                  isObscure: true,
                   controller: passwordController,
                   hintText: 'Password',
                   errorText: passwordError,
@@ -200,10 +203,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             const TextStyle(color: Colors.blue, fontSize: 16),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            Navigator.push(
-                              context,
-                              SignUpScreen.route(),
-                            );
+                            navigatorKey.currentState!
+                                .push(SignUpScreen.route());
                           },
                       ),
                     ],

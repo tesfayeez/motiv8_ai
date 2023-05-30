@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
 import 'package:intl/intl.dart';
+
 class CustomDatePicker extends StatefulWidget {
   @override
   _CustomDatePickerState createState() => _CustomDatePickerState();
@@ -25,7 +26,9 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
               onDateTimeChanged: (DateTime newDate) {
                 setState(() {
                   selectedDate = newDate;
-                  dateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);;
+                  dateController.text =
+                      DateFormat('yyyy-MM-dd').format(selectedDate);
+                  ;
                 });
               },
               initialDateTime: DateTime.now(),
@@ -63,7 +66,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     return CustomTextField(
       leftIcon: const Icon(Icons.calendar_month),
       controller: dateController,
-      readOnly: true,
+      enabled: false,
       onTap: () => _selectDate(context),
       hintText: 'Date of Birth',
     );

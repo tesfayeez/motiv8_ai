@@ -74,7 +74,8 @@ class AuthAPI implements IAuthAPI {
           id: userCredential.user!.uid,
           name: username, // You'll need to get the name from somewhere
           email: email,
-          interests: [] // You'll need to get the interests from somewhere
+          profilePic: ''
+          // You'll need to get the interests from somewhere
           ));
       return right(userCredential.user!);
     } on FirebaseAuthException catch (e, stackTrace) {
@@ -153,7 +154,8 @@ class AuthAPI implements IAuthAPI {
           id: userCredential.user!.uid,
           name: userCredential.user!.displayName ?? '',
           email: userCredential.user!.email ?? '',
-          interests: [] // You'll need to get the interests from somewhere
+          profilePic: googleUser.photoUrl ??
+              '' // You'll need to get the interests from somewhere
           ));
       return right(userCredential);
     } catch (e, stackTrace) {

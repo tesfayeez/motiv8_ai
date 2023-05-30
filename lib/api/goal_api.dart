@@ -29,7 +29,10 @@ class GoalAPI implements IGoalAPI {
   @override
   FutureEither<Goal> createGoal(Goal goal) async {
     try {
-      final goalDocument = await _goalsCollection.add(goal.toMap());
+      final goalDocument =
+          _goalsCollection.doc(goal.id); // Use user.id as the document ID
+      await goalDocument.set(goal.toMap());
+
       final goalSnapshot = await goalDocument.get();
       final createdGoal =
           Goal.fromMap(goalSnapshot.data()!..['id'] = goalSnapshot.id);

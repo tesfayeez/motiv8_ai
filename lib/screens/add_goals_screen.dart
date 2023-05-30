@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
@@ -13,8 +12,6 @@ import 'package:motiv8_ai/widgets/add_goals_text_field.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/custom_date_picker.dart';
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class AddGoalScreen extends ConsumerStatefulWidget {
   static Route route() {
@@ -115,7 +112,10 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: CustomAppBar(
+        isClosePresent: true,
+        isBackPresent: false,
         title: 'Add Goal',
         isCenterTitle: true,
       ),
@@ -160,10 +160,6 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
               text: 'Create',
               onPressed: () {
                 if (_checkFieldsFilled()) {
-                  print("startDate");
-                  print(startDate);
-                  print(endDate);
-                  print(currentUser!.uid);
                   ref.read(goalControllerProvider.notifier).createGoal(
                         name: titleController.text,
                         reminderFrequency: '',
@@ -180,12 +176,12 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                     context: context,
                     builder: (BuildContext context) {
                       return CupertinoAlertDialog(
-                        title: Text('Incomplete Fields'),
-                        content:
-                            Text('Please fill in all the required fields.'),
+                        title: const Text('Incomplete Fields'),
+                        content: const Text(
+                            'Please fill in all the required fields.'),
                         actions: [
                           TextButton(
-                            child: Text('OK'),
+                            child: const Text('OK'),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
