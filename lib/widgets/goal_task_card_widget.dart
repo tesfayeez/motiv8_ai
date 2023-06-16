@@ -34,15 +34,13 @@ class GoalTaskCardWidget extends ConsumerWidget {
     final isGoalTaskPresent = goalTask != null;
     final theme = ref.watch(themeProvider);
 
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+    return Container(
+      margin: const EdgeInsets.only(right: 10.0),
+      width: double.infinity - 40,
+      decoration: cardBoxDecoration(),
       child: Stack(
         children: [
           Container(
-            height: 100,
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
@@ -57,29 +55,32 @@ class GoalTaskCardWidget extends ConsumerWidget {
                 ),
                 const SizedBox(width: 5),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        goalTask!.name,
-                        style: GoogleFonts.poppins(
-                            fontSize: 14, fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        goalTask!.description,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: GoogleFonts.poppins(fontSize: 12),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(DateFormat('MMMM d, yyyy').format(goalTask!.date),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 40.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          goalTask!.name,
                           style: GoogleFonts.poppins(
-                              color: Colors.grey,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500)),
-                    ],
+                              fontSize: 14, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          goalTask!.description,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: GoogleFonts.poppins(fontSize: 12),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(DateFormat('MMMM d, yyyy').format(goalTask!.date),
+                            style: GoogleFonts.poppins(
+                                color: Colors.grey,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500)),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -92,7 +93,7 @@ class GoalTaskCardWidget extends ConsumerWidget {
             child: GestureDetector(
               onTap: addTaskCallback,
               child: Container(
-                width: 35,
+                width: 40,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
                   borderRadius: BorderRadius.only(

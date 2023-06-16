@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -40,12 +41,32 @@ Path drawCircle(Size size) {
   return path;
 }
 
-DateTime? parseDate(String dateString) {
+DateTime parseDate(String dateString, {bool regularDate = false}) {
   final DateFormat format = DateFormat('EEEE | MMM d, yyyy');
   try {
-    return format.parse(dateString);
+    if (regularDate) {
+      final regularFormat = DateFormat('yyyy, M, d');
+      final regularDateString = regularFormat.format(format.parse(dateString));
+      return DateTime.parse(regularDateString);
+    } else {
+      return format.parse(dateString);
+    }
   } catch (e) {
     print('Invalid date format: $dateString');
-    return null;
+    return DateTime.now();
   }
+}
+
+BoxDecoration cardBoxDecoration() {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(10),
+    color: Colors.white,
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.2),
+        offset: const Offset(2, 2),
+        blurRadius: 5,
+      ),
+    ],
+  );
 }

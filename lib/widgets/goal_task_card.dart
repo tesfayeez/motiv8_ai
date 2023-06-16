@@ -14,7 +14,7 @@ class GoalTaskCard extends StatelessWidget {
   final VoidCallback? addTaskCallback;
   final bool isNotAddable;
 
-  GoalTaskCard(
+  const GoalTaskCard(
       {this.goalTask,
       this.goal,
       this.goalTaskCallback,
@@ -43,7 +43,7 @@ class GoalTaskCard extends StatelessWidget {
           ),
           side: !isNotAddable
               ? BorderSide.none
-              : BorderSide(
+              : const BorderSide(
                   color: Color(0xFF00C853), // Set the desired border color here
                   width: 1.0, // Set the desired border width here
                 ),

@@ -17,7 +17,7 @@ class GoalsTextField extends StatelessWidget {
     borderSide: BorderSide(color: Color.fromARGB(255, 175, 228, 254)),
   );
 
-  GoalsTextField({
+  const GoalsTextField({
     required this.hintText,
     this.hasSuffixIcon = false,
     required this.controller,
@@ -38,6 +38,7 @@ class GoalsTextField extends StatelessWidget {
 
   TextField _buildTextField() {
     return TextField(
+      keyboardType: TextInputType.text,
       focusNode: focusNode,
       cursorHeight: 20,
       inputFormatters: [
@@ -57,11 +58,11 @@ class GoalsTextField extends StatelessWidget {
           borderSide: BorderSide(
             color: controller.text.isNotEmpty
                 ? Colors.blue
-                : Color.fromARGB(255, 175, 228, 254),
+                : const Color.fromARGB(255, 175, 228, 254),
           ),
         ),
         focusedBorder: customBorder.copyWith(
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: Colors.blue,
           ),
         ),

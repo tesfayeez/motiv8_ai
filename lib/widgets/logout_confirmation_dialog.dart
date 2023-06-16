@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LogoutConfirmationDialog {
   static Future<void> show(BuildContext context, VoidCallback onPressed) async {
@@ -10,20 +11,23 @@ class LogoutConfirmationDialog {
         context: context,
         builder: (BuildContext context) {
           return CupertinoActionSheet(
-            title: Text('Are you sure you want to log out?'),
+            title: const Text(
+              'Are you sure you want to log out?',
+              style: TextStyle(fontSize: 14),
+            ),
             actions: [
               CupertinoActionSheetAction(
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the modal sheet
                   onPressed(); // Call the onPressed callback
                 },
-                child: Text('Yes'),
+                child: const Text('Yes'),
               ),
             ],
             cancelButton: CupertinoActionSheetAction(
               isDefaultAction: true,
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
           );
         },
@@ -33,27 +37,27 @@ class LogoutConfirmationDialog {
         context: context,
         builder: (BuildContext context) {
           return Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
                   'Are you sure you want to log out?',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
-                SizedBox(height: 16),
-                ElevatedButton(
+                const SizedBox(height: 16),
+                TextButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the modal sheet
                     onPressed(); // Call the onPressed callback
                   },
-                  child: Text('Yes'),
+                  child: Text('Log out'),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text('Cancel'),

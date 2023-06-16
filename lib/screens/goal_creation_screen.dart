@@ -38,7 +38,6 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
-  final TextEditingController timeController = TextEditingController();
 
   final TextEditingController taskBreakdownPreferenceController =
       TextEditingController();
@@ -52,9 +51,13 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
 
   final FocusNode taskNameFocusNode = FocusNode();
   final FocusNode taskDescriptionFocusNode = FocusNode();
-  final FocusNode timeFocusNode = FocusNode();
-  final FocusNode startDataFocusNode = FocusNode();
-  final FocusNode endEndFocusNode = FocusNode();
+  final FocusNode startDateFocusNode = FocusNode();
+  final FocusNode endDateFocusNode = FocusNode();
+  final FocusNode taskBreakdownPreferenceFocusNode = FocusNode();
+  final FocusNode definitionOfSuccessFocusNode = FocusNode();
+  final FocusNode timelineFlexibilityFocusNode = FocusNode();
+  final FocusNode timeCommitmentFocusNode = FocusNode();
+  final FocusNode milestonesFocusNode = FocusNode();
 
   AsyncValue<List<GoalTask>>? taskListAsyncValue;
 
@@ -75,38 +78,43 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
 
   @override
   void dispose() {
-    controller.dispose();
+    taskNameFocusNode.dispose();
+    taskDescriptionFocusNode.dispose();
+    startDateFocusNode.dispose();
+    endDateFocusNode.dispose();
+    taskBreakdownPreferenceFocusNode.dispose();
+    definitionOfSuccessFocusNode.dispose();
+    timelineFlexibilityFocusNode.dispose();
+    timeCommitmentFocusNode.dispose();
+    milestonesFocusNode.dispose();
+
     taskNameController.dispose();
     taskDescriptionController.dispose();
     startDateController.dispose();
     endDateController.dispose();
-    timelineFlexibilityController.dispose();
     taskBreakdownPreferenceController.dispose();
     definitionOfSuccessController.dispose();
+    timelineFlexibilityController.dispose();
     timeCommitmentController.dispose();
     milestonesController.dispose();
-    taskNameFocusNode.dispose();
-    taskDescriptionFocusNode.dispose();
-    timeFocusNode.dispose();
-    startDataFocusNode.dispose();
-    endEndFocusNode.dispose();
+
     super.dispose();
   }
 
-  void setAllValues() {
+  Goal setAllValues() {
     String goalName = taskNameController.text;
     String goalDescriptionText = taskDescriptionController.text;
-    String time = timeController.text;
+
     String timeCommitment = timeCommitmentController.text;
     String timelineFlexibility = timelineFlexibilityController.text;
     String taskBreakdownPreference = taskBreakdownPreferenceController.text;
     String milestones = milestonesController.text;
     String definitionOfSuccess = definitionOfSuccessController.text;
 
-    endDate = parseDate(endDateController.text);
-    startDate = parseDate(startDateController.text);
+    DateTime endDate = parseDate(endDateController.text, regularDate: true);
+    DateTime startDate = parseDate(startDateController.text, regularDate: true);
 
-    currentGoal = Goal(
+    Goal currentGoal = Goal(
       id: const Uuid().v4(),
       name: goalName,
       userID: currentUser!.uid,
@@ -119,6 +127,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       timeCommitment: timeCommitment,
       timelineFlexibility: timelineFlexibility,
     );
+    return currentGoal;
   }
 
   bool _isAnyFieldFocused() {
@@ -126,21 +135,19 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         taskDescriptionController.text.isNotEmpty ||
         startDateController.text.isNotEmpty ||
         endDateController.text.isNotEmpty ||
-        timeController.text.isNotEmpty;
+        taskBreakdownPreferenceController.text.isNotEmpty;
   }
 
   void nextPage() {
     if (currentPage < totalPages - 1) {
       if (currentPage == 0) {
-        FocusScope.of(context).requestFocus(taskNameFocusNode);
-      } else if (currentPage == 1) {
         FocusScope.of(context).requestFocus(taskDescriptionFocusNode);
+      } else if (currentPage == 1) {
+        FocusScope.of(context).requestFocus(startDateFocusNode);
       } else if (currentPage == 2) {
-        FocusScope.of(context).requestFocus(timeFocusNode);
-      } else if (currentPage == 3) {
-        FocusScope.of(context).requestFocus(startDataFocusNode);
+        FocusScope.of(context).requestFocus(milestonesFocusNode);
       } else if (currentPage == 4) {
-        FocusScope.of(context).requestFocus(endEndFocusNode);
+        FocusScope.of(context).requestFocus(definitionOfSuccessFocusNode);
       }
       setState(() {
         currentPage++;
@@ -149,6 +156,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
           duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
     } else {
       // Handle form submission
+      endDate = parseDate(endDateController.text);
+      startDate = parseDate(startDateController.text);
       Goal sampleGoal = Goal(
         id: '1',
         name: 'Fitness Journey',
@@ -166,33 +175,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         timeCommitment: '1 hour per day',
       );
       // Do something with the collected data
-      // if (_checkFieldsFilled()) {
-      //   ref.read(goalControllerProvider.notifier).createGoal(
-      //         name: taskName,
-      //         reminderFrequency: '',
-      //         description: taskDescriptionText,
-      //         startDate: startDate,
-      //         endDate: endDate,
-      //         tasks: [],
-      //         context: context,
-      //         userID: currentUser!.uid,
-      //       );
-      //   Navigator.of(context).pushReplacement(HomeViewScreen.route());
-      // }
-      //HEEEERREEEE
-      // ref.read(goalControllerProvider.notifier).createGoal(
-      //       name: taskName,
-      //       reminderFrequency: '',
-      //       description: taskDescriptionText,
-      //       startDate: startDate,
-      //       endDate: endDate,
-      //       tasks: [],
-      //       context: context,
-      //       userID: currentUser!.uid,
-      //     );
-      // Navigator.of(context).pushReplacement(HomeViewScreen.route());
-      // Navigate to the next screen
-      setAllValues();
+
+      Goal currentGoal = setAllValues();
       Navigator.of(context).push(GoalTasksScreen.route(sampleGoal));
     }
   }
@@ -200,34 +184,15 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   bool _checkFieldsFilled() {
     bool isFilled = true;
 
-    if (taskNameController.text.isEmpty && currentPage == 0) {
+    if (taskDescriptionController.text.isEmpty && currentPage == 0) {
       isFilled = false;
-      // titleController.clear();
-      // titleController.text = 'Please enter Goal name';
     }
 
-    if (taskDescriptionController.text.isEmpty && currentPage == 1) {
+    if (startDateController.text.isEmpty &&
+        endDateController.text.isEmpty &&
+        currentPage == 1) {
       isFilled = false;
-      // descriptionController.clear();
-      // descriptionController.text = 'Please enter Description';
     }
-
-    if (timeController.text.isEmpty && currentPage == 2) {
-      isFilled = false;
-      // timeController.clear();
-      // timeController.text = 'Please select Time';
-    }
-    if (startDateController.text.isEmpty && currentPage == 3) {
-      isFilled = false;
-    } else {
-      startDate = parseDate(startDateController.text);
-    }
-    if (endDateController.text.isEmpty && currentPage == 4) {
-      isFilled = false;
-    } else {
-      endDate = parseDate(endDateController.text);
-    }
-
     return isFilled;
   }
 
@@ -249,9 +214,9 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         child: Stack(
           children: [
             PageView(
-              // physics: _checkFieldsFilled()
-              //     ? const AlwaysScrollableScrollPhysics()
-              //     : const NeverScrollableScrollPhysics(),
+              physics: _checkFieldsFilled()
+                  ? const AlwaysScrollableScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               controller: controller,
               onPageChanged: (index) {
                 setState(() {
@@ -293,7 +258,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                       children: [
                         const SizedBox(height: 5),
                         SectionWidget(
-                          focusNode: startDataFocusNode,
+                          focusNode: startDateFocusNode,
                           isDate: false,
                           isDatePicker: true,
                           controller: startDateController,
@@ -312,7 +277,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                           height: 10,
                         ),
                         SectionWidget(
-                          focusNode: endEndFocusNode,
+                          focusNode: endDateFocusNode,
                           isDate: true,
                           isDatePicker: true,
                           controller: endDateController,
@@ -337,7 +302,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                         const SizedBox(height: 5),
                         SectionWidget(
                           isHeightGrow: true,
-                          focusNode: taskNameFocusNode,
+                          focusNode: milestonesFocusNode,
                           controller: milestonesController,
                           hintText: 'Milestones',
                         ),
@@ -346,9 +311,10 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                   ],
                 ),
                 buildPage(
-                  height: MediaQuery.of(context).size.height * 0.07,
+                  height: MediaQuery.of(context).size.height * 0.06,
                   title: 'Task Breakdown Preference ⚙️',
-                  exampleOfTitle: 'I prefer daily tasks.',
+                  exampleOfTitle:
+                      '🏃 Daily Tasks: Run gradually increasing distances each day to build endurance.Weekly Tasks: 📅 Divide your weekly goal into smaller runs to reach a target mileage.Milestones: 🎉 Set checkpoints like 5k, 10k, half marathon, and full marathon distances to track your progress.',
                   descriptionOfTitle:
                       'How would you like to break down the tasks?',
                   color: Colors.white,
@@ -379,6 +345,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                         const SizedBox(height: 5),
                         SectionWidget(
                           isHeightGrow: true,
+                          focusNode: definitionOfSuccessFocusNode,
                           controller: definitionOfSuccessController,
                           isRadioButton: false,
                           hintText: 'Define Success',
@@ -389,15 +356,13 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                 ),
                 buildPage(
                   height: MediaQuery.of(context).size.height * 0.07,
-                  title: 'Generating your Task...✨',
+                  title: 'Generating your Task ✨',
                   exampleOfTitle: '',
                   descriptionOfTitle:
-                      'Congratulations! Your goal information has been captured. We are now using AI to generate personalized tasks specifically designed to help you achieve your goal. In the next screen, you will see the tasks generated for you.',
+                      'Great! Your goal information has been captured. AI will now generate personalized tasks to help you achieve your goal. Check the next screen for your customized tasks.',
                   color: Colors.white,
                   children: [],
                 ),
-
-                // ...
               ],
             ),
             // Add other screens here...
@@ -417,12 +382,14 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
             Align(
               alignment: Alignment.bottomCenter,
               child: Visibility(
-                visible: _isAnyFieldFocused(),
+                visible: _checkFieldsFilled() && _isAnyFieldFocused(),
                 child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    nextPage();
-                  },
+                  onTap: _checkFieldsFilled()
+                      ? () {
+                          HapticFeedback.selectionClick();
+                          nextPage();
+                        }
+                      : null,
                   child: Container(
                     width: 220,
                     padding: const EdgeInsets.all(15),
@@ -445,22 +412,14 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                         ),
                         const SizedBox(width: 10),
                         currentPage == totalPages - 1
-                            ? Icon(
+                            ? const Icon(
                                 Icons.check,
                                 color: Colors.white,
                               )
-                            : Icon(
+                            : const Icon(
                                 Icons.arrow_forward,
                                 color: Colors.white,
                               )
-
-                        // Icon(
-                        //   currentPage == totalPages - 1
-                        //       ? Icons.check
-                        //       : Icons.arrow_forward,
-                        //   color: Colors.white,
-                        //   size: 35,
-                        // ),
                       ],
                     ),
                   ),
@@ -515,7 +474,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Text(
-                      'For example: $exampleOfTitle',
+                      exampleOfTitle ?? '',
                       style:
                           GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
                     ),
@@ -599,30 +558,4 @@ class SectionWidget extends StatelessWidget {
       ],
     );
   }
-}
-
-class OnboardingPageColors {
-  static final Map<String, Color> page1 = {
-    'lightPurple': Color(0xFFDAD9E5),
-    'vividPurple': Color(0xFF804DF4),
-    'skyBlue': Color(0xFF1A89FB),
-    'darkBlueGray': Color(0xFF28363E),
-    'burntOrange': Color(0xFFE18A28),
-  };
-
-  static final Map<String, Color> page2 = {
-    'darkBlue': Color(0xFF1D4873),
-    'steelBlue': Color(0xFF7F8A9F),
-    'roseTaupe': Color(0xFF675F6B),
-    'lightGray': Color(0xFFDDDEDE),
-    'saffron': Color(0xFFE6B549),
-  };
-
-  static final Map<String, Color> page3 = {
-    'periwinkle': Color(0xFFBDBCF2),
-    'oxfordBlue': Color(0xFF244893),
-    'airForceBlue': Color(0xFF6D8FCA),
-    'iris': Color(0xFF6563A9),
-    'gray': Color(0xFF7C7C95),
-  };
 }

@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
+import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
+import 'package:motiv8_ai/widgets/animated_loading_indicator.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
@@ -111,32 +113,32 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
                 ),
               ),
               const SizedBox(height: 15),
-              Timeline(
-                tasks: tasks,
-              ),
-              // Consumer(
-              //   builder: (context, ref, child) {
-              //     final taskListAsyncValue = ref.watch(
-              //         generateGoalTasksControllerProvider(widget.goal!));
-
-              //     return taskListAsyncValue.when(
-              //       data: (tasks) {
-              //         if (tasks.isNotEmpty) {
-              //           isDoneLoadingTasks = true;
-
-              //           return Timeline(tasks: tasks);
-              //         } else {
-              //           return const Center(
-              //             child: Text("No tasks available"),
-              //           );
-              //         }
-              //       },
-              //       loading: () =>
-              //           Center(child: AnimatedEmojiLoadingIndicator()),
-              //       error: (error, stackTrace) => Text('Error: $error'),
-              //     );
-              //   },
+              // Timeline(
+              //   tasks: tasks,
               // ),
+              Consumer(
+                builder: (context, ref, child) {
+                  final taskListAsyncValue = ref
+                      .watch(generateGoalTasksControllerProvider(widget.goal!));
+
+                  return taskListAsyncValue.when(
+                    data: (tasks) {
+                      if (tasks.isNotEmpty) {
+                        isDoneLoadingTasks = true;
+
+                        return Timeline(tasks: tasks);
+                      } else {
+                        return const Center(
+                          child: Text("No tasks available"),
+                        );
+                      }
+                    },
+                    loading: () =>
+                        Center(child: AnimatedEmojiLoadingIndicator()),
+                    error: (error, stackTrace) => Text('Error: $error'),
+                  );
+                },
+              ),
               const SizedBox(
                 height: 10,
               ),
