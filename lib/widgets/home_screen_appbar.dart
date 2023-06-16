@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
+import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/user_controllers.dart';
+import 'package:motiv8_ai/screens/account_screen.dart';
 import 'package:motiv8_ai/screens/add_goals_screen.dart';
 
 class CustomHomeScreenAppBar extends StatelessWidget
@@ -19,7 +22,9 @@ class CustomHomeScreenAppBar extends StatelessWidget
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, _) {
-        final currentUserModel = ref.watch(currentUserModelProvider);
+        final currentUseris = ref.watch(currentUserProvider);
+        final currentUserModel =
+            ref.watch(currentUserModelProvider(currentUseris!));
         final userName = currentUserModel.when(
           data: (user) => capitalize(user?.name ?? 'User'),
           loading: () => '', // Placeholder value during loading state
@@ -39,7 +44,7 @@ class CustomHomeScreenAppBar extends StatelessWidget
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Flexible(
+                IntrinsicWidth(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -69,15 +74,34 @@ class CustomHomeScreenAppBar extends StatelessWidget
                     ],
                   ),
                 ),
-                Spacer(),
-                CircleAvatar(
-                  radius: 25,
-                  backgroundColor: Colors.grey,
-                  backgroundImage: profilePicUrl.isNotEmpty
-                      ? NetworkImage(profilePicUrl)
-                      : null,
+                const Spacer(),
+                GestureDetector(
+                  onLongPress: () {
+                    pickImage();
+                  },
+                  onTap: () {
+                    Navigator.of(context).push(AccountScreen.route());
+                  },
+                  child: CachedNetworkImage(
+                    imageUrl: profilePicUrl.isNotEmpty
+                        ? profilePicUrl
+                        : "http://via.placeholder.com/200x150",
+                    imageBuilder: (context, imageProvider) => Container(
+                      height: 55,
+                      width: 55,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    placeholder: (context, url) => Icon(Icons.image),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  ),
                 ),
-                SizedBox(width: 5),
+                const SizedBox(width: 5),
               ],
             ),
           ),

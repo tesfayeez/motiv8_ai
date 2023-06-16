@@ -1,21 +1,36 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/api/chat_api.dart';
 import 'package:motiv8_ai/api/local_notifications_api.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
+import 'package:motiv8_ai/models/goaltask_models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final chatAPIControllerProvider = StateNotifierProvider<ChatAPIController,
     AsyncValue<List<Map<String, dynamic>>>>((ref) {
   return ChatAPIController(ref.watch(chatApiProvider));
 });
 
+// final generateGoalTasksControllerProvider =
+//     FutureProvider.family<List<GoalTask>, Goal>((ref, goal) async {
+//   final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
+//   final result = await chatAPIController.generateGoalTasksController(goal);
+//   return result.fold(
+//     (failure) {
+//       // Handle the failure case, e.g., log the error or show an error message
+//       print(failure);
+//       return []; // Return an empty list on failure
+//     },
+//     (tasks) => tasks,
+//   );
+// });
+
 final generateGoalTasksControllerProvider =
-    FutureProvider.family<List<String>, Goal>((ref, goal) async {
-  final chatAPI = ref.read(chatApiProvider);
-  final result = await chatAPI.generateGoalTasks(goal);
-  return result.fold(
-    (failure) => [], // Return an empty list on failure
-    (tasks) => tasks,
-  );
+    FutureProvider.family<List<GoalTask>, Goal>((ref, goal) async {
+  final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
+  return await chatAPIController.generateGoalTasksController(goal);
 });
 
 final motivationalQuotesProvider =
@@ -60,6 +75,31 @@ final getMotivationalQuotesProvider =
       goalName, 2); // Return the quotes
 });
 
+final getMotivationalQuoteProvider =
+    FutureProvider.family<String, String>((ref, goalName) async {
+  final sharedPreferences = await SharedPreferences.getInstance();
+  final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
+  final lastCalledDate = sharedPreferences.getString('lastCalledDate');
+  final currentDate = DateTime.now()
+      .toString()
+      .substring(0, 10); // Get the current date in the format 'yyyy-MM-dd'
+
+  if (lastCalledDate != currentDate) {
+    // Call the getMotivationalQuote function
+    final result = await chatAPIController.getMotivationalQuote(goalName);
+    print("coming hre $result");
+    // Update the last called date in shared preferences
+    await sharedPreferences.setString('lastCalledDate', currentDate);
+    await sharedPreferences.setString('cachedQuote', result);
+    return result;
+  } else {
+    // Return the previously cached quote
+    String quotew = sharedPreferences.getString('cachedQuote') ?? '';
+    // print("cached quote $quotew");
+    return sharedPreferences.getString('cachedQuote') ?? '';
+  }
+});
+
 class ChatAPIController
     extends StateNotifier<AsyncValue<List<Map<String, dynamic>>>> {
   final ChatAPI _chatAPI;
@@ -101,13 +141,26 @@ Overall, Motiv8-AI is a powerful tool for young adults and professionals who are
     );
   }
 
-  Future<void> generateGoalTasksController(Goal goal) async {
-    state = const AsyncValue.loading();
+  Future<List<GoalTask>> generateGoalTasksController(Goal goal) async {
     final result = await _chatAPI.generateGoalTasks(goal);
-    state = result.fold(
-      (error) => AsyncValue.error(error.message, error.stackTrace),
-      (tasks) => AsyncValue.data(
-          tasks.map((task) => {'role': 'system', 'content': task}).toList()),
+    return result.fold(
+      (failure) {
+        // Handle the failure case, e.g., log the error or show an error message
+        print(failure);
+        return <GoalTask>[]; // Return an empty list on failure
+      },
+      (tasks) {
+        // Transform the list of tasks into GoalTask objects
+        // final goalTasks = tasks.map((task) {
+        //   final name = task.name;
+        //   final description = task.description;
+        //   final date = DateTime.parse(task.date as String);
+        //   return GoalTask(name, description, date);
+        // }).toList();
+        print("tasks");
+        print(tasks);
+        return tasks;
+      },
     );
   }
 
@@ -124,6 +177,20 @@ Overall, Motiv8-AI is a powerful tool for young adults and professionals who are
         state = AsyncValue.data([
           for (var quote in quotes) {'role': 'assistant', 'content': quote}
         ]);
+        return quotes; // You should return the quotes here
+      },
+    );
+  }
+
+  Future<String> getMotivationalQuote(String goalName) async {
+    state = const AsyncValue.loading();
+    final result = await _chatAPI.getMotivationalQuote(goalName);
+    return result.fold(
+      (error) {
+        state = AsyncValue.error(error.message, error.stackTrace);
+        throw error; // If you want to propagate the error
+      },
+      (quotes) {
         return quotes; // You should return the quotes here
       },
     );

@@ -36,18 +36,6 @@ class UserAPI implements IUserAPI {
     return userSnapshot.exists;
   }
 
-  // @override
-  // FutureEither<UserModel> createUser(UserModel user) async {
-  //   try {
-  //     final userDocument = await _usersCollection.add(user.toMap());
-  //     final userSnapshot = await userDocument.get();
-  //     final createdUser =
-  //         UserModel.fromMap(userSnapshot.data()!..['id'] = userSnapshot.id);
-  //     return right(createdUser);
-  //   } catch (e, st) {
-  //     return left(Failure(e.toString(), st));
-  //   }
-  // }
   @override
   FutureEither<UserModel> createUser(UserModel user) async {
     try {
@@ -66,6 +54,7 @@ class UserAPI implements IUserAPI {
   @override
   FutureEither<void> deleteUser(String userId) async {
     try {
+      _cache.remove(userId);
       await _usersCollection.doc(userId).delete();
       return right(unit);
     } catch (e, st) {
@@ -76,7 +65,9 @@ class UserAPI implements IUserAPI {
   @override
   FutureEither<void> updateUser(UserModel user) async {
     try {
+      _cache.remove(user.id);
       await _usersCollection.doc(user.id).update(user.toMap());
+
       return right(unit);
     } catch (e, st) {
       return left(Failure(e.toString(), st));
@@ -89,7 +80,8 @@ class UserAPI implements IUserAPI {
   }
 
   Stream<UserModel> getUser(String uid) {
-    print("user id is $uid");
+    // print("user id is $uid");
+
     if (_cache.containsKey(uid)) {
       return _cache[uid]!;
     } else {
@@ -104,5 +96,9 @@ class UserAPI implements IUserAPI {
       _cache[uid] = userStream;
       return userStream;
     }
+  }
+
+  void clearCache() {
+    _cache.clear();
   }
 }

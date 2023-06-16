@@ -26,13 +26,14 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
     final navigatorKey = ref.watch(navigatorKeyProvider);
     return AppBar(
       backgroundColor: backgroundColor,
+      automaticallyImplyLeading: false,
       elevation: 0.0,
       leading: isBackPresent
           ? IconButton(
               icon: const Icon(
                 Icons.arrow_back,
                 color: Colors.black,
-                size: 25,
+                size: 30,
               ),
               onPressed: () => navigatorKey.currentState!.pop(),
             )
@@ -41,15 +42,16 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   icon: const Icon(
                     Icons.close,
                     color: Colors.black,
-                    size: 25,
+                    size: 30,
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () =>
+                      ref.watch(navigatorKeyProvider).currentState!.pop(),
                 )
               : null,
       title: Text(
         title,
         style: GoogleFonts.poppins(
-          fontSize: 16,
+          fontSize: 18,
           color: Colors.black,
         ),
       ),

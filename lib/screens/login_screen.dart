@@ -2,14 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
-import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/commons/pallete_colors.dart';
 import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/forgot_password.screen.dart';
-import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
@@ -28,21 +25,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  void onLoginWithGoogle() async {
-    final authAPI = ref.read(authAPIProvider);
-    final result = await authAPI.signInWithGoogle();
-
-    result.fold((failure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(failure.message)),
-      );
-    }, (user) {
-      // handle successful login
-      final navigatorKey = ref.read(navigatorKeyProvider);
-      navigatorKey.currentState!.pushReplacement(HomeViewScreen.route());
-    });
-  }
-
   // final appBar = UIConstants.appBar();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -74,6 +56,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         passwordError == null &&
         emailController.text.isNotEmpty &&
         passwordController.text.isNotEmpty;
+  }
+
+  void onLoginWithGoogle() {
+    ref.read(authControllerProvider.notifier).onLoginWithGoogle(context);
   }
 
   @override
@@ -203,8 +189,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             const TextStyle(color: Colors.blue, fontSize: 16),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            navigatorKey.currentState!
-                                .push(SignUpScreen.route());
+                            Navigator.of(context).push(SignUpScreen.route());
                           },
                       ),
                     ],

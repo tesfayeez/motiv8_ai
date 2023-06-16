@@ -1,18 +1,20 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/api/local_notifications_api.dart';
-import 'package:motiv8_ai/commons/ThemeData.dart';
+
 import 'package:motiv8_ai/commons/global_providers.dart';
 import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
-import 'package:motiv8_ai/screens/add_goals_screen.dart';
+
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
-import 'package:motiv8_ai/screens/login_screen.dart';
+
 import 'package:motiv8_ai/screens/onboarding_screen.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -46,7 +48,7 @@ void main() async {
 
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final navigatorKey = GlobalKey<NavigatorState>();
-
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(
     ProviderScope(
       overrides: [
@@ -60,30 +62,6 @@ void main() async {
   );
 }
 
-// class MyApp extends ConsumerWidget {
-//   const MyApp({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     return MaterialApp(
-//       scaffoldMessengerKey: scaffoldMessengerKey,
-//       navigatorKey: navigatorKey,
-//       theme: themeData,
-//       title: 'Motiv8',
-//       home: ref.watch(currentUserProviderStream).when(
-//             data: (user) {
-//               if (user != null) {
-//                 return const HomeViewScreen();
-//               }
-//               return const GeneralLoginScreen();
-//             },
-//             error: (error, st) => ErrorText(error: error.toString()),
-//             loading: () => const LoadingPage(),
-//           ),
-//     );
-//   }
-// }
-
 class MyApp extends ConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -91,7 +69,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scaffoldMessengerKey = ref.watch(scaffoldMessengerKeyProvider);
     final navigatorKey = ref.watch(navigatorKeyProvider);
-
+    final themeData = ref.watch(themeProvider);
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
@@ -181,3 +159,28 @@ Future<bool> checkIfFirstTime() async {
 
   return isFirstTime;
 }
+// class MyApp extends ConsumerWidget {
+//   const MyApp({Key? key}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     return MaterialApp(
+//       scaffoldMessengerKey: scaffoldMessengerKey,
+//       navigatorKey: navigatorKey,
+//       theme: themeData,
+//       title: 'Motiv8',
+//       home: ref.watch(currentUserProviderStream).when(
+//             data: (user) {
+//               if (user != null) {
+//                 return const HomeViewScreen();
+//               }
+//               return const GeneralLoginScreen();
+//             },
+//             error: (error, st) => ErrorText(error: error.toString()),
+//             loading: () => const LoadingPage(),
+//           ),
+//     );
+//   }
+// }
+
+

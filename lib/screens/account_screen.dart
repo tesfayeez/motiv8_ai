@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
+import 'package:motiv8_ai/commons/utils.dart';
+import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/user_controllers.dart';
+import 'package:motiv8_ai/main.dart';
+import 'package:motiv8_ai/widgets/account_textfields.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/custom_platform_specific_date_picker.dart';
+import 'package:motiv8_ai/widgets/logout_confirmation_dialog.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
   static route() =>
       MaterialPageRoute(builder: (context) => const AccountScreen());
 
-  const AccountScreen({Key? key}) : super(key: key);
+  final bool isDirectNavigation;
 
+  const AccountScreen({Key? key, this.isDirectNavigation = false})
+      : super(key: key);
   @override
   _AccountScreenState createState() => _AccountScreenState();
 }
@@ -40,7 +47,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   Future<void> _updateProfile() async {
     final userController = ref.read(userControllerProvider.notifier);
-    final currentUserModel = ref.watch(currentUserModelProvider);
+    final currentUseris = ref.watch(currentUserProvider);
+    final currentUserModel =
+        ref.watch(currentUserModelProvider(currentUseris!));
+    final scaffolMessengerKey = ref.watch(scaffoldMessengerKeyProvider);
     final currentUser = currentUserModel.when(
       data: (user) => user,
       loading: () => null,
@@ -58,16 +68,22 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         _isEditing = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffolMessengerKey.currentState!.showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')),
       );
     }
   }
 
+  void logout(BuildContext context, WidgetRef ref) {
+    ref.read(authControllerProvider.notifier).logout(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer(builder: (context, ref, child) {
-      final currentUserModel = ref.watch(currentUserModelProvider);
+      final currentUseris = ref.watch(currentUserProvider);
+      final currentUserModel =
+          ref.watch(currentUserModelProvider(currentUseris!));
       final username = currentUserModel.when(
         data: (user) => user?.name ?? '',
         loading: () => '', // Placeholder value during loading state
@@ -75,6 +91,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       );
       final email = currentUserModel.when(
         data: (user) => user?.email ?? '',
+        loading: () => '', // Placeholder value during loading state
+        error: (_, __) => '', // Placeholder value on error
+      );
+      final profilePic = currentUserModel.when(
+        data: (user) => user?.profilePic ?? '',
         loading: () => '', // Placeholder value during loading state
         error: (_, __) => '', // Placeholder value on error
       );
@@ -87,7 +108,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
       return Scaffold(
         appBar: CustomAppBar(
+          isCenterTitle: true,
           title: 'Account',
+          isBackPresent: widget.isDirectNavigation
+              ? false
+              : ModalRoute.of(context)?.canPop ?? false,
         ),
         body: SafeArea(
           child: Column(
@@ -102,14 +127,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         GestureDetector(
                           onTap: () {
                             print("add image");
+                            pickImage();
                           },
-                          child: const CircleAvatar(
-                            radius: 70,
+                          child: CircleAvatar(
+                            radius: 60,
                             backgroundColor: Colors.grey,
-                            child: Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                            ),
+                            backgroundImage: profilePic.isNotEmpty
+                                ? NetworkImage(profilePic)
+                                : null,
                           ),
                         ),
                         const SizedBox(
@@ -118,7 +143,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         // Icon(_isEditing ? Icons.close : Icons.edit)
                         TextButton(
                           child: Text(
-                            _isEditing ? 'Save Update' : 'Edit Profile',
+                            'Edit Profile',
                             style: GoogleFonts.poppins(
                                 color: Colors.blue, fontSize: 16),
                           ),
@@ -130,7 +155,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         ),
                         Visibility(
                           visible: !_isEditing,
-                          child: CustomTextField(
+                          child: AccountTextField(
                             leftIcon: const Icon(Icons.person),
                             controller: usernameTextFieldController,
                             hintText: 'User name',
@@ -140,7 +165,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         ),
                         Visibility(
                           visible: _isEditing,
-                          child: CustomTextField(
+                          child: AccountTextField(
                             leftIcon: const Icon(Icons.person),
                             controller: usernameTextFieldController,
                             hintText: 'User name',
@@ -151,7 +176,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         ),
                         Visibility(
                           visible: !_isEditing,
-                          child: CustomTextField(
+                          child: AccountTextField(
                             leftIcon: const Icon(Icons.mail),
                             controller: emailTextFieldController,
                             hintText: 'Email',
@@ -161,7 +186,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         ),
                         Visibility(
                           visible: _isEditing,
-                          child: CustomTextField(
+                          child: AccountTextField(
                             leftIcon: const Icon(Icons.mail),
                             controller: emailTextFieldController,
                             hintText: 'Email',
@@ -170,21 +195,38 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                         const SizedBox(
                           height: 15,
                         ),
-                        CustomDatePicker(),
+                        Center(
+                          child: GestureDetector(
+                            child: Text(
+                              "Log out",
+                              style: GoogleFonts.poppins(
+                                  color: Colors.red, fontSize: 14),
+                            ),
+                            onTap: () {
+                              LogoutConfirmationDialog.show(
+                                context,
+                                () {
+                                  logout(context, ref);
+                                },
+                              );
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
               ),
               // Move the 'Continue' button to the bottom of the screen
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                child: CustomButton(
-                  text: 'Continue',
-                  onPressed: _isEditing ? _updateProfile : null,
-                ),
-              ),
+              _isEditing
+                  ? Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      child: CustomButton(
+                        text: 'Update Profile',
+                        onPressed: _isEditing ? _updateProfile : null,
+                      ))
+                  : SizedBox()
             ],
           ),
         ),

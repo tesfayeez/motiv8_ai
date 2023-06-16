@@ -1,12 +1,15 @@
+import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
+import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/widgets/add_goals_text_field.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
@@ -47,6 +50,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
   final TextEditingController targetDateController = TextEditingController();
   final TextEditingController startingDateController = TextEditingController();
   AsyncValue<List<String>>? taskListAsyncValue;
+  late ConfettiController _confettiController;
   DateTime? startDate;
   DateTime? endDate;
   Goal? currentGoal;
@@ -56,15 +60,6 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
     fontSize: 18,
     fontWeight: FontWeight.w500,
   );
-  DateTime? parseDate(String dateString) {
-    final DateFormat format = DateFormat('EEEE | MMM d, yyyy');
-    try {
-      return format.parse(dateString);
-    } catch (e) {
-      print('Invalid date format: $dateString');
-      return null;
-    }
-  }
 
   bool _checkFieldsFilled() {
     bool isFilled = true;
@@ -102,14 +97,21 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
   }
 
   @override
+  void initState() {
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 2));
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (ref.watch(currentUserProvider) != null) {
       currentUser = ref.watch(currentUserProvider);
     }
-    if (currentGoal != null) {
-      taskListAsyncValue =
-          ref.watch(generateGoalTasksControllerProvider(currentGoal!));
-    }
+    // if (currentGoal != null) {
+    //   taskListAsyncValue =
+    //       ref.watch(generateGoalTasksControllerProvider(currentGoal!));
+    // }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -157,7 +159,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
               isDatePicker: true,
             ),
             CustomButton(
-              text: 'Create',
+              text: 'Update Goal',
               onPressed: () {
                 if (_checkFieldsFilled()) {
                   ref.read(goalControllerProvider.notifier).createGoal(
@@ -170,7 +172,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                         context: context,
                         userID: currentUser!.uid,
                       );
-                  Navigator.of(context).pop();
+                  ref.watch(navigatorKeyProvider).currentState!.pop();
                 } else {
                   showDialog(
                     context: context,

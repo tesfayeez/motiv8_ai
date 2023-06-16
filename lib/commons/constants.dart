@@ -10,8 +10,12 @@ import 'package:motiv8_ai/screens/settings_screen.dart';
 class UIConstants {
   static List<Widget> bottomTabBarPages = [
     const HomeScreen(),
-    const AddGoalScreen(),
-    const SettingsScreen(),
-    const AccountScreen()
+    const GoalsScreen(),
+    const SettingsScreen(
+      isDirectNavigation: true,
+    ),
+    const AccountScreen(
+      isDirectNavigation: true,
+    )
   ];
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:motiv8_ai/api/user_api.dart';
@@ -9,12 +10,21 @@ final userControllerProvider =
   return UserController(userAPI: ref.watch(userApiProvider));
 });
 
-final currentUserModelProvider = StreamProvider<UserModel?>((ref) {
-  final userApi = ref.watch(userApiProvider);
-  final currentUser = ref.watch(currentUserProvider);
+// final currentUserModelProvider = StreamProvider<UserModel?>((ref) {
+//   final userApi = ref.watch(userApiProvider);
+//   final currentUser = ref.watch(currentUserProvider);
 
-  if (currentUser != null) {
-    return userApi.getUser(currentUser.uid);
+//   if (currentUser != null) {
+//     return userApi.getUser(currentUser.uid);
+//   } else {
+//     return Stream.value(null);
+//   }
+// });
+final currentUserModelProvider =
+    StreamProvider.family<UserModel?, User>((ref, user) {
+  final userApi = ref.watch(userApiProvider);
+  if (user != null) {
+    return userApi.getUser(user.uid);
   } else {
     return Stream.value(null);
   }

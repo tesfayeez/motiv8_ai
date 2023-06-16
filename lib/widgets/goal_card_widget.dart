@@ -7,10 +7,10 @@ import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/widgets/custom_checkbox.dart';
+import 'package:motiv8_ai/widgets/custom_dialog_widget.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
-import 'package:vibration/vibration.dart';
 
 class GoalCard extends ConsumerStatefulWidget {
   final Goal goalModel;
@@ -63,18 +63,18 @@ class _GoalCardState extends ConsumerState<GoalCard> {
       barrierColor: Colors.black.withOpacity(0.7),
       builder: (context) {
         return SimpleDialog(
-          title: Text('Options'),
+          title: Text('Options', style: GoogleFonts.poppins()),
           children: [
             SimpleDialogOption(
               onPressed: () {
                 // Edit goal
                 // Perform the action for editing the goal here
               },
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Edit goal'),
-                  Icon(Icons.edit),
+                  Text('Edit goal', style: GoogleFonts.poppins()),
+                  const Icon(Icons.edit),
                 ],
               ),
             ),
@@ -93,24 +93,26 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                     userID: ref.watch(currentUserProvider)!.uid);
                 Navigator.of(context).pop();
               },
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Duplicate goal'),
-                  Icon(Icons.content_copy),
+                  Text('Duplicate goal', style: GoogleFonts.poppins()),
+                  const Icon(Icons.content_copy),
                 ],
               ),
             ),
             SimpleDialogOption(
               onPressed: () {
+                Navigator.of(context).pop();
+                CustomDialog.show(context);
                 // Complete goal
                 // Perform the action for completing the goal here
               },
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Complete goal'),
-                  Icon(Icons.check_circle),
+                  Text('Complete goal', style: GoogleFonts.poppins()),
+                  const Icon(Icons.check_circle),
                 ],
               ),
             ),
@@ -123,14 +125,14 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                     .deleteGoal(goalId: widget.goalModel.id, context: context);
                 Navigator.of(context).pop();
               },
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Text(
                     'Delete goal',
-                    style: TextStyle(color: Colors.red),
+                    style: GoogleFonts.poppins(color: Colors.red),
                   ),
-                  Icon(Icons.delete, color: Colors.red),
+                  const Icon(Icons.delete, color: Colors.red),
                 ],
               ),
             ),
@@ -288,7 +290,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                   ),
                 ),
               ),
-              if (widget.percentage == 100)
+              if (_isSelected)
                 Align(
                   alignment: Alignment.center,
                   child: ConfettiWidget(

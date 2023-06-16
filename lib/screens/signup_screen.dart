@@ -9,10 +9,12 @@ import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
+import 'package:motiv8_ai/screens/userwalk_through_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/social_login_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Import any other required classes and widgets here
@@ -236,16 +238,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     ),
                     children: [
                       TextSpan(
-                        text: ' Login',
+                        text: 'Login',
                         style: const TextStyle(
                           color: Colors.blue,
                           fontSize: 16,
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            navigatorKey.currentState!.push(
-                              LoginScreen.route(),
-                            );
+                            ref.watch(navigatorKeyProvider).currentState!.push(
+                                  UserWalkthroughScreen.route(),
+                                );
                           },
                       )
                     ],

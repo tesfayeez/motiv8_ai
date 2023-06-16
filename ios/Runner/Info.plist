@@ -62,6 +62,11 @@
 	<string>true</string>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:245333633905:ios:d37ae6e586f397ff3ca4d0</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to select and upload images for your profile and other features.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to your camera to take photos and videos for various features, such as capturing images for your profile or recording video content.</string>
+
 
 </dict>
 </plist>

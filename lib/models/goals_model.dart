@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
+import 'package:motiv8_ai/models/goaltask_models.dart';
+
 class Goal {
   final String id;
   final String name;
@@ -12,7 +14,13 @@ class Goal {
   final DateTime? startDate;
   final DateTime? endDate;
   final String reminderFrequency;
-  final List<String>? tasks;
+  final List<GoalTask>? tasks;
+  final String? milestones;
+  final String? taskBreakdownPreference;
+  final String? definitionOfSuccess;
+  final String? strategiesApproaches;
+  final String? timelineFlexibility;
+  final String? timeCommitment;
 
   Goal({
     required this.id,
@@ -23,57 +31,46 @@ class Goal {
     required this.endDate,
     this.reminderFrequency = '',
     this.tasks = const [],
+    this.milestones,
+    this.taskBreakdownPreference,
+    this.definitionOfSuccess,
+    this.strategiesApproaches,
+    this.timelineFlexibility,
+    this.timeCommitment,
   });
 
-  // factory Goal.fromMap(Map<String, dynamic> data) {
-  //   return Goal(
-  //     id: data['id'],
-  //     name: data['name'],
-  //     userID: data['userID'],
-  //     description: data['description'],
-  //     startDate:
-  //         data['startDate'] != null ? DateTime.parse(data['startDate']) : null,
-  //     endDate: data['endDate'] != null ? DateTime.parse(data['endDate']) : null,
-  //     reminderFrequency: data['reminderFrequency'],
-  //     tasks: List<String>.from(data['tasks']),
-  //   );
-  // }
-  // factory Goal.fromMap(Map<String, dynamic> data) {
-  //   final startDateMillis = data['startDate'] is int ? data['startDate'] : null;
-  //   final endDateMillis = data['endDate'] is int ? data['endDate'] : null;
-
-  //   return Goal(
-  //     id: data['id'] as String,
-  //     name: data['name'] as String,
-  //     userID: data['userID'] as String,
-  //     description: data['description'] as String,
-  //     startDate: startDateMillis != null
-  //         ? DateTime.fromMillisecondsSinceEpoch(startDateMillis)
-  //         : null,
-  //     endDate: endDateMillis != null
-  //         ? DateTime.fromMillisecondsSinceEpoch(endDateMillis)
-  //         : null,
-  //     reminderFrequency: data['reminderFrequency'] as String,
-  //     tasks: List<String>.from(data['tasks'] as List<dynamic>),
-  //   );
-  // }
-  factory Goal.fromMap(Map<String, dynamic> data) {
-    final int? startDateMillis = data['startDate'] as int?;
-    final int? endDateMillis = data['endDate'] as int?;
-
+  Goal copyWith({
+    String? id,
+    String? name,
+    String? userID,
+    String? description,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? reminderFrequency,
+    List<GoalTask>? tasks,
+    String? milestones,
+    String? taskBreakdownPreference,
+    String? definitionOfSuccess,
+    String? strategiesApproaches,
+    String? timelineFlexibility,
+    String? timeCommitment,
+  }) {
     return Goal(
-      id: data['id'] as String,
-      name: data['name'] as String,
-      userID: data['userID'] as String,
-      description: data['description'] as String,
-      startDate: startDateMillis != null
-          ? DateTime.fromMillisecondsSinceEpoch(startDateMillis)
-          : null,
-      endDate: endDateMillis != null
-          ? DateTime.fromMillisecondsSinceEpoch(endDateMillis)
-          : null,
-      reminderFrequency: data['reminderFrequency'] as String,
-      tasks: List<String>.from(data['tasks'] as List<dynamic>),
+      id: id ?? this.id,
+      name: name ?? this.name,
+      userID: userID ?? this.userID,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      reminderFrequency: reminderFrequency ?? this.reminderFrequency,
+      tasks: tasks ?? this.tasks,
+      milestones: milestones ?? this.milestones,
+      taskBreakdownPreference:
+          taskBreakdownPreference ?? this.taskBreakdownPreference,
+      definitionOfSuccess: definitionOfSuccess ?? this.definitionOfSuccess,
+      strategiesApproaches: strategiesApproaches ?? this.strategiesApproaches,
+      timelineFlexibility: timelineFlexibility ?? this.timelineFlexibility,
+      timeCommitment: timeCommitment ?? this.timeCommitment,
     );
   }
 
@@ -87,32 +84,48 @@ class Goal {
       'endDate': endDate?.millisecondsSinceEpoch,
       'reminderFrequency': reminderFrequency,
       'tasks': tasks,
+      'milestones': milestones,
+      'taskBreakdownPreference': taskBreakdownPreference,
+      'definitionOfSuccess': definitionOfSuccess,
+      'strategiesApproaches': strategiesApproaches,
+      'timelineFlexibility': timelineFlexibility,
+      'timeCommitment': timeCommitment,
     };
   }
 
-  String _convertToDateString(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
-
-  Goal copyWith({
-    String? id,
-    String? name,
-    String? userID,
-    String? description,
-    DateTime? startDate,
-    DateTime? endDate,
-    String? reminderFrequency,
-    List<String>? tasks,
-  }) {
+  factory Goal.fromMap(Map<String, dynamic> map) {
     return Goal(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      userID: userID ?? this.userID,
-      description: description ?? this.description,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      reminderFrequency: reminderFrequency ?? this.reminderFrequency,
-      tasks: tasks ?? this.tasks,
+      id: map['id'] as String,
+      name: map['name'] as String,
+      userID: map['userID'] as String,
+      description: map['description'] as String,
+      startDate: map['startDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['startDate'] as int)
+          : null,
+      endDate: map['endDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['endDate'] as int)
+          : null,
+      reminderFrequency: map['reminderFrequency'] as String,
+      tasks: map['tasks'] != null
+          ? List<GoalTask>.from(map['tasks'] as List<GoalTask>)
+          : null,
+      milestones:
+          map['milestones'] != null ? map['milestones'] as String : null,
+      taskBreakdownPreference: map['taskBreakdownPreference'] != null
+          ? map['taskBreakdownPreference'] as String
+          : null,
+      definitionOfSuccess: map['definitionOfSuccess'] != null
+          ? map['definitionOfSuccess'] as String
+          : null,
+      strategiesApproaches: map['strategiesApproaches'] != null
+          ? map['strategiesApproaches'] as String
+          : null,
+      timelineFlexibility: map['timelineFlexibility'] != null
+          ? map['timelineFlexibility'] as String
+          : null,
+      timeCommitment: map['timeCommitment'] != null
+          ? map['timeCommitment'] as String
+          : null,
     );
   }
 
@@ -123,7 +136,7 @@ class Goal {
 
   @override
   String toString() {
-    return 'Goal(id: $id, name: $name, userID: $userID, description: $description, startDate: $startDate, endDate: $endDate, reminderFrequency: $reminderFrequency, tasks: $tasks)';
+    return 'Goal(id: $id, name: $name, userID: $userID, description: $description, startDate: $startDate, endDate: $endDate, reminderFrequency: $reminderFrequency, tasks: $tasks, milestones: $milestones, taskBreakdownPreference: $taskBreakdownPreference, definitionOfSuccess: $definitionOfSuccess, strategiesApproaches: $strategiesApproaches, timelineFlexibility: $timelineFlexibility, timeCommitment: $timeCommitment)';
   }
 
   @override
@@ -137,7 +150,13 @@ class Goal {
         other.startDate == startDate &&
         other.endDate == endDate &&
         other.reminderFrequency == reminderFrequency &&
-        listEquals(other.tasks, tasks);
+        listEquals(other.tasks, tasks) &&
+        other.milestones == milestones &&
+        other.taskBreakdownPreference == taskBreakdownPreference &&
+        other.definitionOfSuccess == definitionOfSuccess &&
+        other.strategiesApproaches == strategiesApproaches &&
+        other.timelineFlexibility == timelineFlexibility &&
+        other.timeCommitment == timeCommitment;
   }
 
   @override
@@ -149,6 +168,39 @@ class Goal {
         startDate.hashCode ^
         endDate.hashCode ^
         reminderFrequency.hashCode ^
-        tasks.hashCode;
+        tasks.hashCode ^
+        milestones.hashCode ^
+        taskBreakdownPreference.hashCode ^
+        definitionOfSuccess.hashCode ^
+        strategiesApproaches.hashCode ^
+        timelineFlexibility.hashCode ^
+        timeCommitment.hashCode;
   }
 }
+// / factory Goal.fromMap(Map<String, dynamic> data) {
+  //   final int? startDateMillis = data['startDate'] as int?;
+  //   final int? endDateMillis = data['endDate'] as int?;
+
+  //   return Goal(
+  //     id: data['id'] as String,
+  //     name: data['name'] as String,
+  //     userID: data['userID'] as String,
+  //     description: data['description'] as String,
+  //     startDate: startDateMillis != null
+  //         ? DateTime.fromMillisecondsSinceEpoch(startDateMillis)
+  //         : null,
+  //     endDate: endDateMillis != null
+  //         ? DateTime.fromMillisecondsSinceEpoch(endDateMillis)
+  //         : null,
+
+  //     reminderFrequency: data['reminderFrequency'] as String,
+  //     tasks: List<String>.from(data['tasks'] as List<dynamic>),
+
+  //   );
+  // }
+
+  
+
+  // String _convertToDateString(DateTime date) {
+  //   return DateFormat('yyyy-MM-dd').format(date);
+  // }

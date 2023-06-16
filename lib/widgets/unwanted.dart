@@ -67,7 +67,9 @@
 //           IconButton(
 //             icon: Icon(Icons.close, color: themeData.primaryIconTheme.color),
 //             onPressed: () {
-//               Navigator.of(context).pop();
+//               ref
+                        // .watch(navigatorKeyProvider)
+                        // .currentState!.pop();
 //             },
 //           ),
 //         ],
@@ -263,7 +265,9 @@
 //                                   context: context,
 //                                   userID: currentUser!.uid,
 //                                 );
-//                             Navigator.of(context).pop();
+//                             ref
+                        // .watch(navigatorKeyProvider)
+                        // .currentState!.pop();
 //                           },
 //                           loading: () => const Loader(),
 //                           error: (error, stackTrace) {
@@ -499,7 +503,9 @@
 //       done: Text("Get Started"),
 //       onDone: () {
 //         // Perform actions when done button is pressed
-//         Navigator.of(context).push(LoginScreen.route());
+// //         ref
+//                         .watch(navigatorKeyProvider)
+//                         .currentState!.push(LoginScreen.route());
 //       },
 //       next: Text("Next"),
 //     );

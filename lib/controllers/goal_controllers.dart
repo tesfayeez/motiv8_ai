@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:motiv8_ai/api/chat_api.dart';
 import 'package:motiv8_ai/api/goal_api.dart';
-import 'package:motiv8_ai/commons/utils.dart';
-import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
+import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/widgets/caledarView_widget.dart';
 import 'package:uuid/uuid.dart';
 
@@ -13,6 +13,8 @@ final goalControllerProvider =
   return GoalController(
     ref: ref,
     goalAPI: ref.watch(goalApiProvider),
+    scaffoldMessengerKey: ref.watch(scaffoldMessengerKeyProvider),
+    navigatorKey: ref.watch(navigatorKeyProvider),
   );
 });
 
@@ -20,19 +22,31 @@ final getGoalsStreamProvider =
     StreamProvider.autoDispose.family<List<Goal>, String>((ref, userID) {
   final goalController = ref.watch(goalControllerProvider.notifier);
   final selectedDate = ref.watch(calendarStateProvider).selectedDay;
-  print("Selected date $selectedDate");
+  // print("Selected date $selectedDate");
   return goalController.getGoalsStream(userID, selectedDate);
+});
+
+final getGoalTasStreamProvider =
+    StreamProvider.family<List<GoalTask>, String>((ref, goalId) {
+  final goalController = ref.watch(goalControllerProvider.notifier);
+  return goalController.getSingleGoalsStream(goalId);
 });
 
 class GoalController extends StateNotifier<bool> {
   final GoalAPI _goalAPI;
   final Ref _ref;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey;
+  final GlobalKey<NavigatorState> _navigatorKey;
 
   GoalController({
     required Ref ref,
     required GoalAPI goalAPI,
+    required GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey,
+    required GlobalKey<NavigatorState> navigatorKey,
   })  : _ref = ref,
         _goalAPI = goalAPI,
+        _scaffoldMessengerKey = scaffoldMessengerKey,
+        _navigatorKey = navigatorKey,
         super(false);
 
   Future<void> createGoal({
@@ -41,15 +55,15 @@ class GoalController extends StateNotifier<bool> {
     required DateTime? startDate,
     required DateTime? endDate,
     required String reminderFrequency,
-    required List<String> tasks,
+    required List<GoalTask> tasks,
     required BuildContext context,
     required String userID,
   }) async {
     state = true;
     Goal goal = Goal(
       id: const Uuid().v4(),
-      userID: userID,
       name: name,
+      userID: userID,
       description: description,
       startDate: startDate,
       endDate: endDate,
@@ -61,6 +75,20 @@ class GoalController extends StateNotifier<bool> {
     res.fold((l) => showSnackBar(l.message), (r) {
       goal = r;
       showSnackBar('Goal created');
+    });
+
+    state = false;
+  }
+
+  Future<void> createGoalTask({
+    required String goalId,
+    required GoalTask goalTask,
+  }) async {
+    state = true;
+
+    final res = await _goalAPI.createGoalTask(goalId, goalTask);
+    res.fold((l) => showSnackBar(l.message), (r) {
+      showSnackBar('Task Added');
     });
 
     state = false;
@@ -91,8 +119,8 @@ class GoalController extends StateNotifier<bool> {
   }
 
   Stream<List<Goal>> getGoalsStream(String userID, DateTime? selectedDate) {
-    print("here at getGoalsStream $userID");
-    print("here at getGoalsStream $selectedDate");
+    // print("here at getGoalsStream $userID");
+    // print("here at getGoalsStream $selectedDate");
 
     return _goalAPI.goalsStream(userID).map((snapshot) {
       List<Goal> goals = snapshot.docs
@@ -115,8 +143,36 @@ class GoalController extends StateNotifier<bool> {
     });
   }
 
+  Stream<List<GoalTask>> getSingleGoalsStream(String goalId) {
+    return _goalAPI.singleGoalStream(goalId).map((snapshot) {
+      final goalData = snapshot.data();
+      if (goalData == null || !goalData.containsKey('tasks')) {
+        return []; // Return an empty list if the goal document or tasks field doesn't exist
+      }
+
+      final List<Map<String, dynamic>> tasks =
+          List.from(goalData['tasks'] ?? []);
+
+      final goalTasks =
+          tasks.map((taskData) => GoalTask.fromMap(taskData)).toList();
+
+      goalTasks.sort((a, b) => a.date
+          .compareTo(b.date)); // Sort the goal tasks by date in ascending order
+
+      // goalTasks.forEach((task) => print(task)); // Print each goal task
+
+      return goalTasks;
+    });
+  }
+
   void showSnackBar(String message) {
-    final snackBar = SnackBar(content: Text(message));
+    final snackBar = SnackBar(
+      content: Text(
+        message,
+        style: TextStyle(color: Colors.white),
+      ),
+      backgroundColor: Colors.black.withOpacity(0.4),
+    );
     _ref
         .watch(scaffoldMessengerKeyProvider)
         .currentState

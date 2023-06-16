@@ -112,6 +112,8 @@ class AuthAPI implements IAuthAPI {
   FutureEither<void> signoutUser() async {
     try {
       await _auth.signOut();
+      _userApi.clearCache();
+
       return right(null);
     } on FirebaseAuthException catch (e, stackTrace) {
       return left(
@@ -183,5 +185,6 @@ class AuthAPI implements IAuthAPI {
 class Failure {
   final String message;
   final StackTrace stackTrace;
-  const Failure(this.message, this.stackTrace);
+  const Failure(this.message, [StackTrace? stackTrace])
+      : stackTrace = stackTrace ?? StackTrace.empty;
 }

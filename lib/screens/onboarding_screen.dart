@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
   Widget buildFooter(Color color) {
     return Container(
@@ -16,7 +18,7 @@ class OnboardingScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return IntroductionScreen(
       pages: [
         PageViewModel(
@@ -60,9 +62,12 @@ class OnboardingScreen extends StatelessWidget {
       showNextButton: false,
       showDoneButton: true,
       showSkipButton: true,
-      skip: Text('Skip'),
+      skip: const Text('Skip'),
       onSkip: () {
-        Navigator.of(context).push(GeneralLoginScreen.route());
+        ref
+            .watch(navigatorKeyProvider)
+            .currentState!
+            .push(GeneralLoginScreen.route());
       },
       done: const Text(
         "Get Started",
