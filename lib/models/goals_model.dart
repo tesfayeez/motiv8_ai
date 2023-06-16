@@ -11,8 +11,8 @@ class Goal {
   final String name;
   final String userID;
   final String description;
-  final DateTime? startDate;
-  final DateTime? endDate;
+  final DateTime startDate;
+  final DateTime endDate;
   final String reminderFrequency;
   final List<GoalTask>? tasks;
   final String? milestones;
@@ -80,8 +80,8 @@ class Goal {
       'name': name,
       'userID': userID,
       'description': description,
-      'startDate': startDate?.millisecondsSinceEpoch,
-      'endDate': endDate?.millisecondsSinceEpoch,
+      'startDate': startDate.millisecondsSinceEpoch,
+      'endDate': endDate.millisecondsSinceEpoch,
       'reminderFrequency': reminderFrequency,
       'tasks': tasks,
       'milestones': milestones,
@@ -99,12 +99,8 @@ class Goal {
       name: map['name'] as String,
       userID: map['userID'] as String,
       description: map['description'] as String,
-      startDate: map['startDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['startDate'] as int)
-          : null,
-      endDate: map['endDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['endDate'] as int)
-          : null,
+      startDate: DateTime.fromMillisecondsSinceEpoch(map['startDate'] as int),
+      endDate: DateTime.fromMillisecondsSinceEpoch(map['endDate'] as int),
       reminderFrequency: map['reminderFrequency'] as String,
       tasks: map['tasks'] != null
           ? List<GoalTask>.from(map['tasks'] as List<GoalTask>)

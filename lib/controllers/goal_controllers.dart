@@ -52,8 +52,8 @@ class GoalController extends StateNotifier<bool> {
   Future<void> createGoal({
     required String name,
     required String description,
-    required DateTime? startDate,
-    required DateTime? endDate,
+    required DateTime startDate,
+    required DateTime endDate,
     required String reminderFrequency,
     required List<GoalTask> tasks,
     required BuildContext context,
