@@ -34,7 +34,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   @override
   void initState() {
     super.initState();
-    _dateFormat = DateFormat('EEEE | MMM d, yyyy');
+    _dateFormat = DateFormat('EEEE, MMM d, yyyy');
     _timeFormat = DateFormat('hh:mm a');
   }
 

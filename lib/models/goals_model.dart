@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 
 import 'package:motiv8_ai/models/goaltask_models.dart';
 
@@ -51,7 +50,6 @@ class Goal {
     String? milestones,
     String? taskBreakdownPreference,
     String? definitionOfSuccess,
-    String? strategiesApproaches,
     String? timelineFlexibility,
     String? timeCommitment,
   }) {
@@ -68,13 +66,15 @@ class Goal {
       taskBreakdownPreference:
           taskBreakdownPreference ?? this.taskBreakdownPreference,
       definitionOfSuccess: definitionOfSuccess ?? this.definitionOfSuccess,
-      strategiesApproaches: strategiesApproaches ?? this.strategiesApproaches,
       timelineFlexibility: timelineFlexibility ?? this.timelineFlexibility,
       timeCommitment: timeCommitment ?? this.timeCommitment,
     );
   }
 
   Map<String, dynamic> toMap() {
+    final tasksList = (tasks ?? []).map((task) => task.toMap()).toList();
+    print(tasksList);
+
     return <String, dynamic>{
       'id': id,
       'name': name,
@@ -83,11 +83,10 @@ class Goal {
       'startDate': startDate.millisecondsSinceEpoch,
       'endDate': endDate.millisecondsSinceEpoch,
       'reminderFrequency': reminderFrequency,
-      'tasks': tasks,
+      'tasks': tasksList,
       'milestones': milestones,
       'taskBreakdownPreference': taskBreakdownPreference,
       'definitionOfSuccess': definitionOfSuccess,
-      'strategiesApproaches': strategiesApproaches,
       'timelineFlexibility': timelineFlexibility,
       'timeCommitment': timeCommitment,
     };
@@ -103,25 +102,15 @@ class Goal {
       endDate: DateTime.fromMillisecondsSinceEpoch(map['endDate'] as int),
       reminderFrequency: map['reminderFrequency'] as String,
       tasks: map['tasks'] != null
-          ? List<GoalTask>.from(map['tasks'] as List<GoalTask>)
+          ? (map['tasks'] as List<dynamic>)
+              .map((task) => GoalTask.fromMap(task as Map<String, dynamic>))
+              .toList()
           : null,
-      milestones:
-          map['milestones'] != null ? map['milestones'] as String : null,
-      taskBreakdownPreference: map['taskBreakdownPreference'] != null
-          ? map['taskBreakdownPreference'] as String
-          : null,
-      definitionOfSuccess: map['definitionOfSuccess'] != null
-          ? map['definitionOfSuccess'] as String
-          : null,
-      strategiesApproaches: map['strategiesApproaches'] != null
-          ? map['strategiesApproaches'] as String
-          : null,
-      timelineFlexibility: map['timelineFlexibility'] != null
-          ? map['timelineFlexibility'] as String
-          : null,
-      timeCommitment: map['timeCommitment'] != null
-          ? map['timeCommitment'] as String
-          : null,
+      milestones: map['milestones'] as String?,
+      taskBreakdownPreference: map['taskBreakdownPreference'] as String?,
+      definitionOfSuccess: map['definitionOfSuccess'] as String?,
+      timelineFlexibility: map['timelineFlexibility'] as String?,
+      timeCommitment: map['timeCommitment'] as String?,
     );
   }
 
@@ -132,7 +121,7 @@ class Goal {
 
   @override
   String toString() {
-    return 'Goal(id: $id, name: $name, userID: $userID, description: $description, startDate: $startDate, endDate: $endDate, reminderFrequency: $reminderFrequency, tasks: $tasks, milestones: $milestones, taskBreakdownPreference: $taskBreakdownPreference, definitionOfSuccess: $definitionOfSuccess, strategiesApproaches: $strategiesApproaches, timelineFlexibility: $timelineFlexibility, timeCommitment: $timeCommitment)';
+    return 'Goal(id: $id, name: $name, userID: $userID, description: $description, startDate: $startDate, endDate: $endDate, reminderFrequency: $reminderFrequency, tasks: $tasks, milestones: $milestones, taskBreakdownPreference: $taskBreakdownPreference, definitionOfSuccess: $definitionOfSuccess, timelineFlexibility: $timelineFlexibility, timeCommitment: $timeCommitment)';
   }
 
   @override
@@ -150,7 +139,6 @@ class Goal {
         other.milestones == milestones &&
         other.taskBreakdownPreference == taskBreakdownPreference &&
         other.definitionOfSuccess == definitionOfSuccess &&
-        other.strategiesApproaches == strategiesApproaches &&
         other.timelineFlexibility == timelineFlexibility &&
         other.timeCommitment == timeCommitment;
   }
@@ -168,7 +156,6 @@ class Goal {
         milestones.hashCode ^
         taskBreakdownPreference.hashCode ^
         definitionOfSuccess.hashCode ^
-        strategiesApproaches.hashCode ^
         timelineFlexibility.hashCode ^
         timeCommitment.hashCode;
   }

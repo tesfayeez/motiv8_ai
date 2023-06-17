@@ -4,32 +4,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
+import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/goal_header_time_line.dart';
 import 'package:motiv8_ai/widgets/goal_task_card.dart';
 
-import 'package:motiv8_ai/widgets/new_time_line_widget.dart';
-
 class GoalHeader extends ConsumerWidget {
-  final Goal? goal;
-  final VoidCallback? goalTaskCallback;
-  final VoidCallback? addTaskCallback;
+  final Goal goal;
+  final VoidCallback addGoalCallback;
+  final VoidCallback addTaskCallback;
 
-  GoalHeader({
-    this.goal,
-    this.goalTaskCallback,
-    this.addTaskCallback,
+  const GoalHeader({
+    required this.goal,
+    required this.addGoalCallback,
+    required this.addTaskCallback,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isGoalPresent = goal != null;
     final goalTasksAsyncValue = ref.watch(
-        getGoalTasStreamProvider('8e7480b5-2a2c-42ee-9c24-2bdaa55c0b89'));
+        getGoalTaskStreamProvider('8e7480b5-2a2c-42ee-9c24-2bdaa55c0b89'));
     final theme = ref.read(themeProvider);
-
+    final goalTaskList = ref.watch(goalTaskListProvider);
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
@@ -47,27 +46,24 @@ class GoalHeader extends ConsumerWidget {
                 Text(
                   capitalize(isGoalPresent ? 'Your Goal 🎯' : ''),
                   style: GoogleFonts.poppins(
-                    fontSize: isGoalPresent ? 20 : 18,
-                    fontWeight:
-                        isGoalPresent ? FontWeight.w400 : FontWeight.w500,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 Row(
                   children: [
-                    buildActionButton("Add Task", () {
-                      HapticFeedback.heavyImpact();
-                    }, theme.colorScheme.primary),
+                    buildActionButton("Add Task", () => addTaskCallback(),
+                        theme.colorScheme.primary),
                     const SizedBox(width: 10),
-                    buildActionButton("Add Goal", () {
-                      HapticFeedback.heavyImpact();
-                    }, theme.colorScheme.primary),
+                    buildActionButton("Add Goal", () => addGoalCallback(),
+                        theme.colorScheme.primary),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 8.0),
             Text(
-              capitalize(isGoalPresent ? goal!.description : ''),
+              capitalize(goal.description),
               style: GoogleFonts.poppins(
                 fontSize: isGoalPresent ? 16 : 14,
                 fontWeight: isGoalPresent ? FontWeight.w500 : null,
@@ -78,7 +74,7 @@ class GoalHeader extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  DateCard(date: goal!.startDate!),
+                  DateCard(date: goal.startDate),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Icon(
@@ -87,29 +83,15 @@ class GoalHeader extends ConsumerWidget {
                       color: Colors.grey,
                     ),
                   ),
-                  DateCard(date: goal!.endDate!),
+                  DateCard(date: goal.endDate),
                 ],
               )
             ],
             const SizedBox(height: 10),
             if (isGoalPresent) ...[
-              goalTasksAsyncValue.when(
-                data: (goalTasks) {
-                  final goalTaskCards = goalTasks.map((goalTask) {
-                    return GoalTaskCard(
-                      isNotAddable: true,
-                      goalTask: goalTask,
-                    );
-                  }).toList();
-                  if (goalTasks.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'Add AI Tasks or Create Your Own',
-                        style: GoogleFonts.poppins(
-                            color: Colors.grey, fontSize: 14),
-                      ),
-                    );
-                  } else {
+              Consumer(
+                builder: (context, ref, child) {
+                  if (goalTaskList.isNotEmpty) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -118,14 +100,19 @@ class GoalHeader extends ConsumerWidget {
                           style: GoogleFonts.poppins(fontSize: 22),
                         ),
                         const SizedBox(height: 5),
-                        GoalHeaderTimeline(tasks: goalTasks)
-                        // TimelineCustom(children: goalTaskCards),
+                        GoalHeaderTimeline(tasks: goalTaskList),
                       ],
+                    );
+                  } else {
+                    return Center(
+                      child: Text(
+                        'Add AI Tasks or Create Your Own',
+                        style: GoogleFonts.poppins(
+                            color: Colors.grey, fontSize: 14),
+                      ),
                     );
                   }
                 },
-                loading: () => const CircularProgressIndicator(),
-                error: (error, stackTrace) => Text('Error: $error'),
               ),
             ],
           ],
@@ -136,7 +123,10 @@ class GoalHeader extends ConsumerWidget {
 
   Widget buildActionButton(String label, VoidCallback onTap, Color color) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        onTap();
+        HapticFeedback.heavyImpact();
+      },
       child: Container(
         alignment: Alignment.center,
         width: 90,

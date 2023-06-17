@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AnimatedEmojiLoadingIndicator extends StatefulWidget {
   @override
@@ -33,7 +34,17 @@ class _AnimatedEmojiLoadingIndicatorState
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        const SizedBox(height: 50),
+        Text(
+          'Genating your tasks...',
+          style: GoogleFonts.poppins(fontSize: 15),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
         Center(
           child: AnimatedBuilder(
             animation: _animation,
@@ -45,14 +56,14 @@ class _AnimatedEmojiLoadingIndicatorState
                     opacity: _animation.value,
                     child: const Text(
                       '🤔',
-                      style: TextStyle(fontSize: 30),
+                      style: TextStyle(fontSize: 35),
                     ),
                   ),
                   Opacity(
                     opacity: 1 - _animation.value,
                     child: const Text(
                       '💭',
-                      style: TextStyle(fontSize: 30),
+                      style: TextStyle(fontSize: 35),
                     ),
                   ),
                 ],

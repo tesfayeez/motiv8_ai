@@ -8,6 +8,53 @@ import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final taskListProvider =
+    StateNotifierProvider<TaskList, List<GoalTask>>((ref) => TaskList());
+
+final goalTaskListProvider =
+    StateNotifierProvider<GoalTaskList, List<GoalTask>>(
+        (ref) => GoalTaskList());
+
+class TaskList extends StateNotifier<List<GoalTask>> {
+  TaskList() : super([]);
+
+  void addTask(GoalTask task) {
+    state = [...state, task];
+  }
+
+  void removeTask(String id) {
+    state = state.where((task) => task.id != id).toList();
+  }
+
+  void updateTasks(List<GoalTask> tasks) {
+    state = tasks;
+  }
+
+  void clear() {
+    state = [];
+  }
+}
+
+class GoalTaskList extends StateNotifier<List<GoalTask>> {
+  GoalTaskList() : super([]);
+
+  void addTask(GoalTask task) {
+    state = [...state, task];
+  }
+
+  void removeTask(String id) {
+    state = state.where((task) => task.id != id).toList();
+  }
+
+  void updateTasks(List<GoalTask> tasks) {
+    state = tasks;
+  }
+
+  void clear() {
+    state = [];
+  }
+}
+
 final chatAPIControllerProvider = StateNotifierProvider<ChatAPIController,
     AsyncValue<List<Map<String, dynamic>>>>((ref) {
   return ChatAPIController(ref.watch(chatApiProvider));
@@ -30,7 +77,9 @@ final chatAPIControllerProvider = StateNotifierProvider<ChatAPIController,
 final generateGoalTasksControllerProvider =
     FutureProvider.family<List<GoalTask>, Goal>((ref, goal) async {
   final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
-  return await chatAPIController.generateGoalTasksController(goal);
+  final tasks = await chatAPIController.generateGoalTasksController(goal);
+  ref.read(taskListProvider.notifier).updateTasks(tasks);
+  return tasks;
 });
 
 final motivationalQuotesProvider =
@@ -124,7 +173,6 @@ Overall, Motiv8-AI is a powerful tool for young adults and professionals who are
         // "content":
         //     "You are a highly efficient assistant. Your purpose is to aid in the creation of clear, achievable goals and assist in breaking these goals down into manageable, actionable tasks."
       },
-      {"role": "user", "content": "Hi there!"},
     ]);
   }
 
@@ -145,20 +193,9 @@ Overall, Motiv8-AI is a powerful tool for young adults and professionals who are
     final result = await _chatAPI.generateGoalTasks(goal);
     return result.fold(
       (failure) {
-        // Handle the failure case, e.g., log the error or show an error message
-        print(failure);
-        return <GoalTask>[]; // Return an empty list on failure
+        return <GoalTask>[];
       },
       (tasks) {
-        // Transform the list of tasks into GoalTask objects
-        // final goalTasks = tasks.map((task) {
-        //   final name = task.name;
-        //   final description = task.description;
-        //   final date = DateTime.parse(task.date as String);
-        //   return GoalTask(name, description, date);
-        // }).toList();
-        print("tasks");
-        print(tasks);
         return tasks;
       },
     );
@@ -196,36 +233,3 @@ Overall, Motiv8-AI is a powerful tool for young adults and professionals who are
     );
   }
 }
-
-
-
-
-
-// final motivationalQuotesProvider =
-//     FutureProvider.family<List<String>, String>((ref, goalName) async {
-//   final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
-//   final quotes = await chatAPIController.getMotivationalQuotes(goalName, 2);
-//   return quotes;
-// });
-// final motivationalQuotesProvider =
-//     FutureProvider.family<List<String>, String>((ref, goalName) async {
-//   final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
-//   final quotes = await chatAPIController.getMotivationalQuotes(goalName, 2);
-//   final localNotificationService = ref.read(localNotificationProvider);
-
-//   var now = DateTime.now();
-//   var firstNotificationTime = DateTime(now.year, now.month, now.day, 9);
-//   var secondNotificationTime = DateTime(now.year, now.month, now.day, 14);
-
-//   if (quotes.isNotEmpty) {
-//     await localNotificationService.showNotificationAtTime(
-//         'Motiv8-AI', quotes[0], firstNotificationTime);
-//   }
-
-//   if (quotes.length > 1) {
-//     await localNotificationService.showNotificationAtTime(
-//         'Motiv8-AI', quotes[1], secondNotificationTime);
-//   }
-
-//   return quotes;
-// });

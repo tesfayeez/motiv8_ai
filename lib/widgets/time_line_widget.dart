@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 
 import 'package:motiv8_ai/models/goaltask_models.dart';
@@ -14,9 +15,15 @@ class Timeline extends ConsumerWidget {
 
   const Timeline({required this.tasks});
 
+  void addTask(GoalTask task, WidgetRef ref) {
+    ref.read(taskListProvider.notifier).removeTask(task.id);
+    ref.read(goalTaskListProvider.notifier).addTask(task);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ThemeData theme = ref.watch(themeProvider);
+    final addGoalTasks = ref.watch(goalTaskListProvider);
 
     return ListView(
       shrinkWrap: true,
@@ -80,10 +87,11 @@ class Timeline extends ConsumerWidget {
                   child: GoalTaskCardWidget(
                     goalTask: task,
                     addTaskCallback: () {
-                      ref.watch(goalControllerProvider.notifier).createGoalTask(
-                            goalId: '8e7480b5-2a2c-42ee-9c24-2bdaa55c0b89',
-                            goalTask: task,
-                          );
+                      // ref.watch(goalControllerProvider.notifier).createGoalTask(
+                      //       goalId: '8e7480b5-2a2c-42ee-9c24-2bdaa55c0b89',
+                      //       goalTask: task,
+                      //     );
+                      addTask(task, ref);
                     },
                   ),
                 )

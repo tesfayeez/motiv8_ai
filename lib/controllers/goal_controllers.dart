@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/api/chat_api.dart';
 import 'package:motiv8_ai/api/goal_api.dart';
+import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
@@ -26,11 +27,25 @@ final getGoalsStreamProvider =
   return goalController.getGoalsStream(userID, selectedDate);
 });
 
-final getGoalTasStreamProvider =
-    StreamProvider.family<List<GoalTask>, String>((ref, goalId) {
+final getAllGoalsStreamProvider =
+    StreamProvider.autoDispose.family<List<Goal>, String>((ref, userID) {
   final goalController = ref.watch(goalControllerProvider.notifier);
-  return goalController.getSingleGoalsStream(goalId);
+  return goalController.getAllGoalsStream(userID);
 });
+
+final getGoalTaskStreamProvider =
+    StreamProvider.autoDispose.family<List<GoalTask>, String>((ref, userID) {
+  final goalController = ref.watch(goalControllerProvider.notifier);
+  final selectedDate = ref.watch(calendarStateProvider).selectedDay;
+  // print("Selected date $selectedDate");
+  return goalController.getGoalTaskStream(userID, selectedDate);
+});
+
+// final getGoalTaskStreamProvider =
+//     StreamProvider.family<List<GoalTask>, String>((ref, goalId) {
+//   final goalController = ref.watch(goalControllerProvider.notifier);
+//   return goalController.getSingleGoalsStream(goalId);
+// });
 
 class GoalController extends StateNotifier<bool> {
   final GoalAPI _goalAPI;
@@ -50,32 +65,22 @@ class GoalController extends StateNotifier<bool> {
         super(false);
 
   Future<void> createGoal({
-    required String name,
-    required String description,
-    required DateTime startDate,
-    required DateTime endDate,
-    required String reminderFrequency,
-    required List<GoalTask> tasks,
     required BuildContext context,
-    required String userID,
+    required Goal goal,
   }) async {
     state = true;
-    Goal goal = Goal(
-      id: const Uuid().v4(),
-      name: name,
-      userID: userID,
-      description: description,
-      startDate: startDate,
-      endDate: endDate,
-      reminderFrequency: '',
-      tasks: tasks,
-    );
+    final addedGoalTaskList = _ref.read(goalTaskListProvider);
+    Goal userGoal =
+        goal.copyWith(id: const Uuid().v4(), tasks: addedGoalTaskList);
 
-    final res = await _goalAPI.createGoal(goal);
-    res.fold((l) => showSnackBar(l.message), (r) {
-      goal = r;
-      showSnackBar('Goal created');
-    });
+    final res = await _goalAPI.createGoal(userGoal);
+    res.fold(
+      (l) => showSnackBar(l.message),
+      (r) {
+        goal = r;
+        showSnackBar('Goal created');
+      },
+    );
 
     state = false;
   }
@@ -127,9 +132,9 @@ class GoalController extends StateNotifier<bool> {
           .map((doc) => Goal.fromMap(doc.data()..['id'] = doc.id))
           .where((goal) {
         if (selectedDate != null) {
-          return goal.startDate?.day == selectedDate.day &&
-              goal.startDate?.month == selectedDate.month &&
-              goal.startDate?.year == selectedDate.year;
+          return goal.startDate.day == selectedDate.day &&
+              goal.startDate.month == selectedDate.month &&
+              goal.startDate.year == selectedDate.year;
         } else {
           // Handle the case when selectedDate is null
           // For example, you can choose to include all goals
@@ -140,6 +145,44 @@ class GoalController extends StateNotifier<bool> {
       goals.forEach((goal) => print(goal)); // Print each goal
 
       return goals;
+    });
+  }
+
+  Stream<List<Goal>> getAllGoalsStream(String userID) {
+    return _goalAPI.goalsStream(userID).map((snapshot) {
+      List<Goal> goals = snapshot.docs
+          .map((doc) => Goal.fromMap(doc.data()..['id'] = doc.id))
+          .toList();
+
+      goals.sort((a, b) => a.startDate.compareTo(b.startDate));
+
+      goals.forEach((goal) => print(goal)); // Print each goal
+
+      return goals;
+    });
+  }
+
+  Stream<List<GoalTask>> getGoalTaskStream(
+      String userID, DateTime? selectedDate) {
+    return _goalAPI.goalsStream(userID).map((snapshot) {
+      List<GoalTask> goalTasks = [];
+
+      snapshot.docs.forEach((doc) {
+        final goal = Goal.fromMap(doc.data()..['id'] = doc.id);
+        final tasks = goal.tasks ?? []; // Retrieve the tasks from the goal
+
+        final filteredTasks = tasks.where((task) =>
+            task.date.day == selectedDate?.day &&
+            task.date.month == selectedDate?.month &&
+            task.date.year == selectedDate?.year);
+
+        goalTasks
+            .addAll(filteredTasks); // Add filtered tasks to the goalTasks list
+      });
+
+      goalTasks.forEach((goalTask) => print(goalTask)); // Print each goal task
+
+      return goalTasks;
     });
   }
 

@@ -51,7 +51,7 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
       title: Text(
         title,
         style: GoogleFonts.poppins(
-          fontSize: 18,
+          fontSize: 20,
           color: Colors.black,
         ),
       ),
@@ -60,7 +60,7 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
           ? PreferredSize(
               preferredSize: const Size.fromHeight(1.0),
               child: Container(
-                color: Colors.black54,
+                color: Colors.black45,
                 height: 1.0,
               ),
             )

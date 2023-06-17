@@ -147,15 +147,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           //if you want to use sqllite
 // ref.watch(goalsProvider).when(
-          ref.watch(getGoalsStreamProvider(currentUser!.uid)).when(
-                data: (goals) {
-                  if (goals.isNotEmpty) {
+          ref.watch(getGoalTaskStreamProvider(currentUser!.uid)).when(
+                data: (goalTasks) {
+                  if (goalTasks.isNotEmpty) {
                     Random random = Random();
                     int randomHour = random.nextInt(24);
                     int randomMinute = random.nextInt(60);
                     int percentage = random.nextInt(10);
                     DateTime goalDate =
-                        DateTime.now().add(Duration(days: goals.length));
+                        DateTime.now().add(Duration(days: goalTasks.length));
                     String alarmTime = "${randomHour}:${randomMinute} pm";
                     String currentTime =
                         "${DateTime.now().hour}:${DateTime.now().minute} pm";
@@ -166,7 +166,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Padding(
                             padding: const EdgeInsets.only(left: 10.0),
                             child: Text(
-                              'My Goals',
+                              'My Tasks',
                               style: GoogleFonts.poppins(
                                 fontSize: 25,
                                 color: Colors.black,
@@ -182,12 +182,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 true, // If you want to keep the list constrained to the minimum possible height
                             physics:
                                 const NeverScrollableScrollPhysics(), // If you don't want the ListView to be scrollable
-                            itemCount: goals.length,
+                            itemCount: goalTasks.length,
                             itemBuilder: (context, index) {
-                              final goal = goals[index];
+                              final goalTask = goalTasks[index];
                               return GoalCard(
-                                goalModel: goal,
-                                goalDate: goalDate,
+                                goalTaskModel: goalTask,
+                                goalDate: goalTask.date,
                                 alarmTime: alarmTime,
                                 currentTime: currentTime,
                                 percentage: 100,

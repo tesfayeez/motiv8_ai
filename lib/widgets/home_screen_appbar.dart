@@ -16,7 +16,7 @@ class CustomHomeScreenAppBar extends StatelessWidget
   CustomHomeScreenAppBar({required this.message});
 
   @override
-  Size get preferredSize => Size.fromHeight(100.0);
+  Size get preferredSize => Size.fromHeight(80.0);
 
   @override
   Widget build(BuildContext context) {

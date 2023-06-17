@@ -6,6 +6,8 @@ import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
+import 'package:motiv8_ai/models/goaltask_models.dart';
+import 'package:motiv8_ai/screens/add_task_dialog.dart';
 import 'package:motiv8_ai/widgets/custom_checkbox.dart';
 import 'package:motiv8_ai/widgets/custom_dialog_widget.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -13,14 +15,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
 
 class GoalCard extends ConsumerStatefulWidget {
-  final Goal goalModel;
+  final GoalTask? goalTaskModel;
+  final Goal? goalModel;
   final DateTime goalDate;
   final String alarmTime;
   final String currentTime;
   final int percentage;
 
   GoalCard({
-    required this.goalModel,
+    this.goalTaskModel,
+    this.goalModel,
     required this.goalDate,
     required this.alarmTime,
     required this.currentTime,
@@ -65,32 +69,51 @@ class _GoalCardState extends ConsumerState<GoalCard> {
         return SimpleDialog(
           title: Text('Options', style: GoogleFonts.poppins()),
           children: [
-            SimpleDialogOption(
-              onPressed: () {
-                // Edit goal
-                // Perform the action for editing the goal here
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Edit goal', style: GoogleFonts.poppins()),
-                  const Icon(Icons.edit),
-                ],
+            if (widget.goalModel != null)
+              SimpleDialogOption(
+                onPressed: () {
+                  // Edit goal
+                  // Perform the action for editing the goal here
+                  showDialog(
+                    context: context,
+                    builder: (context) => AddTaskDialog(),
+                  );
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text('Add Task', style: GoogleFonts.poppins()),
+                    const Icon(Icons.edit),
+                  ],
+                ),
               ),
-            ),
+            if (widget.goalModel != null)
+              SimpleDialogOption(
+                onPressed: () {
+                  // Edit goal
+                  // Perform the action for editing the goal here
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text('Edit goal', style: GoogleFonts.poppins()),
+                    const Icon(Icons.edit),
+                  ],
+                ),
+              ),
             SimpleDialogOption(
               onPressed: () {
                 // Duplicate goal
                 // Perform the action for duplicating the goal here
-                ref.watch(goalControllerProvider.notifier).createGoal(
-                    name: "${widget.goalModel.name} Duplicate",
-                    description: widget.goalModel.description,
-                    startDate: widget.goalModel.startDate,
-                    endDate: widget.goalModel.endDate,
-                    reminderFrequency: '',
-                    tasks: [],
-                    context: context,
-                    userID: ref.watch(currentUserProvider)!.uid);
+                // ref.watch(goalControllerProvider.notifier).createGoal(
+                //     name: "${widget.goalModel.name} Duplicate",
+                //     description: widget.goalModel.description,
+                //     startDate: widget.goalModel.startDate,
+                //     endDate: widget.goalModel.endDate,
+                //     reminderFrequency: '',
+                //     tasks: [],
+                //     context: context,
+                //     userID: ref.watch(currentUserProvider)!.uid);
                 Navigator.of(context).pop();
               },
               child: Row(
@@ -116,26 +139,26 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                 ],
               ),
             ),
-            SimpleDialogOption(
-              onPressed: () {
-                // Delete goal
-                // Perform the action for deleting the goal here
-                ref
-                    .watch(goalControllerProvider.notifier)
-                    .deleteGoal(goalId: widget.goalModel.id, context: context);
-                Navigator.of(context).pop();
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    'Delete goal',
-                    style: GoogleFonts.poppins(color: Colors.red),
-                  ),
-                  const Icon(Icons.delete, color: Colors.red),
-                ],
+            if (widget.goalTaskModel != null)
+              SimpleDialogOption(
+                onPressed: () {
+                  // Delete goal
+                  // Perform the action for deleting the goal here
+                  // ref.watch(goalControllerProvider.notifier).deleteGoal(
+                  //     goalId: widget.goalTaskModel.id, context: context);
+                  // Navigator.of(context).pop();
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Delete Task',
+                      style: GoogleFonts.poppins(color: Colors.red),
+                    ),
+                    const Icon(Icons.delete, color: Colors.red),
+                  ],
+                ),
               ),
-            ),
           ],
         );
       },
@@ -150,6 +173,12 @@ class _GoalCardState extends ConsumerState<GoalCard> {
       _confettiController.play();
     }
 
+    final String name =
+        widget.goalTaskModel?.name ?? widget.goalModel?.name ?? '';
+    final String description = widget.goalTaskModel?.description ??
+        widget.goalModel?.description ??
+        '';
+
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: GestureDetector(
@@ -161,7 +190,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
         onTap: () {
           HapticFeedback.lightImpact();
 
-          print("Clicked ${widget.goalModel.name}");
+          print("Clicked $name");
         },
         child: SizedBox(
           width: width,
@@ -205,7 +234,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                               children: [
                                 const SizedBox(height: 2.0),
                                 Text(
-                                  capitalize(widget.goalModel.name),
+                                  capitalize(name),
                                   style: GoogleFonts.poppins(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
@@ -213,14 +242,14 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                 ),
                                 const SizedBox(height: 5.0),
                                 Text(
-                                  capitalize(widget.goalModel.description),
+                                  capitalize(description),
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                   ),
                                 ),
                                 const SizedBox(height: 5.0),
                                 Text(
-                                  'Goal Date: ${DateFormat.yMMMd().format(widget.goalDate)}',
+                                  'Task Date: ${DateFormat.yMMMd().format(widget.goalDate)}',
                                   style: GoogleFonts.poppins(
                                     fontSize: 14,
                                     color: Colors.black54,
@@ -232,20 +261,21 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                           const SizedBox(
                             width: 30,
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 15.0),
-                              CircularStepProgressIndicator(
-                                unselectedColor: Colors.black,
-                                height: 55,
-                                totalSteps: 10,
-                                currentStep: 2,
-                                width: 55,
-                                roundedCap: (_, isSelected) => isSelected,
-                              ),
-                            ],
-                          ),
+                          if (widget.goalModel != null)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const SizedBox(height: 15.0),
+                                CircularStepProgressIndicator(
+                                  unselectedColor: Colors.black,
+                                  height: 55,
+                                  totalSteps: 10,
+                                  currentStep: 2,
+                                  width: 55,
+                                  roundedCap: (_, isSelected) => isSelected,
+                                ),
+                              ],
+                            ),
                           const SizedBox(width: 10.0),
                         ],
                       ),

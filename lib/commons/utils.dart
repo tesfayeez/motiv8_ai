@@ -42,14 +42,16 @@ Path drawCircle(Size size) {
 }
 
 DateTime parseDate(String dateString, {bool regularDate = false}) {
-  final DateFormat format = DateFormat('EEEE | MMM d, yyyy');
+  final DateFormat inputFormat = DateFormat('EEEE, MMM d, yyyy');
   try {
     if (regularDate) {
-      final regularFormat = DateFormat('yyyy, M, d');
-      final regularDateString = regularFormat.format(format.parse(dateString));
-      return DateTime.parse(regularDateString);
+      final DateTime date = inputFormat.parse(dateString);
+      final DateTime dateWithoutTime =
+          DateTime(date.year, date.month, date.day);
+
+      return dateWithoutTime;
     } else {
-      return format.parse(dateString);
+      return inputFormat.parse(dateString);
     }
   } catch (e) {
     print('Invalid date format: $dateString');

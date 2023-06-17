@@ -113,6 +113,11 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
 
     DateTime endDate = parseDate(endDateController.text, regularDate: true);
     DateTime startDate = parseDate(startDateController.text, regularDate: true);
+    print("the dates");
+    print(startDateController.text);
+    print(endDateController.text);
+    print(endDate);
+    print(startDate);
 
     Goal currentGoal = Goal(
       id: const Uuid().v4(),
@@ -177,7 +182,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       // Do something with the collected data
 
       Goal currentGoal = setAllValues();
-      Navigator.of(context).push(GoalTasksScreen.route(sampleGoal));
+      Navigator.of(context).push(GoalTasksScreen.route(currentGoal));
     }
   }
 
