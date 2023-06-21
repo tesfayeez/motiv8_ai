@@ -1,246 +1,250 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
+import 'package:motiv8_ai/widgets/presenting_animation_widget.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-class OnboardingScreen extends ConsumerWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
-  Widget buildFooter(Color color) {
+import 'homeview_screen.dart';
+
+final onboardingScreenpageProvider = StateProvider<int>((ref) => 0);
+
+class OnBoardingScreen extends ConsumerStatefulWidget {
+  static route() => MaterialPageRoute(builder: (context) => OnBoardingScreen());
+  @override
+  _OnBoardingScreenState createState() => _OnBoardingScreenState();
+}
+
+class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
+  final controller = PageController(initialPage: 0);
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(_pageChangeListen);
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_pageChangeListen);
+    controller.dispose();
+    super.dispose();
+  }
+
+  void _pageChangeListen() {
+    setState(() {
+      _currentPage = controller.page!.round();
+    });
+    ref.read(onboardingScreenpageProvider.notifier).state = _currentPage;
+  }
+
+  Widget buildPage({
+    required Color color,
+    required String svg,
+    required List<Widget> children, // Update the parameter type to List<Widget>
+  }) {
     return Container(
       color: color,
-      height: 60,
+      child: Column(
+        children: [
+          const SizedBox(height: 15),
+          SvgPicture.asset(
+            svg,
+            width: MediaQuery.of(context).size.width * 0.43,
+            height: MediaQuery.of(context).size.height * 0.45,
+          ),
+          const SizedBox(height: 15),
+          ...children, // Spread the children widgets
+        ],
+      ),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return IntroductionScreen(
-      pages: [
-        PageViewModel(
-          title: "Daily Goal Achiever",
-          body: "Set and achieve your daily goals with ease.",
-          image: SvgPicture.asset("assets/onboarding1.svg"),
-          decoration: PageDecoration(
-            pageColor: OnboardingPageColors.page1['burntOrange'],
-            bodyTextStyle: GoogleFonts.poppins(fontSize: 18),
-            titleTextStyle:
-                GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
-            imagePadding: EdgeInsets.all(30),
-          ),
-        ),
-        PageViewModel(
-          title: "AI Task Recommendations",
-          body: "Receive personalized task recommendations powered by AI.",
-          image: SvgPicture.asset("assets/onboarding2.svg"),
-          decoration: PageDecoration(
-            pageColor: OnboardingPageColors.page2['steelBlue'],
-            bodyTextStyle: GoogleFonts.poppins(fontSize: 18),
-            titleTextStyle:
-                GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
-            imagePadding: const EdgeInsets.all(24),
-          ),
-        ),
-        PageViewModel(
-          title: "Smart Task Suggestions",
-          body:
-              "Let our AI be your personal task assistant. By understanding your habits and patterns, it recommends tasks that align with your goals, providing valuable insights to optimize your daily workflow.",
-          image: SvgPicture.asset("assets/onboarding3.svg"),
-          decoration: PageDecoration(
-            pageColor: OnboardingPageColors.page3['airForceBlue'],
-            bodyTextStyle: GoogleFonts.poppins(fontSize: 18),
-            titleTextStyle:
-                GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
-            imagePadding: const EdgeInsets.all(24),
-          ),
-        ),
-      ],
-      showNextButton: false,
-      showDoneButton: true,
-      showSkipButton: true,
-      skip: const Text('Skip'),
-      onSkip: () {
-        ref
-            .watch(navigatorKeyProvider)
-            .currentState!
-            .push(GeneralLoginScreen.route());
-      },
-      done: const Text(
-        "Get Started",
-        style: TextStyle(color: Colors.green),
-      ),
-      onDone: () {
-        Navigator.of(context).push(GeneralLoginScreen.route());
-      },
-      dotsDecorator: DotsDecorator(
-        activeColor: Colors.green,
-        size: const Size(10, 10),
-        spacing: const EdgeInsets.symmetric(horizontal: 8),
-        activeSize: const Size(22, 10),
-        activeShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
+  Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 20,
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: SmoothPageIndicator(
+                effect: ExpandingDotsEffect(
+                  activeDotColor: theme.colorScheme.primary,
+                  dotWidth: 10,
+                  dotHeight: 10,
+                  dotColor: theme.colorScheme.tertiary,
+                ),
+                controller: controller,
+                count: 3,
+              ),
+            ),
+            Expanded(
+              child: PageView(
+                controller: controller,
+                onPageChanged: (index) => ref
+                    .read(onboardingScreenpageProvider.notifier)
+                    .state = index,
+                children: [
+                  // Screen 1: Welcome
+                  buildPage(
+                    color: Colors.white,
+                    svg: "assets/onboarding1.svg",
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                          "Welcome to Motive8!",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 30,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                            "Discover AI's magic touch in task management. With tailored task suggestions based on your preferences and goals, staying focused has never been easier.",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                              color: theme.colorScheme.onTertiary,
+                            )),
+                      ),
+                    ],
+                  ),
+                  // Screen 2: Personal Introduction
+                  buildPage(
+                    color: Colors.white,
+                    svg: "assets/onboarding2.svg",
+                    children: [
+                      Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: Text(
+                            "Your To-Do Lists, Personalized",
+                            style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 26,
+                                color: theme.colorScheme.primary),
+                          )),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 10),
+                        child: Text(
+                          "Say goodbye to one-size-fits-all task lists. With our AI's adaptability, you can easily create to-do lists tailored to your goals and style.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: theme.colorScheme.tertiary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  buildPage(
+                    color: Colors.white,
+                    svg: "assets/onboarding3.svg",
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text("Smart Task Suggestions",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 30,
+                              color: theme.colorScheme.primary,
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                          "Get customized task suggestions from our AI! It learns your habits and suggests tasks that fit your goals, making your daily planning easier and more efficient.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: theme.colorScheme.tertiary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Add other screens here...
+
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: GestureDetector(
+                onTap: () {
+                  if (_currentPage == 2) {
+                    HapticFeedback.heavyImpact();
+                    // Update this value to match the number of pages - 1
+                    Navigator.of(context)
+                        .pushReplacement(GeneralLoginScreen.route());
+                  } else {
+                    // Navigate to the next screen
+                    HapticFeedback.heavyImpact();
+                    controller.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutSine,
+                    );
+                  }
+                },
+                child: Container(
+                  width: 200, // Set the width of the container here
+                  padding: const EdgeInsets.all(15),
+                  decoration: customButtonDecoration(theme.colorScheme.primary)
+                      .copyWith(borderRadius: BorderRadius.circular(30)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _currentPage == 2 ? "Get Started" : "Next",
+                        style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      const Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                        size: 35,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ],
         ),
       ),
     );
   }
-}
-
-// import 'package:flutter/material.dart';
-
-// class OnboardingScreen extends StatefulWidget {
-//   @override
-//   _OnboardingScreenState createState() => _OnboardingScreenState();
-// }
-
-// class _OnboardingScreenState extends State<OnboardingScreen> {
-//   PageController _pageController;
-//   int _currentPage = 0;
-//   List<Map<String, String?>> _pages = [
-//     {
-//       'image': 'assets/onboarding1.svg',
-//       'detail': 'Page 1 detail description',
-//     },
-//     {
-//       'image': 'assets/onboarding2.svg',
-//       'detail': 'Page 2 detail description',
-//     },
-//     {
-//       'image': 'assets/onboarding3.svg',
-//       'detail': 'Page 3 detail description',
-//     },
-//   ];
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _pageController = PageController(initialPage: _currentPage);
-//   }
-
-//   @override
-//   void dispose() {
-//     _pageController.dispose();
-//     super.dispose();
-//   }
-
-//   void _nextPage() {
-//     if (_currentPage < _pages.length - 1) {
-//       setState(() {
-//         _currentPage++;
-//       });
-//       _pageController.nextPage(
-//         duration: Duration(milliseconds: 500),
-//         curve: Curves.ease,
-//       );
-//     }
-//   }
-
-//   Widget _buildPage(int index) {
-//     return Column(
-//       mainAxisAlignment: MainAxisAlignment.center,
-//       children: [
-//         Image.asset(
-//           _pages[index]['image'],
-//           height: 200,
-//         ),
-//         SizedBox(height: 16),
-//         Text(
-//           _pages[index]['detail'],
-//           style: TextStyle(fontSize: 18),
-//           textAlign: TextAlign.center,
-//         ),
-//       ],
-//     );
-//   }
-
-//   Widget _buildPageIndicator() {
-//     return Row(
-//       mainAxisAlignment: MainAxisAlignment.center,
-//       children: List.generate(
-//         _pages.length,
-//         (index) => AnimatedContainer(
-//           duration: Duration(milliseconds: 300),
-//           margin: EdgeInsets.symmetric(horizontal: 8),
-//           width: _currentPage == index ? 16 : 8,
-//           height: 8,
-//           decoration: BoxDecoration(
-//             color: _currentPage == index ? Colors.blue : Colors.grey,
-//             borderRadius: BorderRadius.circular(4),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Onboarding'),
-//       ),
-//       body: Column(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           Expanded(
-//             child: PageView.builder(
-//               controller: _pageController,
-//               itemCount: _pages.length,
-//               itemBuilder: (context, index) {
-//                 return _buildPage(index);
-//               },
-//               onPageChanged: (index) {
-//                 setState(() {
-//                   _currentPage = index;
-//                 });
-//               },
-//             ),
-//           ),
-//           SizedBox(height: 16),
-//           _buildPageIndicator(),
-//           SizedBox(height: 16),
-//           ElevatedButton(
-//             onPressed: _nextPage,
-//             child: Text(
-//               _currentPage == _pages.length - 1 ? 'Finish' : 'Next',
-//             ),
-//           ),
-//           SizedBox(height: 16),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// void main() {
-//   runApp(MaterialApp(
-//     home: OnboardingScreen(),
-//   ));
-// }
-class OnboardingPageColors {
-  static final Map<String, Color> page1 = {
-    'lightPurple': Color(0xFFDAD9E5),
-    'vividPurple': Color(0xFF804DF4),
-    'skyBlue': Color(0xFF1A89FB),
-    'darkBlueGray': Color(0xFF28363E),
-    'burntOrange': Color(0xFFE18A28),
-  };
-
-  static final Map<String, Color> page2 = {
-    'darkBlue': Color(0xFF1D4873),
-    'steelBlue': Color(0xFF7F8A9F),
-    'roseTaupe': Color(0xFF675F6B),
-    'lightGray': Color(0xFFDDDEDE),
-    'saffron': Color(0xFFE6B549),
-  };
-
-  static final Map<String, Color> page3 = {
-    'periwinkle': Color(0xFFBDBCF2),
-    'oxfordBlue': Color(0xFF244893),
-    'airForceBlue': Color(0xFF6D8FCA),
-    'iris': Color(0xFF6563A9),
-    'gray': Color(0xFF7C7C95),
-  };
 }

@@ -33,11 +33,14 @@ class GoalTaskCardWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isGoalTaskPresent = goalTask != null;
     final theme = ref.watch(themeProvider);
-
+    final isDarkTheme = theme.brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(right: 10.0),
       width: double.infinity - 40,
-      decoration: cardBoxDecoration(),
+      decoration: goalCardTimeLineboxDecoration(
+        isDarkTheme,
+        theme.colorScheme.onSecondaryContainer,
+      ),
       child: Stack(
         children: [
           Container(

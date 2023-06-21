@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal_card_widget.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
@@ -17,7 +18,9 @@ class MyGoalsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
     return Scaffold(
+      backgroundColor: theme.colorScheme.onBackground,
       appBar: CustomAppBar(
         title: 'My Goals',
         isBackPresent: isDirectNavigation
@@ -79,9 +82,9 @@ class MyGoalsScreen extends ConsumerWidget {
                           Text(
                             "Tap + to add your Goal",
                             style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: theme.colorScheme.onTertiary),
                           )
                         ],
                       ),

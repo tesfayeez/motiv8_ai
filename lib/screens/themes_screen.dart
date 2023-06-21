@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeScreen extends ConsumerWidget {
   static route() =>
@@ -40,42 +43,19 @@ class ThemeScreen extends ConsumerWidget {
               ThemeButton(
                 color: Color(0xFF1988FF),
                 onPressed: () {
-                  ref.read(themeProvider.notifier).changeTheme(AppTheme.theme1);
+                  ref.read(themeProvider.notifier).changeTheme(AppTheme.light);
                 },
-                text: 'Dodger Blue​',
+                text: 'Light',
               ),
               const SizedBox(height: 16),
               ThemeButton(
                 onPressed: () {
-                  ref.read(themeProvider.notifier).changeTheme(AppTheme.theme2);
+                  ref.read(themeProvider.notifier).changeTheme(AppTheme.dark);
                 },
-                text: 'Tangerine',
-                color: Color(0xFFE68000),
+                text: 'Dark',
+                color: const Color(0x00000040),
               ),
               const SizedBox(height: 16),
-              ThemeButton(
-                onPressed: () {
-                  ref.read(themeProvider.notifier).changeTheme(AppTheme.theme3);
-                },
-                text: 'Mobster',
-                color: Color(0xFF59515E),
-              ),
-              const SizedBox(height: 16),
-              ThemeButton(
-                onPressed: () {
-                  ref.read(themeProvider.notifier).changeTheme(AppTheme.theme4);
-                },
-                text: 'KSU Purple',
-                color: Color(0xFF512888),
-              ),
-              const SizedBox(height: 16),
-              ThemeButton(
-                onPressed: () {
-                  ref.read(themeProvider.notifier).changeTheme(AppTheme.theme5);
-                },
-                text: 'Cornflower Blue',
-                color: Color(0xFF6495ED),
-              )
             ],
           ),
         ),
@@ -92,90 +72,82 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
   ThemeNotifier()
       : super(themeData1); // Default theme can be any of the defined themes
 
-  static final ThemeData themeData1 = ThemeData.from(
+  static final ThemeData themeData1 = ThemeData(
     colorScheme: ColorScheme(
+      primary: const Color(0xFF1988FF),
+      tertiary: const Color(0xFF343A40), //any text color
+      onTertiary: const Color(0xFF495057), //for bottom navigation unselected
+      secondary:
+          const Color(0xFFEBF2FF), //For calendar view back ground unselected
+      onSecondaryContainer: Colors.white, //for goal card background
+      surface: Colors.white, //any white color
+      background: Colors.white,
+      error: Colors.red[700]!,
+      onPrimary: const Color(0xFF1988FF),
+      onSecondary: Colors.white,
+      onSurface: Colors.white,
+      onBackground: const Color(0xFFFCFCFC), //main scaffold background
+      onError: Colors.white,
+      brightness: Brightness.light,
+      tertiaryContainer:
+          const Color(0xFFE4EDFF), //taskscreen goal header timeline card
+    ),
+  ).copyWith(
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: const Color(0xFF1988FF),
+      behavior: SnackBarBehavior.floating,
+      elevation: 8.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+      ),
+    ),
+  );
+
+  static final ThemeData themeData1Dark = ThemeData.from(
+    colorScheme: ColorScheme.dark(
         primary: const Color(0xFF1988FF), // Dodger Blue
-        primaryContainer: const Color(0xFFEBF2FF)
-            .withOpacity(0.4), // A bit darker than Dodger Blue
-        secondary: const Color(0xFFE68000), // Tangerine for contrast
-        secondaryContainer: const Color(0xFFD66E00), // A bit darker Tangerine
+        tertiary: Colors.white,
+        onTertiary: const Color(0xD1D1D1D1),
+        primaryContainer: const Color(0x00000040),
+        secondary:
+            const Color.fromRGBO(170, 170, 170, 0.15), // Tangerine for contrast
         surface: Colors.white,
-        background: Colors.white,
+        background: const Color(0xFF202124),
         error: Colors
             .red[700]!, // We assume this exists in the Material Color Reds
         onPrimary: const Color(0xFF1988FF),
         onSecondary: Colors.black,
-        onSurface: Colors.white,
-        onBackground: Colors.black,
+        onSurface: const Color(0xFF202124),
+        onBackground: const Color(0xFF202124),
         onError: Colors.white,
-        brightness: Brightness.light,
-        onSecondaryContainer: const Color(0xFFEBF2FF)),
-  );
-
-  static final ThemeData themeData2 = ThemeData.from(
-    colorScheme: const ColorScheme.light(
-      primary: Color(0xFFE68000),
-      onPrimary: Colors.white,
-      surface: Colors.white,
-      onSurface: Colors.black,
-    ),
-  );
-
-  static final ThemeData themeData3 = ThemeData.from(
-    colorScheme: const ColorScheme.light(
-      primary: Color(0xFF59515E),
-      onPrimary: Colors.white,
-      surface: Colors.white,
-      onSurface: Colors.black,
-    ),
-  );
-
-  static final ThemeData themeData4 = ThemeData.from(
-    colorScheme: const ColorScheme.light(
-      primary: Color(0xFF512888),
-      onPrimary: Colors.white,
-      surface: Colors.white,
-      onSurface: Colors.black,
-    ),
-  );
-
-  static final ThemeData themeData5 = ThemeData.from(
-    colorScheme: const ColorScheme.dark(
-      primary: Color(0xFF6495ED),
-      onPrimary: Colors.white,
-      surface: Colors.white,
-      onSurface: Colors.black,
+        brightness: Brightness.dark,
+        tertiaryContainer: const Color.fromRGBO(170, 170, 170, 0.15),
+        onSecondaryContainer: const Color.fromRGBO(170, 170, 170, 0.15)),
+  ).copyWith(
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: const Color(0xFF1988FF),
+      behavior: SnackBarBehavior.floating,
+      elevation: 8.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+      ),
     ),
   );
 
   void changeTheme(AppTheme theme) {
     switch (theme) {
-      case AppTheme.theme1:
+      case AppTheme.light:
         state = themeData1;
         break;
-      case AppTheme.theme2:
-        state = themeData2;
-        break;
-      case AppTheme.theme3:
-        state = themeData3;
-        break;
-      case AppTheme.theme4:
-        state = themeData4;
-        break;
-      case AppTheme.theme5:
-        state = themeData5;
+
+      case AppTheme.dark:
+        state = themeData1Dark;
         break;
     }
   }
 }
 
-enum AppTheme {
-  theme1,
-  theme2,
-  theme3,
-  theme4,
-  theme5,
-}
+enum AppTheme { light, dark }
 
 class ThemeButton extends StatelessWidget {
   const ThemeButton({
@@ -204,7 +176,7 @@ class ThemeButton extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 text,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                 ),
@@ -242,7 +214,6 @@ class ThemeButton extends StatelessWidget {
     );
   }
 }
-
 
 // child: Text,
 //         style: Theme.of(context).textTheme.button,

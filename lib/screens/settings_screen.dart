@@ -120,31 +120,46 @@ class CustomContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     return Container(
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-        color: containerColor,
-        borderRadius: BorderRadius.circular(20),
+      decoration: const BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x00000040),
+            offset: Offset(0, 0),
+            blurRadius: 20,
+            spreadRadius: 0,
+          )
+        ],
       ),
       child: Column(
         children: listTileData.map((data) {
-          return ListTile(
-            leading: Icon(data.icon),
-            title: Text(
-              data.text,
-              style: GoogleFonts.poppins(
-                  color: tileItemColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400),
-            ),
-            trailing: Icon(
-              Icons.chevron_right,
-              color: tileItemColor,
-              size: 25,
-            ), // Indicator on the right
-            onTap: data.onPressed,
-          );
+          if (isIOS) {
+            return CupertinoListTile(
+              icon: data.icon,
+              text: data.text,
+              onPressed: data.onPressed,
+            );
+          } else {
+            return ListTile(
+              leading: Icon(data.icon),
+              title: Text(
+                data.text,
+                style: GoogleFonts.poppins(
+                    color: tileItemColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400),
+              ),
+              trailing: Icon(
+                Icons.chevron_right,
+                color: tileItemColor,
+                size: 25,
+              ), // Indicator on the right
+              onTap: data.onPressed,
+            );
+          }
         }).toList(),
       ),
     );
@@ -161,4 +176,34 @@ class ListTileData {
     required this.icon,
     required this.onPressed,
   });
+}
+
+class CupertinoListTile extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  CupertinoListTile({
+    required this.text,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+        child: Row(
+          children: <Widget>[
+            Icon(icon, size: 28.0),
+            SizedBox(width: 10.0),
+            Expanded(child: Text(text, style: TextStyle(fontSize: 20.0))),
+            Icon(Icons.chevron_right, size: 28.0),
+          ],
+        ),
+      ),
+    );
+  }
 }

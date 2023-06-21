@@ -8,6 +8,7 @@ import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/forgot_password.screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
@@ -66,8 +67,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final navigatorKey = ref.read(navigatorKeyProvider);
     final isLoading = ref.watch(authControllerProvider);
+    final theme = ref.watch(themeProvider);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.onBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -80,9 +82,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Sign In to Your Account',
                   style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.normal,
-                      fontSize: 28),
+                    color: theme.colorScheme.tertiary,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.normal,
+                    fontSize: 28,
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
@@ -90,7 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Welcome back you\'ve been missed',
                   style: GoogleFonts.poppins(
-                      fontSize: 14, color: Pallete.greyColor),
+                      fontSize: 14, color: theme.colorScheme.onTertiary),
                 ),
                 const SizedBox(
                   height: 25,
@@ -130,11 +134,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ForgotPasswordScreen.route(),
                           );
                         },
-                        child: const Text(
+                        child: Text(
                           'Forgot Password?',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                            fontWeight: FontWeight.w300,
+                            color: theme.colorScheme.primary,
                           ),
                         )),
                   ],
@@ -178,15 +182,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 RichText(
                   text: TextSpan(
                     text: 'Don\'t have an account?',
-                    style: const TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Pallete.greyColor,
+                      color: theme.colorScheme.onTertiary,
                     ),
                     children: [
                       TextSpan(
                         text: ' Sign up',
-                        style:
-                            const TextStyle(color: Colors.blue, fontSize: 16),
+                        style: GoogleFonts.poppins(
+                            color: theme.colorScheme.primary, fontSize: 16),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.of(context).push(SignUpScreen.route());

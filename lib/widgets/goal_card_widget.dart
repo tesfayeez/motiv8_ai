@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
@@ -8,8 +9,10 @@ import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/add_task_dialog.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_checkbox.dart';
 import 'package:motiv8_ai/widgets/custom_dialog_widget.dart';
+import 'package:motiv8_ai/widgets/progress.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
@@ -168,7 +171,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width * 0.93;
-
+    final theme = ref.watch(themeProvider);
     if (widget.percentage == 100) {
       _confettiController.play();
     }
@@ -198,18 +201,8 @@ class _GoalCardState extends ConsumerState<GoalCard> {
             children: [
               Container(
                 margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 3,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
+                decoration: goalCardDarkThemeDecoration(
+                    theme.colorScheme.onSecondaryContainer),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: Column(
@@ -219,14 +212,16 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          CustomCheckbox(
-                            value: _isSelected,
-                            onChanged: (bool newValue) {
-                              setState(() {
-                                _isSelected = newValue;
-                              });
-                            },
-                          ),
+                          if (widget.goalTaskModel != null)
+                            CustomCheckbox(
+                              color: theme.colorScheme.tertiary,
+                              value: _isSelected,
+                              onChanged: (bool newValue) {
+                                setState(() {
+                                  _isSelected = newValue;
+                                });
+                              },
+                            ),
                           const SizedBox(width: 5.0),
                           Flexible(
                             child: Column(
@@ -236,7 +231,8 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                 Text(
                                   capitalize(name),
                                   style: GoogleFonts.poppins(
-                                    fontSize: 18,
+                                    fontSize: 16,
+                                    color: theme.colorScheme.tertiary,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -244,76 +240,135 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                 Text(
                                   capitalize(description),
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
+                                    color: theme.colorScheme.tertiary,
+                                    fontSize: 14,
                                   ),
                                 ),
                                 const SizedBox(height: 5.0),
-                                Text(
-                                  'Task Date: ${DateFormat.yMMMd().format(widget.goalDate)}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    color: Colors.black54,
-                                  ),
-                                ),
+                                widget.goalModel != null
+                                    ? Row(
+                                        children: [
+                                          Text(
+                                            DateFormat.yMMMd().format(
+                                                widget.goalModel!.startDate),
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 13,
+                                              color: theme.colorScheme.tertiary,
+                                            ),
+                                          ),
+                                          Icon(
+                                            Icons.arrow_forward,
+                                            color: theme.colorScheme.onTertiary,
+                                          ),
+                                          Text(
+                                            DateFormat.yMMMd().format(
+                                                widget.goalModel!.endDate),
+                                            style: GoogleFonts.poppins(
+                                              fontSize: 13,
+                                              color: theme.colorScheme.tertiary,
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    : Text(
+                                        'Task Date: ${DateFormat.yMMMd().format(widget.goalDate)}',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 14,
+                                          color: theme.colorScheme.tertiary
+                                              .withOpacity(0.8),
+                                        ),
+                                      ),
                               ],
                             ),
                           ),
-                          const SizedBox(
-                            width: 30,
-                          ),
-                          if (widget.goalModel != null)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const SizedBox(height: 15.0),
-                                CircularStepProgressIndicator(
-                                  unselectedColor: Colors.black,
-                                  height: 55,
-                                  totalSteps: 10,
-                                  currentStep: 2,
-                                  width: 55,
-                                  roundedCap: (_, isSelected) => isSelected,
-                                ),
-                              ],
-                            ),
-                          const SizedBox(width: 10.0),
                         ],
                       ),
-                      const Divider(),
+                      Divider(
+                        color: theme.colorScheme.tertiary,
+                      ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: widget.goalModel != null
+                            ? MainAxisAlignment.center
+                            : MainAxisAlignment.end,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.alarm,
-                                color: Colors.blue,
-                                size: 18,
-                              ),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              Text(
-                                widget.alarmTime,
-                                style: GoogleFonts.poppins(
-                                    fontSize: 10, color: Colors.grey),
-                              ),
-                              const SizedBox(width: 8.0),
-                              const Icon(
-                                Icons.access_time,
-                                color: Colors.blue,
-                                size: 18,
-                              ),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              Text(
-                                widget.currentTime,
-                                style: GoogleFonts.poppins(
-                                    fontSize: 10, color: Colors.grey),
-                              ),
-                            ],
-                          )
+                          widget.goalModel != null
+                              ? Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text(
+                                          'Progress',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            color: theme.colorScheme.tertiary
+                                                .withOpacity(0.8),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: width * 0.75,
+                                        ),
+                                        Text(
+                                          '30%',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            color: theme.colorScheme.tertiary
+                                                .withOpacity(0.8),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5.0),
+                                    StepProgressIndicator(
+                                        roundedEdges: const Radius.circular(5),
+                                        unselectedColor: theme
+                                            .colorScheme.primary
+                                            .withOpacity(0.3),
+                                        selectedColor:
+                                            theme.colorScheme.primary,
+                                        totalSteps: 10,
+                                        currentStep: 1,
+                                        padding: 1,
+                                        unselectedSize: 10,
+                                        selectedSize: 10,
+                                        fallbackLength: width - 15),
+                                  ],
+                                )
+                              : Row(
+                                  children: [
+                                    Icon(
+                                      Icons.alarm,
+                                      color: theme.colorScheme.primary,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(
+                                      width: 2,
+                                    ),
+                                    Text(
+                                      widget.alarmTime,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 10,
+                                          color: theme.colorScheme.tertiary),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Icon(
+                                      Icons.access_time,
+                                      color: theme.colorScheme.primary,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(
+                                      width: 2,
+                                    ),
+                                    Text(
+                                      widget.currentTime,
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 10,
+                                          color: theme.colorScheme.tertiary),
+                                    ),
+                                  ],
+                                ),
+                          const SizedBox(width: 10.0),
                         ],
                       ),
                     ],

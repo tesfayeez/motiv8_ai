@@ -72,11 +72,19 @@ dependencies:
   go_router: ^7.1.1
   animated_text_kit: ^4.2.2
   cached_network_image: ^3.2.3
+  
+  
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  flutter_native_splash: ^2.3.1
+  
+flutter_native_splash:
+  image: assets/logo_4_14.png
+  color: "#ffffff"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

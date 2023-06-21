@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/constants.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 
-class HomeViewScreen extends StatefulWidget {
+class HomeViewScreen extends ConsumerStatefulWidget {
   static route() =>
       MaterialPageRoute(builder: (context) => const HomeViewScreen());
   const HomeViewScreen({
@@ -15,7 +17,7 @@ class HomeViewScreen extends StatefulWidget {
   _HomeViewScreenState createState() => _HomeViewScreenState();
 }
 
-class _HomeViewScreenState extends State<HomeViewScreen> {
+class _HomeViewScreenState extends ConsumerState<HomeViewScreen> {
   int _page = 0;
 
   final List<String> tabAssets = [
@@ -46,13 +48,14 @@ class _HomeViewScreenState extends State<HomeViewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
     return Scaffold(
       body: IndexedStack(
         index: _page,
         children: UIConstants.bottomTabBarPages,
       ),
       bottomNavigationBar: CupertinoTabBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.onBackground,
         currentIndex: _page,
         onTap: onPageChange,
         border: const Border(
@@ -65,8 +68,8 @@ class _HomeViewScreenState extends State<HomeViewScreen> {
               asset,
               colorFilter: ColorFilter.mode(
                 _page == index
-                    ? const Color(0xff1988FF)
-                    : const Color(0xff343A40),
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onTertiary,
                 BlendMode.srcIn,
               ),
             ),

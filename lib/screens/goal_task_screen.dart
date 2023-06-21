@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/animated_loading_indicator.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
@@ -42,7 +43,9 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
     return Scaffold(
+      backgroundColor: theme.colorScheme.onBackground,
       appBar: CustomAppBar(
         isCenterTitle: true,
         title: 'Goal Builder 🧠',
@@ -75,8 +78,7 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
                 child: Text(
                   'Tasks & Timelines 📝 🕒',
                   style: GoogleFonts.poppins(
-                    fontSize: 20,
-                  ),
+                      fontSize: 20, color: theme.colorScheme.tertiary),
                 ),
               ),
               const SizedBox(height: 25),
@@ -91,7 +93,31 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
                       if (taskList.isNotEmpty) {
                         return Timeline(tasks: taskList);
                       } else {
-                        return const Center(child: Text("No tasks available"));
+                        return Center(
+                            child: Column(
+                          children: [
+                            Text(
+                              "No Tasks Available",
+                              style: GoogleFonts.poppins(
+                                  color: theme.colorScheme.onTertiary),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            InkWell(
+                              splashColor: Colors.white,
+                              onTap: () {},
+                              child: Text(
+                                '💡🗒️ AI Tasks',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            )
+                          ],
+                        ));
                       }
                     },
                     loading: () {

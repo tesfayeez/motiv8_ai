@@ -8,6 +8,7 @@ import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/goal_task_screen.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/CustomRadioButtons.dart';
 import 'package:motiv8_ai/widgets/add_goals_text_field.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
@@ -206,8 +207,9 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     if (ref.watch(currentUserProvider) != null) {
       currentUser = ref.watch(currentUserProvider);
     }
-
+    final theme = ref.watch(themeProvider);
     return Scaffold(
+      backgroundColor: theme.colorScheme.onBackground,
       resizeToAvoidBottomInset: true,
       appBar: CustomAppBar(
         title: 'Add your Goal',
@@ -233,7 +235,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                 // Screen 1: Welcome
                 buildPage(
                   height: MediaQuery.of(context).size.height * 0.07,
-                  color: Colors.white,
+                  color: theme.colorScheme.onBackground,
                   title: 'Enter your Goal Description 📝',
                   descriptionOfTitle:
                       'Please provide more detail about your goal. What specific outcomes are you seeking to achieve?',
@@ -257,7 +259,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                       'Start Date: June 15, 2023, End Date: September 15, 2023.',
                   descriptionOfTitle:
                       'Please enter the start date and end date for your goal.',
-                  color: Colors.white,
+                  color: theme.colorScheme.onBackground,
                   children: [
                     Column(
                       children: [
@@ -300,7 +302,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                       'Are there any milestones or key events related to your goal that occur between your start and end dates?',
                   exampleOfTitle:
                       'I would like to be able to run 1 mile without stopping by July 1, 2 miles by July 15, 3 miles by August 1, 4 miles by August 15, and 5 miles by September 1',
-                  color: Colors.white,
+                  color: theme.colorScheme.onBackground,
                   children: [
                     Column(
                       children: [
@@ -322,7 +324,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                       '🏃 Daily Tasks: Run gradually increasing distances each day to build endurance.Weekly Tasks: 📅 Divide your weekly goal into smaller runs to reach a target mileage.Milestones: 🎉 Set checkpoints like 5k, 10k, half marathon, and full marathon distances to track your progress.',
                   descriptionOfTitle:
                       'How would you like to break down the tasks?',
-                  color: Colors.white,
+                  color: theme.colorScheme.onBackground,
                   children: [
                     Column(
                       children: [
@@ -343,7 +345,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                       'Success for me is being able to run 5 miles without stopping. I will know I have achieved it when I can do this consistently.',
                   descriptionOfTitle:
                       'What does success look like for your goal? How will you know when you\'ve achieved it?',
-                  color: Colors.white,
+                  color: theme.colorScheme.onBackground,
                   children: [
                     Column(
                       children: [
@@ -365,7 +367,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                   exampleOfTitle: '',
                   descriptionOfTitle:
                       'Great! Your goal information has been captured. AI will now generate personalized tasks to help you achieve your goal. Check the next screen for your customized tasks.',
-                  color: Colors.white,
+                  color: theme.colorScheme.onBackground,
                   children: [],
                 ),
               ],
@@ -374,11 +376,11 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
             Align(
               alignment: Alignment.topCenter,
               child: SmoothPageIndicator(
-                effect: const ExpandingDotsEffect(
+                effect: ExpandingDotsEffect(
                   activeDotColor: Colors.orange,
                   dotWidth: 15,
                   dotHeight: 7,
-                  dotColor: Colors.blue,
+                  dotColor: theme.colorScheme.primary,
                 ),
                 controller: controller,
                 count: totalPages,
@@ -399,7 +401,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                     width: 220,
                     padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Row(
@@ -411,9 +413,10 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                               ? "Generate Tasks"
                               : "Continue",
                           style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: theme.colorScheme.surface,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         currentPage == totalPages - 1

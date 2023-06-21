@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 
@@ -24,7 +25,7 @@ class Timeline extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ThemeData theme = ref.watch(themeProvider);
     final addGoalTasks = ref.watch(goalTaskListProvider);
-
+    final isDarkTheme = theme.brightness == Brightness.dark;
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -48,20 +49,8 @@ class Timeline extends ConsumerWidget {
                     width: 70,
                     height: 100,
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          offset: Offset(3, 3),
-                          blurRadius: 7,
-                        )
-                      ],
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(30.0),
-                        bottomRight: Radius.circular(30.0),
-                      ),
-                    ),
+                    decoration: goalCardTimeLineDateDisplayerBoxDecoration(
+                        theme.colorScheme.onSecondaryContainer, isDarkTheme),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -70,13 +59,14 @@ class Timeline extends ConsumerWidget {
                           task.date.day.toString(),
                           style: GoogleFonts.poppins(
                             fontSize: 30,
-                            color: Colors.black87,
+                            color: theme.colorScheme.tertiary,
                           ),
                         ),
                         Text(
                           DateFormat('MMM yyyy').format(task.date),
                           style: GoogleFonts.poppins(
-                              color: Colors.black54, fontSize: 10),
+                              color: theme.colorScheme.onTertiary,
+                              fontSize: 10),
                         ),
                       ],
                     ),

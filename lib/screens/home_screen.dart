@@ -87,14 +87,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           heroTag: null,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          backgroundColor: theme.primaryColor,
+          backgroundColor: theme.colorScheme.primary,
           onPressed: () {
             // Add your onPressed code here!
-
+            Goal sampleGoal = Goal(
+              id: '1',
+              name: 'Fitness Journey',
+              userID: '123',
+              description: 'Achieve a healthy and fit lifestyle',
+              startDate: DateTime(2023, 1, 1),
+              endDate: DateTime(2023, 12, 31),
+              reminderFrequency: 'Daily',
+              tasks: [],
+              milestones: 'Lose 10 pounds',
+              taskBreakdownPreference: 'Weekly',
+              definitionOfSuccess: 'Improved stamina and strength',
+              strategiesApproaches: 'Work with a personal trainer',
+              timelineFlexibility: 'Moderate',
+              timeCommitment: '1 hour per day',
+            );
             HapticFeedback.heavyImpact();
-            Navigator.of(context).push(GoalCreationScreen.route());
+            // Navigator.of(context).push(GoalTasksScreen.route(sampleGoal));
+            // Navigator.of(context).push(GoalCreationScreen.route());
 
-            // navigateToGoalCreationScreen(context);
+            navigateToGoalCreationScreen(context);
           },
           child: Icon(
             Icons.add,
@@ -103,8 +119,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.onBackground,
       appBar: CustomHomeScreenAppBar(
+        appBarColor: theme.colorScheme.onBackground,
+        textColor: theme.colorScheme.tertiary,
         message: 'Have a nice day!',
       ),
       body: SafeArea(
@@ -120,33 +138,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 error: (error, stack) => [const SizedBox()],
                 data: (quote) => [
                   if (quote.isNotEmpty) ...[
-                    _buildQuoteWidget(quote: quote, color: Colors.black),
+                    _buildQuoteWidget(
+                      quote: quote,
+                      color: theme.colorScheme.tertiary,
+                    ),
                   ] else ...[
                     _buildQuoteWidget(
                       quote:
                           "\"Dream big, work hard, stay focused and surround yourself with positive people who believe in you'",
-                      color: Colors.black,
+                      color: theme.colorScheme.tertiary,
                     ),
                   ],
                 ],
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Divider(
               thickness: 0.9,
-              color: Colors.black54,
+              color: theme.colorScheme.tertiary,
             ),
           ),
-
           const SizedBox(height: 10.0),
           CalendarView(key: widget.key),
           const SizedBox(height: 10.0),
-          // List your goals for the day here
-
-          //if you want to use sqllite
-// ref.watch(goalsProvider).when(
           ref.watch(getGoalTaskStreamProvider(currentUser!.uid)).when(
                 data: (goalTasks) {
                   if (goalTasks.isNotEmpty) {
@@ -169,7 +185,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               'My Tasks',
                               style: GoogleFonts.poppins(
                                 fontSize: 25,
-                                color: Colors.black,
+                                color: theme.colorScheme.tertiary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -216,6 +232,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
+                              color: theme.colorScheme.tertiary,
                             ),
                           )
                         ],
@@ -231,6 +248,297 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+// class _HomeScreenState extends ConsumerState<HomeScreen> {
+//   User? currentUser;
+//   String motivationQuote = "";
+
+//   Widget _buildQuoteWidget({required String quote, required Color color}) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         SvgPicture.asset("assets/quotes.svg"),
+//         const SizedBox(height: 5.0),
+//         Text(
+//           quote,
+//           style: GoogleFonts.poppins(
+//               fontSize: 14, color: color, fontWeight: FontWeight.w400),
+//         ),
+//       ],
+//     );
+//   }
+
+//   void navigateToGoalCreationScreen(BuildContext context) {
+//     Navigator.of(context).push(
+//       PageRouteBuilder(
+//         pageBuilder: (context, animation, secondaryAnimation) =>
+//             GoalCreationScreen(),
+//         transitionsBuilder: (context, animation, secondaryAnimation, child) {
+//           return SlideTransition(
+//             position: Tween<Offset>(
+//               begin: const Offset(0, 1),
+//               end: Offset.zero,
+//             ).animate(animation),
+//             child: child,
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // final showNotificationOnClick = ref.read(notificationButtonProvider);
+//     final theme = ref.watch(themeProvider);
+
+//     if (ref.watch(currentUserProvider) != null) {
+//       currentUser = ref.watch(currentUserProvider);
+//     }
+//     final motivationalQuoteAsync =
+//         ref.watch(getMotivationalQuoteProvider('Random'));
+//     return Scaffold(
+//         floatingActionButton: SizedBox(
+//           height: 50,
+//           width: 50,
+//           child: FloatingActionButton(
+//             heroTag: null,
+//             shape:
+//                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+//             backgroundColor: theme.primaryColor,
+//             onPressed: () {
+//               // Add your onPressed code here!
+
+//               HapticFeedback.heavyImpact();
+//               Navigator.of(context).push(GoalCreationScreen.route());
+
+//               // navigateToGoalCreationScreen(context);
+//             },
+//             child: Icon(
+//               Icons.add,
+//               size: 30,
+//               color: theme.colorScheme.surface,
+//             ),
+//           ),
+//         ),
+//         backgroundColor: Colors.white,
+//         appBar: CustomHomeScreenAppBar(message: 'exana'),
+//         body: SafeArea(
+//             child: CustomScrollView(slivers: [
+//           SliverToBoxAdapter(
+//             child: Padding(
+//               padding: const EdgeInsets.only(left: 8.0),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: motivationalQuoteAsync.when(
+//                     loading: () => [const SizedBox()],
+//                     error: (error, stack) => [const SizedBox()],
+//                     data: (quote) => [
+//                           if (quote.isNotEmpty) ...[
+//                             _buildQuoteWidget(
+//                                 quote: quote, color: Colors.black),
+//                           ] else ...[
+//                             _buildQuoteWidget(
+//                               quote:
+//                                   "\"Dream big, work hard, stay focused and surround yourself with positive people who believe in you'",
+//                               color: Colors.black,
+//                             )
+//                           ]
+//                         ]),
+//               ),
+//             ),
+//           ),
+//           const SliverToBoxAdapter(
+//             child: Padding(
+//               padding: EdgeInsets.symmetric(horizontal: 10.0),
+//               child: Divider(
+//                 thickness: 0.9,
+//                 color: Colors.black54,
+//               ),
+//             ),
+//           ),
+//           SliverPersistentHeader(
+//             delegate: _SliverAppBarDelegate(
+//               minHeight: 60.0,
+//               maxHeight: 200.0,
+//               child: Container(
+//                 color: Colors.white,
+//                 child: CalendarView(key: widget.key),
+//               ),
+//             ),
+//             pinned: true,
+//           ),
+//           const SliverPadding(
+//             padding: EdgeInsets.only(top: 10.0),
+//           ),
+//           ref.watch(getGoalTaskStreamProvider(currentUser!.uid)).when(
+//                 data: (goalTasks) {
+//                   if (goalTasks.isNotEmpty) {
+//                     if (goalTasks.isNotEmpty) {
+//                       Random random = Random();
+//                       int randomHour = random.nextInt(24);
+//                       int randomMinute = random.nextInt(60);
+//                       int percentage = random.nextInt(10);
+//                       DateTime goalDate =
+//                           DateTime.now().add(Duration(days: goalTasks.length));
+//                       String alarmTime = "${randomHour}:${randomMinute} pm";
+//                       String currentTime =
+//                           "${DateTime.now().hour}:${DateTime.now().minute} pm";
+
+//                       return SliverToBoxAdapter(
+//                         child: Align(
+//                           alignment: Alignment.topCenter,
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             mainAxisAlignment: MainAxisAlignment.start,
+//                             children: [
+//                               Padding(
+//                                 padding: const EdgeInsets.only(left: 10.0),
+//                                 child: Text(
+//                                   'My Tasks',
+//                                   style: GoogleFonts.poppins(
+//                                     fontSize: 25,
+//                                     color: Colors.black,
+//                                     fontWeight: FontWeight.w500,
+//                                   ),
+//                                 ),
+//                               ),
+//                               ...goalTasks.map((goalTask) => GoalCard(
+//                                     goalTaskModel: goalTask,
+//                                     goalDate: goalTask.date,
+//                                     alarmTime: alarmTime,
+//                                     currentTime: currentTime,
+//                                     percentage: 100,
+//                                   )),
+//                             ],
+//                           ),
+//                         ),
+//                       );
+//                     }
+//                   } else {
+//                     return SliverToBoxAdapter(
+//                       child: Column(
+//                         children: [
+//                           GestureDetector(
+//                             onTap: () {
+//                               navigateToGoalCreationScreen(context);
+//                             },
+//                             child: SvgPicture.asset('assets/nogoals.svg',
+//                                 semanticsLabel: 'Acme Logo'),
+//                           ),
+//                           const SizedBox(
+//                             height: 5,
+//                           ),
+//                           Text(
+//                             "Tap + to add your Goal",
+//                             style: GoogleFonts.poppins(
+//                               fontSize: 18,
+//                               fontWeight: FontWeight.w500,
+//                             ),
+//                           )
+//                         ],
+//                       ),
+//                     );
+//                   }
+//                   return Container();
+//                 },
+//                 loading: () => SliverFillRemaining(
+//                   child: CustomProgressIndicator(),
+//                 ),
+//                 error: (error, _) => SliverFillRemaining(
+//                   child: Text('Error: $error'),
+//                 ),
+//               )
+//         ])));
+//   }
+// }
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate({
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
+  });
+
+  final double minHeight;
+  final double maxHeight;
+  final Widget child;
+
+  @override
+  double get minExtent => minHeight;
+
+  @override
+  double get maxExtent => maxHeight;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox.expand(child: child);
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
+  }
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverPersistentHeader(
+              delegate: MyDelegate(),
+              pinned: true,
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text('Item ${index + 1}'),
+                  );
+                },
+                childCount: 100, // number of items in the list
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MyDelegate extends SliverPersistentHeaderDelegate {
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      height: 150.0,
+      color: Colors.lightBlue,
+      alignment: Alignment.center,
+      child: Text(
+        'I stick',
+        style: TextStyle(
+          fontSize: 30.0,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  @override
+  double get maxExtent => 150.0;
+
+  @override
+  double get minExtent => 150.0;
+
+  @override
+  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => false;
+}
+
 //  List<Goal> generateRandomGoals(int count) {
 //     List<Goal> goals = [];
 //     Random random = Random();

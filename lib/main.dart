@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,7 +58,7 @@ void main() async {
         navigatorKeyProvider.overrideWithValue(navigatorKey),
       ],
       child: MaterialApp(
-        home: isFirstTime ? const OnboardingScreen() : const MyApp(),
+        home: isFirstTime ? OnBoardingScreen() : const MyApp(),
       ),
     ),
   );

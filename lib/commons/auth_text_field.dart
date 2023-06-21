@@ -99,6 +99,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 
 class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -145,9 +146,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: customAuthTextfieldDecoration(Colors.black),
       height: widget.textFieldHeight,
       child: TextFormField(
         onTap: widget.onTap,
@@ -162,7 +161,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         decoration: InputDecoration(
           filled: true,
-          fillColor: const Color(0xFFF0F0F0),
+          fillColor: Color.fromRGBO(170, 170, 170, 0.15),
           prefixIcon: widget.leftIcon?.color == null
               ? widget.leftIcon
               : Icon(widget.leftIcon?.icon, color: Colors.grey),
@@ -195,7 +194,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           hintStyle: const TextStyle(fontSize: 18, color: Colors.grey),
           errorText: widget.errorText,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
         ),

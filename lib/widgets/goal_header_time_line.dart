@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 
@@ -9,6 +12,18 @@ class GoalHeaderTimeline extends ConsumerWidget {
   final List<GoalTask> tasks;
 
   const GoalHeaderTimeline({required this.tasks});
+
+  Color generateRandomColor() {
+    final random = Random();
+    // Generate a random color by limiting the minimum value for each color component
+    final color = Color.fromARGB(
+      255,
+      128 + random.nextInt(128), // Red component will be between 128 and 255
+      128 + random.nextInt(128), // Green component will be between 128 and 255
+      128 + random.nextInt(128), // Blue component will be between 128 and 255
+    );
+    return color;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,6 +35,7 @@ class GoalHeaderTimeline extends ConsumerWidget {
       itemCount: tasks.length,
       itemBuilder: (context, index) {
         final task = tasks[index];
+        final randomColor = generateRandomColor();
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Column(
@@ -29,9 +45,9 @@ class GoalHeaderTimeline extends ConsumerWidget {
                   Container(
                     width: 20,
                     height: 20,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.blue,
+                      color: randomColor,
                     ),
                   ),
                   Padding(
@@ -46,11 +62,11 @@ class GoalHeaderTimeline extends ConsumerWidget {
                             DateFormat('MMM d, yyyy').format(task.date),
                             style: GoogleFonts.poppins(
                               fontSize: 16,
-                              color: Colors.grey,
+                              color: theme.colorScheme.onTertiary,
                             ),
                           ),
                         ),
-                        DashedLine(),
+                        const DashedLine(),
                       ],
                     ),
                   ),
@@ -58,21 +74,9 @@ class GoalHeaderTimeline extends ConsumerWidget {
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 20.0, top: 20),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(left: 8),
-                      width: 2,
-                      color: Colors.green,
-                      height: 130,
-                    ),
-                    Flexible(
-                      child: GoalTaskCardForHeaderWidget(
-                        goalTask: task,
-                      ),
-                    ),
-                  ],
+                child: GoalTaskCardForHeaderWidget(
+                  color: randomColor,
+                  goalTask: task,
                 ),
               ),
             ],
@@ -87,7 +91,7 @@ class DashedLine extends StatelessWidget {
   final int numDashes;
   final Color color;
 
-  const DashedLine({this.numDashes = 58, this.color = Colors.green});
+  const DashedLine({this.numDashes = 58, this.color = const Color(0xFFC4D7FF)});
 
   @override
   Widget build(BuildContext context) {
@@ -109,43 +113,50 @@ class DashedLine extends StatelessWidget {
 
 class GoalTaskCardForHeaderWidget extends ConsumerWidget {
   final GoalTask goalTask;
+  final Color color;
 
-  const GoalTaskCardForHeaderWidget({required this.goalTask});
+  const GoalTaskCardForHeaderWidget(
+      {required this.goalTask, required this.color});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
-
-    return Container(
-      margin: const EdgeInsets.only(left: 20.0, right: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.blue.shade50.withOpacity(0.5),
-      ),
-      width: double.infinity,
+    final isDarkTheme = theme.brightness == Brightness.dark;
+    return IntrinsicHeight(
       child: Row(
         children: [
+          Container(
+            margin: const EdgeInsets.only(left: 8),
+            width: 2,
+            color: color,
+          ),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  goalTask.name,
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+            child: Container(
+              margin: const EdgeInsets.only(left: 20.0, right: 10),
+              padding: const EdgeInsets.all(10),
+              decoration: addedTasksToGoalHeader(
+                  theme.colorScheme.tertiaryContainer, isDarkTheme),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    goalTask.name,
+                    style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.tertiary),
                   ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  goalTask.description,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 4,
-                  style: GoogleFonts.poppins(fontSize: 14),
-                ),
-              ],
+                  const SizedBox(height: 5),
+                  Text(
+                    goalTask.description,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 4,
+                    style: GoogleFonts.poppins(
+                        fontSize: 14, color: theme.colorScheme.tertiary),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

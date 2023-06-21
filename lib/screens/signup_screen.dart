@@ -9,6 +9,7 @@ import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/screens/userwalk_through_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
@@ -72,8 +73,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   Widget build(BuildContext context) {
     final navigatorKey = ref.read(navigatorKeyProvider);
     final isLoading = ref.watch(authControllerProvider);
+    final theme = ref.watch(themeProvider);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.onBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -86,9 +88,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 Text(
                   'Create an Account',
                   style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.normal,
-                      fontSize: 28),
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.normal,
+                    fontSize: 28,
+                    color: theme.colorScheme.tertiary,
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
@@ -96,7 +100,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 Text(
                   'Join our community and start your journey',
                   style: GoogleFonts.poppins(
-                      fontSize: 14, color: Pallete.greyColor),
+                      fontSize: 14, color: theme.colorScheme.onTertiary),
                 ),
                 const SizedBox(
                   height: 20,
@@ -135,8 +139,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   leading: Transform.scale(
                     scale: 1.2, // Adjust the scale to make checkbox bigger
                     child: Checkbox(
-                      checkColor: Colors.white,
-                      activeColor: Colors.blue,
+                      checkColor: theme.colorScheme.surface,
+                      activeColor: theme.colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                             3), // Adjust the border radius to make checkbox rounded
@@ -152,16 +156,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   title: Text.rich(
                     TextSpan(
                       children: <TextSpan>[
-                        const TextSpan(
+                        TextSpan(
                             text: 'I agree to the company ',
-                            style: TextStyle(
-                              color: Colors.grey,
+                            style: GoogleFonts.poppins(
+                              color: theme.colorScheme.onTertiary,
                               fontSize: 14,
                             )),
                         TextSpan(
                           text: 'Terms of Service',
-                          style: const TextStyle(
-                            color: Colors.black,
+                          style: GoogleFonts.poppins(
+                            color: theme.colorScheme.tertiary,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -171,17 +175,17 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   'https://ezex55.wixsite.com/my-site-1');
                             },
                         ),
-                        const TextSpan(
+                        TextSpan(
                             text: ' and ',
-                            style: TextStyle(
-                              color: Colors.grey,
+                            style: GoogleFonts.poppins(
+                              color: theme.colorScheme.onTertiary,
                               fontSize: 14,
                             )),
                         TextSpan(
                           text: 'Privacy Policy',
-                          style: const TextStyle(
+                          style: GoogleFonts.poppins(
                             fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                            color: theme.colorScheme.tertiary,
                             fontSize: 14,
                           ),
                           recognizer: TapGestureRecognizer()
@@ -194,7 +198,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 10,
                 ),
                 const SizedBox(
@@ -232,22 +236,21 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 RichText(
                   text: TextSpan(
                     text: 'Already have an account?',
-                    style: const TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Pallete.greyColor,
+                      color: theme.colorScheme.onTertiary,
                     ),
                     children: [
                       TextSpan(
-                        text: 'Login',
-                        style: const TextStyle(
-                          color: Colors.blue,
+                        text: ' Login',
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w400,
                           fontSize: 16,
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            ref.watch(navigatorKeyProvider).currentState!.push(
-                                  UserWalkthroughScreen.route(),
-                                );
+                            Navigator.of(context).push(LoginScreen.route());
                           },
                       )
                     ],

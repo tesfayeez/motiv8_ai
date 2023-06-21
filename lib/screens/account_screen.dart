@@ -6,6 +6,7 @@ import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/user_controllers.dart';
 import 'package:motiv8_ai/main.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/account_textfields.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
@@ -80,6 +81,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
     return Consumer(builder: (context, ref, child) {
       final currentUseris = ref.watch(currentUserProvider);
       final currentUserModel =
@@ -107,6 +109,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       }
 
       return Scaffold(
+        backgroundColor: theme.colorScheme.onBackground,
         appBar: CustomAppBar(
           isCenterTitle: true,
           title: 'Account',
@@ -145,7 +148,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           child: Text(
                             'Edit Profile',
                             style: GoogleFonts.poppins(
-                                color: Colors.blue, fontSize: 16),
+                                color: theme.colorScheme.primary, fontSize: 16),
                           ),
                           onPressed: () {
                             setState(() {
@@ -200,7 +203,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                             child: Text(
                               "Log out",
                               style: GoogleFonts.poppins(
-                                  color: Colors.red, fontSize: 14),
+                                  color: theme.colorScheme.error, fontSize: 14),
                             ),
                             onTap: () {
                               LogoutConfirmationDialog.show(

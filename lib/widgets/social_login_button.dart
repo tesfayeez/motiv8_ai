@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 
-class SocialLoginButton extends StatelessWidget {
+class SocialLoginButton extends ConsumerWidget {
   final String text;
   final VoidCallback onPressed;
   final String svgAssetName;
@@ -15,8 +17,10 @@ class SocialLoginButton extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     double screenWidth = MediaQuery.of(context).size.width;
+
+    final theme = ref.watch(themeProvider);
 
     return SizedBox(
       width: screenWidth * 0.75,
@@ -24,12 +28,13 @@ class SocialLoginButton extends StatelessWidget {
       child: ElevatedButton(
         style: ButtonStyle(
           elevation: MaterialStateProperty.all(0), // light grey shadow
-          backgroundColor: MaterialStateProperty.all(Colors.white),
-          foregroundColor: MaterialStateProperty.all(Colors.grey), // icon color
+          backgroundColor: MaterialStateProperty.all(Colors.transparent),
+          foregroundColor: MaterialStateProperty.all(
+              theme.colorScheme.onTertiary), // icon color
           shape: MaterialStateProperty.all(
             RoundedRectangleBorder(
-              side: const BorderSide(
-                color: Colors.grey, // border color
+              side: BorderSide(
+                color: theme.colorScheme.onTertiary, // border color
                 width: 0.5,
               ),
               borderRadius: BorderRadius.circular(
@@ -50,9 +55,10 @@ class SocialLoginButton extends StatelessWidget {
             Text(
               text,
               style: GoogleFonts.poppins(
-                  color: Colors.black,
-                  fontStyle: FontStyle.normal,
-                  fontSize: 16),
+                color: theme.colorScheme.tertiary,
+                fontStyle: FontStyle.normal,
+                fontSize: 16,
+              ),
             ),
           ],
         ),

@@ -12,8 +12,13 @@ import 'package:motiv8_ai/screens/add_goals_screen.dart';
 class CustomHomeScreenAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final String message;
+  final Color appBarColor;
+  final Color textColor;
 
-  CustomHomeScreenAppBar({required this.message});
+  CustomHomeScreenAppBar(
+      {required this.message,
+      required this.appBarColor,
+      required this.textColor});
 
   @override
   Size get preferredSize => Size.fromHeight(80.0);
@@ -37,7 +42,7 @@ class CustomHomeScreenAppBar extends StatelessWidget
         );
 
         return AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: appBarColor,
           elevation: 0,
           automaticallyImplyLeading: false,
           title: Padding(
@@ -54,21 +59,21 @@ class CustomHomeScreenAppBar extends StatelessWidget
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: textColor,
                         ),
                       ),
                       Text(
                         DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now()),
                         style: GoogleFonts.poppins(
                           fontSize: 12,
-                          color: Colors.black,
+                          color: textColor,
                         ),
                       ),
                       Text(
                         message,
                         style: GoogleFonts.poppins(
                           fontSize: 10,
-                          color: Colors.grey,
+                          color: textColor.withOpacity(0.8),
                         ),
                       ),
                     ],

@@ -58,7 +58,7 @@ class CalendarView extends ConsumerWidget {
       width: 40, // Making it square
       height: 40, // Making it square
       decoration: BoxDecoration(
-        color: themeData.colorScheme.primaryContainer,
+        color: themeData.colorScheme.secondary,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
@@ -128,7 +128,7 @@ class CalendarView extends ConsumerWidget {
       width: 40, // Making it square
       height: 40, // Making it square
       decoration: BoxDecoration(
-        color: themeData.colorScheme.primaryContainer,
+        color: themeData.colorScheme.secondary,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
