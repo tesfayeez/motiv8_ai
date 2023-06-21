@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarData {
@@ -51,13 +52,13 @@ final calendarStateProvider =
 class CalendarView extends ConsumerWidget {
   const CalendarView({Key? key}) : super(key: key);
 
-  Widget buildDefaultDay(
-      BuildContext context, DateTime day, CalendarData calendarData) {
+  Widget buildDefaultDay(BuildContext context, DateTime day,
+      CalendarData calendarData, ThemeData themeData) {
     return Container(
       width: 40, // Making it square
       height: 40, // Making it square
       decoration: BoxDecoration(
-        color: Colors.blueGrey.shade50,
+        color: themeData.colorScheme.secondary,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
@@ -67,7 +68,7 @@ class CalendarView extends ConsumerWidget {
             Text(
               '${DateFormat.E().format(day)}',
               style: GoogleFonts.poppins(
-                color: Colors.blue,
+                color: themeData.colorScheme.onPrimary,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),
@@ -75,7 +76,7 @@ class CalendarView extends ConsumerWidget {
             Text(
               '${day.day}',
               style: GoogleFonts.poppins(
-                color: Colors.blue,
+                color: themeData.colorScheme.onPrimary,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -86,13 +87,13 @@ class CalendarView extends ConsumerWidget {
     );
   }
 
-  Widget buildSelectedDay(
-      BuildContext context, DateTime day, CalendarData calendarData) {
+  Widget buildSelectedDay(BuildContext context, DateTime day,
+      CalendarData calendarData, ThemeData themeData) {
     return Container(
-      width: 50, // Making it square and slightly bigger
-      height: 50, // Making it square and slightly bigger
+      width: 55, // Making it square and slightly bigger
+      height: 57, // Making it square and slightly bigger
       decoration: BoxDecoration(
-        color: Colors.blue,
+        color: themeData.colorScheme.primary,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
@@ -102,16 +103,16 @@ class CalendarView extends ConsumerWidget {
             Text(
               '${DateFormat.E().format(day)}',
               style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 10,
+                color: themeData.colorScheme.surface,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
             Text(
               '${day.day}',
               style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 18,
+                color: themeData.colorScheme.surface,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -121,24 +122,36 @@ class CalendarView extends ConsumerWidget {
     );
   }
 
-  Widget buildToday(BuildContext context, DateTime day, DateTime focusedDay) {
+  Widget buildToday(BuildContext context, DateTime day, DateTime focusedDay,
+      ThemeData themeData) {
     return Container(
-      width: 40,
-      height: 40,
+      width: 40, // Making it square
+      height: 40, // Making it square
       decoration: BoxDecoration(
+        color: themeData.colorScheme.secondary,
         borderRadius: BorderRadius.circular(10),
-
-        color:
-            Colors.blue.shade400, // You can change this to your desired color
       ),
       child: Center(
-        child: Text(
-          '${day.day}',
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '${DateFormat.E().format(day)}',
+              style: GoogleFonts.poppins(
+                color: themeData.colorScheme.onPrimary,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              '${day.day}',
+              style: GoogleFonts.poppins(
+                color: themeData.colorScheme.onPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -146,7 +159,7 @@ class CalendarView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ThemeData themeData = Theme.of(context);
+    ThemeData themeData = ref.watch(themeProvider);
     final calendarData = ref.watch(calendarStateProvider);
 
     return TableCalendar(
@@ -173,13 +186,13 @@ class CalendarView extends ConsumerWidget {
       },
       calendarBuilders: CalendarBuilders(
           defaultBuilder: (context, day, _) {
-            return buildDefaultDay(context, day, calendarData);
+            return buildDefaultDay(context, day, calendarData, themeData);
           },
           selectedBuilder: (context, day, _) {
-            return buildSelectedDay(context, day, calendarData);
+            return buildSelectedDay(context, day, calendarData, themeData);
           },
           todayBuilder: (context, day, focusedDay) =>
-              buildToday(context, day, focusedDay)),
+              buildToday(context, day, focusedDay, themeData)),
     );
   }
 }

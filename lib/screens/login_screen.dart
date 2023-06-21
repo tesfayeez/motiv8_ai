@@ -1,22 +1,20 @@
-import 'dart:ffi';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
-import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/commons/pallete_colors.dart';
 import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/forgot_password.screen.dart';
-import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/social_login_button.dart';
+
+import '../main.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -28,20 +26,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  void onLoginWithGoogle() async {
-    final authAPI = ref.read(authAPIProvider);
-    final result = await authAPI.signInWithGoogle();
-
-    result.fold((failure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(failure.message)),
-      );
-    }, (user) {
-      // handle successful login
-      Navigator.of(context).pushReplacement(HomeViewScreen.route());
-    });
-  }
-
   // final appBar = UIConstants.appBar();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -75,11 +59,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         passwordController.text.isNotEmpty;
   }
 
+  void onLoginWithGoogle() {
+    ref.read(authControllerProvider.notifier).onLoginWithGoogle(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final navigatorKey = ref.read(navigatorKeyProvider);
     final isLoading = ref.watch(authControllerProvider);
+    final theme = ref.watch(themeProvider);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.onBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -92,9 +82,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Sign In to Your Account',
                   style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.normal,
-                      fontSize: 28),
+                    color: theme.colorScheme.tertiary,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.normal,
+                    fontSize: 28,
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
@@ -102,7 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   'Welcome back you\'ve been missed',
                   style: GoogleFonts.poppins(
-                      fontSize: 14, color: Pallete.greyColor),
+                      fontSize: 14, color: theme.colorScheme.onTertiary),
                 ),
                 const SizedBox(
                   height: 25,
@@ -122,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 CustomTextField(
                   leftIcon: const Icon(Icons.lock),
-                  isObescure: true,
+                  isObscure: true,
                   controller: passwordController,
                   hintText: 'Password',
                   errorText: passwordError,
@@ -142,11 +134,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ForgotPasswordScreen.route(),
                           );
                         },
-                        child: const Text(
+                        child: Text(
                           'Forgot Password?',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                            fontWeight: FontWeight.w300,
+                            color: theme.colorScheme.primary,
                           ),
                         )),
                   ],
@@ -190,21 +182,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 RichText(
                   text: TextSpan(
                     text: 'Don\'t have an account?',
-                    style: const TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Pallete.greyColor,
+                      color: theme.colorScheme.onTertiary,
                     ),
                     children: [
                       TextSpan(
                         text: ' Sign up',
-                        style:
-                            const TextStyle(color: Colors.blue, fontSize: 16),
+                        style: GoogleFonts.poppins(
+                            color: theme.colorScheme.primary, fontSize: 16),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            Navigator.push(
-                              context,
-                              SignUpScreen.route(),
-                            );
+                            Navigator.of(context).push(SignUpScreen.route());
                           },
                       ),
                     ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GoalStreaksRow extends StatelessWidget {
   final int goalStreaks;
@@ -20,19 +21,11 @@ class GoalStreaksRow extends StatelessWidget {
       children: [
         Column(
           children: [
-            Icon(
-              Icons.trending_up,
-              size: 50.0,
-              color: theme.primaryColor,
-            ),
-            Text(
-              'Goal Streaks',
-              style: theme.textTheme.titleLarge,
-            ),
-            Text(
-              goalStreaks.toString(),
-              style: theme.textTheme.titleMedium,
-            ),
+            const Icon(Icons.trending_up, size: 50.0, color: Colors.blueAccent),
+            Text('Goal Streaks',
+                style: GoogleFonts.poppins(color: Colors.blueAccent)),
+            Text(goalStreaks.toString(),
+                style: GoogleFonts.poppins(color: Colors.blueAccent)),
           ],
         ),
         Column(
@@ -40,15 +33,15 @@ class GoalStreaksRow extends StatelessWidget {
             Icon(
               Icons.calendar_today,
               size: 50.0,
-              color: theme.primaryColor,
+              color: Colors.blueAccent,
             ),
             Text(
               'Perfect Days',
-              style: theme.textTheme.titleLarge,
+              style: GoogleFonts.poppins(color: Colors.blueAccent),
             ),
             Text(
               perfectDays.toString(),
-              style: theme.textTheme.titleMedium,
+              style: GoogleFonts.poppins(color: Colors.blueAccent),
             ),
           ],
         ),
@@ -57,15 +50,15 @@ class GoalStreaksRow extends StatelessWidget {
             Icon(
               Icons.check_circle_outline,
               size: 50.0,
-              color: theme.primaryColor,
+              color: Colors.blueAccent,
             ),
             Text(
               'Daily Average',
-              style: theme.textTheme.titleLarge,
+              style: GoogleFonts.poppins(color: Colors.blueAccent),
             ),
             Text(
               dailyAverageHabits.toStringAsFixed(1),
-              style: theme.textTheme.titleMedium,
+              style: GoogleFonts.poppins(color: Colors.blueAccent),
             ),
           ],
         ),

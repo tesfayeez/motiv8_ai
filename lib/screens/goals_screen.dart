@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/widgets/caledarView_widget.dart';
+import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal_achievments.dart';
 import 'dart:math' as math;
 import 'package:vector_math/vector_math.dart' as vector_math;
@@ -14,6 +15,11 @@ class GoalsScreen extends ConsumerWidget {
     var theme = Theme.of(context);
 
     return Scaffold(
+      appBar: CustomAppBar(
+        title: "My Goals",
+        isCenterTitle: true,
+        isBackPresent: false,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -31,7 +37,7 @@ class GoalsScreen extends ConsumerWidget {
                     CustomPaint(
                       size: const Size(200, 200),
                       painter:
-                          GoalProgressPainter(goalProgress, theme.primaryColor),
+                          GoalProgressPainter(goalProgress, Colors.blueAccent),
                     ),
                     const SizedBox(height: 20),
                     const GoalStreaksRow(

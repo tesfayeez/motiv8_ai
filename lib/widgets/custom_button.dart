@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -18,23 +19,20 @@ class CustomButton extends StatelessWidget {
     return SizedBox(
       width: screenWidth * 0.9,
       height: 55, // set the height as per your requirement
-      child: ElevatedButton(
-        style: ButtonStyle(
-          elevation: MaterialStateProperty.all(1), // light grey shadow
-          backgroundColor:
-              MaterialStateProperty.all(Colors.blue), // button color
-          shape: MaterialStateProperty.all(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  20), // Set the borderRadius as per your requirement for circular borders
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: customButtonDecoration(const Color(0xFF1988FF)),
+          alignment: Alignment.center,
+          child: Text(
+            text,
+            style: TextStyle(
+              color: Colors.white,
+              fontStyle: FontStyle.normal,
+              fontSize: 16,
             ),
           ),
-        ),
-        onPressed: onPressed,
-        child: Text(
-          text,
-          style: GoogleFonts.poppins(
-              color: Colors.white, fontStyle: FontStyle.normal, fontSize: 16),
         ),
       ),
     );

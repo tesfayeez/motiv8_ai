@@ -8,12 +8,14 @@ class CustomDatePicker extends StatefulWidget {
     Key? key,
     this.title,
     this.showDate = true,
+    this.focusNode,
     required this.controller,
   }) : super(key: key);
 
   final String? title;
   final TextEditingController controller;
   final bool showDate;
+  final FocusNode? focusNode;
 
   @override
   _CustomDatePickerState createState() => _CustomDatePickerState();
@@ -32,12 +34,21 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
   @override
   void initState() {
     super.initState();
-    _dateFormat = DateFormat('EEEE | MMM d, yyyy');
+    _dateFormat = DateFormat('EEEE, MMM d, yyyy');
     _timeFormat = DateFormat('hh:mm a');
   }
 
   @override
   Widget build(BuildContext context) {
+    final focusNode = widget.focusNode ?? FocusNode();
+    final shouldRequestFocus =
+        focusNode.hasFocus && widget.controller.text.isEmpty;
+
+    if (shouldRequestFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(focusNode);
+      });
+    }
     return TextFormField(
       readOnly: true,
       controller: widget.controller,

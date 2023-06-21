@@ -1,16 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:motiv8_ai/api/auth_api.dart';
-import 'package:motiv8_ai/commons/auth_text_field.dart';
 import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/commons/pallete_colors.dart';
-import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
-import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
 import 'package:motiv8_ai/widgets/social_login_button.dart';
@@ -25,40 +23,16 @@ class GeneralLoginScreen extends ConsumerStatefulWidget {
 }
 
 class _GeneralLoginScreenState extends ConsumerState<GeneralLoginScreen> {
-  void onLoginWithGoogle() async {
-    if (!mounted) {
-      return; // State is no longer active, exit the method
-    }
-
-    final authAPI = ref.read(authAPIProvider);
-    final result = await authAPI.signInWithGoogle();
-
-    if (!mounted) {
-      return; // State is no longer active, exit the method
-    }
-
-    result.fold(
-      (failure) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(failure.message)),
-          );
-        }
-      },
-      (user) {
-        if (mounted) {
-          // handle successful login
-          Navigator.of(context).push(HomeViewScreen.route());
-        }
-      },
-    );
+  void onLoginWithGoogle() {
+    ref.read(authControllerProvider.notifier).onLoginWithGoogle(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider);
+    final theme = ref.watch(themeProvider);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.onBackground,
       body: isLoading
           ? const Loader()
           : SafeArea(
@@ -70,19 +44,19 @@ class _GeneralLoginScreenState extends ConsumerState<GeneralLoginScreen> {
                       const SizedBox(
                         height: 20,
                       ),
-                      Image.asset(
-                        'assets/login.png',
-                        height: 300,
-                      ),
+                      SvgPicture.asset('assets/signin.svg',
+                          semanticsLabel: 'Acme Logo'),
                       const SizedBox(
                         height: 20,
                       ),
                       Text(
                         'Sign In',
                         style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.normal,
-                            fontSize: 28),
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.normal,
+                          fontSize: 28,
+                          color: theme.colorScheme.tertiary,
+                        ),
                       ),
                       const SizedBox(
                         height: 10,
@@ -90,7 +64,9 @@ class _GeneralLoginScreenState extends ConsumerState<GeneralLoginScreen> {
                       Text(
                         'Welcome Back',
                         style: GoogleFonts.poppins(
-                            fontSize: 14, color: Pallete.greyColor),
+                          fontSize: 14,
+                          color: theme.colorScheme.onTertiary,
+                        ),
                       ),
                       const SizedBox(
                         height: 30,
@@ -134,17 +110,17 @@ class _GeneralLoginScreenState extends ConsumerState<GeneralLoginScreen> {
                       RichText(
                         text: TextSpan(
                           text: 'Don\'t have an account?',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: Pallete.greyColor,
+                            color: theme.colorScheme.tertiary,
                           ),
                           children: [
                             TextSpan(
                               text: ' Sign up',
-                              style: const TextStyle(
-                                color: Colors.blue,
-                                fontSize: 16,
-                              ),
+                              style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   Navigator.push(

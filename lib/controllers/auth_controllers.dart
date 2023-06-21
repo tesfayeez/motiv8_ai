@@ -1,19 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/main.dart';
-import 'package:motiv8_ai/models/user_model.dart';
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
+import 'package:motiv8_ai/screens/new_Screen_for_special_someone.dart';
+import 'package:motiv8_ai/screens/userwalk_through_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final authControllerProvider =
     StateNotifierProvider<AuthController, bool>((ref) {
-  return AuthController(authAPI: ref.watch(authAPIProvider));
+  return AuthController(
+    authAPI: ref.watch(authAPIProvider),
+    scaffoldMessengerKey: ref.watch(scaffoldMessengerKeyProvider),
+    navigatorKey: ref.watch(navigatorKeyProvider),
+  );
 });
 
-final currentUserProviderStream = StreamProvider((ref) {
+final currentUserProviderStream = StreamProvider.autoDispose((ref) {
   final authController = ref.watch(authControllerProvider.notifier);
   return authController.currentUserStream();
 });
@@ -29,8 +36,15 @@ final currentUserProvider = Provider<User?>((ref) {
 
 class AuthController extends StateNotifier<bool> {
   final AuthAPI _authAPI;
-  AuthController({required AuthAPI authAPI})
-      : _authAPI = authAPI,
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey;
+  final GlobalKey<NavigatorState> _navigatorKey;
+  AuthController({
+    required AuthAPI authAPI,
+    required GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey,
+    required GlobalKey<NavigatorState> navigatorKey,
+  })  : _authAPI = authAPI,
+        _scaffoldMessengerKey = scaffoldMessengerKey,
+        _navigatorKey = navigatorKey,
         super(false);
 
   User? getCurrentUser() => _authAPI.getCurrentUser();
@@ -54,15 +68,19 @@ class AuthController extends StateNotifier<bool> {
       },
       (r) {
         print("Account Created succesfully");
-        Navigator.push(context, LoginScreen.route());
+        Navigator.of(context).pushAndRemoveUntil(
+          LoginScreen.route(),
+          (route) => false,
+        );
       },
     );
   }
 
-  void login(
-      {required String email,
-      required String password,
-      required BuildContext context}) async {
+  void login({
+    required String email,
+    required String password,
+    required BuildContext context,
+  }) async {
     state = true;
     final res = await _authAPI.login(email: email, password: password);
     state = false;
@@ -73,9 +91,9 @@ class AuthController extends StateNotifier<bool> {
       },
       (r) {
         print("Home View");
-        Navigator.pushReplacement(
-          context,
+        Navigator.of(context).pushAndRemoveUntil(
           HomeViewScreen.route(),
+          (route) => false,
         );
       },
     );
@@ -83,16 +101,27 @@ class AuthController extends StateNotifier<bool> {
 
   void logout(BuildContext context) async {
     final res = await _authAPI.signoutUser();
+    GoogleSignIn().signOut();
+
     res.fold((l) => null, (r) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        GeneralLoginScreen.route(),
+      printNavigationStack(context);
+
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const GeneralLoginScreen()),
         (route) => false,
       );
+      printNavigationStack(context);
     });
   }
 
-  void resetPassword({required String email}) async {
+  void printNavigationStack(BuildContext context) {
+    final navigationStack = _navigatorKey.currentState!.toString();
+    print(navigationStack);
+  }
+
+  void resetPassword(
+      {required BuildContext context, required String email}) async {
     final res = await _authAPI.resetPassword(email);
     res.fold(
       (l) {
@@ -100,14 +129,59 @@ class AuthController extends StateNotifier<bool> {
         showSnackBar(l.message);
       },
       (r) {
+        showSnackBar(
+            "Password reset email has been sent to $email. Please check your inbox.");
         print("Password reset email sent");
         // Navigate to login screen or show a dialog notifying the user about the password reset email
       },
     );
   }
-}
 
-void showSnackBar(String message) {
-  final snackBar = SnackBar(content: Text(message));
-  scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
+  void onLoginWithGoogle(BuildContext context) async {
+    state = true;
+    final result = await _authAPI.signInWithGoogle();
+    state = false;
+
+    result.fold(
+      (failure) {
+        _scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text(failure.message)),
+        );
+      },
+      (user) async {
+        String? users = user.user!.email;
+        print(" email for special $users");
+        // handle successful login
+        bool isFirstTime = await checkIfFirstTime();
+        UserWalkthroughScreen.route();
+        if (user.user!.email == 'ezex.55@gmail.com') {
+          print("its here at email");
+          Navigator.of(context)
+              .pushReplacement(SpecialUserWalkthroughScreen.route());
+        } else {
+          Navigator.of(context).pushReplacement(UserWalkthroughScreen.route());
+        }
+
+        // _navigatorKey.currentState?.pushReplacement(
+        //   isFirstTime ? UserWalkthroughScreen.route() : HomeViewScreen.route(),
+        // );
+      },
+    );
+  }
+
+  void showSnackBar(String message) {
+    final snackBar = SnackBar(content: Text(message));
+    _scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
+  }
+
+  Future<bool> checkIfFirstTimeLogin() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isFirstTime = prefs.getBool('firstLogin') ?? true;
+
+    if (isFirstTime) {
+      await prefs.setBool('firstLogin', false);
+    }
+
+    return isFirstTime;
+  }
 }
