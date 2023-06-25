@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,7 @@ class Timeline extends ConsumerWidget {
   const Timeline({required this.tasks});
 
   void addTask(GoalTask task, WidgetRef ref) {
+    HapticFeedback.selectionClick();
     ref.read(taskListProvider.notifier).removeTask(task.id);
     ref.read(goalTaskListProvider.notifier).addTask(task);
   }

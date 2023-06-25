@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
+import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/goal_task_screen.dart';
@@ -12,7 +13,7 @@ import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/CustomRadioButtons.dart';
 import 'package:motiv8_ai/widgets/add_goals_text_field.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
-import 'package:motiv8_ai/widgets/custom_date_picker.dart';
+import 'package:motiv8_ai/widgets/goal_header_widget.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,12 +21,15 @@ final goalNameProvider = Provider<String>((ref) => throw UnimplementedError());
 final funFactProvider = Provider<String>((ref) => throw UnimplementedError());
 
 class GoalCreationScreen extends ConsumerStatefulWidget {
-  final bool isDirectNavigation;
+  final bool? showBackButton;
 
-  GoalCreationScreen({this.isDirectNavigation = false, super.key});
+  GoalCreationScreen({this.showBackButton = false, super.key});
 
-  static Route route() {
-    return MaterialPageRoute(builder: (context) => GoalCreationScreen());
+  static Route route({bool? showBackButton}) {
+    return MaterialPageRoute(
+        builder: (context) => GoalCreationScreen(
+              showBackButton: showBackButton,
+            ));
   }
 
   @override
@@ -34,8 +38,8 @@ class GoalCreationScreen extends ConsumerStatefulWidget {
 
 class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   final PageController controller = PageController(initialPage: 0);
-  final TextEditingController taskNameController = TextEditingController();
-  final TextEditingController taskDescriptionController =
+  final TextEditingController goalNameController = TextEditingController();
+  final TextEditingController goalDescriptionController =
       TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
@@ -89,8 +93,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     timeCommitmentFocusNode.dispose();
     milestonesFocusNode.dispose();
 
-    taskNameController.dispose();
-    taskDescriptionController.dispose();
+    goalNameController.dispose();
+    goalDescriptionController.dispose();
     startDateController.dispose();
     endDateController.dispose();
     taskBreakdownPreferenceController.dispose();
@@ -103,8 +107,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   }
 
   Goal setAllValues() {
-    String goalName = taskNameController.text;
-    String goalDescriptionText = taskDescriptionController.text;
+    String goalName = goalNameController.text;
+    String goalDescriptionText = goalDescriptionController.text;
 
     String timeCommitment = timeCommitmentController.text;
     String timelineFlexibility = timelineFlexibilityController.text;
@@ -137,8 +141,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   }
 
   bool _isAnyFieldFocused() {
-    return taskNameController.text.isNotEmpty ||
-        taskDescriptionController.text.isNotEmpty ||
+    return goalNameController.text.isNotEmpty ||
+        goalDescriptionController.text.isNotEmpty ||
         startDateController.text.isNotEmpty ||
         endDateController.text.isNotEmpty ||
         taskBreakdownPreferenceController.text.isNotEmpty;
@@ -146,15 +150,15 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
 
   void nextPage() {
     if (currentPage < totalPages - 1) {
-      if (currentPage == 0) {
-        FocusScope.of(context).requestFocus(taskDescriptionFocusNode);
-      } else if (currentPage == 1) {
-        FocusScope.of(context).requestFocus(startDateFocusNode);
-      } else if (currentPage == 2) {
-        FocusScope.of(context).requestFocus(milestonesFocusNode);
-      } else if (currentPage == 4) {
-        FocusScope.of(context).requestFocus(definitionOfSuccessFocusNode);
-      }
+      // if (currentPage == 0) {
+      //   FocusScope.of(context).requestFocus(taskDescriptionFocusNode);
+      // } else if (currentPage == 1) {
+      //   FocusScope.of(context).requestFocus(startDateFocusNode);
+      // } else if (currentPage == 2) {
+      //   FocusScope.of(context).requestFocus(milestonesFocusNode);
+      // } else if (currentPage == 4) {
+      //   FocusScope.of(context).requestFocus(definitionOfSuccessFocusNode);
+      // }
       setState(() {
         currentPage++;
       });
@@ -162,26 +166,6 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
           duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
     } else {
       // Handle form submission
-      endDate = parseDate(endDateController.text);
-      startDate = parseDate(startDateController.text);
-      Goal sampleGoal = Goal(
-        id: '1',
-        name: 'Fitness Journey',
-        userID: '123',
-        description: 'Achieve a healthy and fit lifestyle',
-        startDate: DateTime(2023, 1, 1),
-        endDate: DateTime(2023, 12, 31),
-        reminderFrequency: 'Daily',
-        tasks: [],
-        milestones: 'Lose 10 pounds',
-        taskBreakdownPreference: 'Weekly',
-        definitionOfSuccess: 'Improved stamina and strength',
-        strategiesApproaches: 'Work with a personal trainer',
-        timelineFlexibility: 'Moderate',
-        timeCommitment: '1 hour per day',
-      );
-      // Do something with the collected data
-
       Goal currentGoal = setAllValues();
       Navigator.of(context).push(GoalTasksScreen.route(currentGoal));
     }
@@ -190,14 +174,18 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   bool _checkFieldsFilled() {
     bool isFilled = true;
 
-    if (taskDescriptionController.text.isEmpty && currentPage == 0) {
-      isFilled = false;
+    if (goalDescriptionController.text.isEmpty && currentPage == 0) {
+      setState(() {
+        isFilled = false;
+      });
     }
 
     if (startDateController.text.isEmpty &&
         endDateController.text.isEmpty &&
         currentPage == 1) {
-      isFilled = false;
+      setState(() {
+        isFilled = false;
+      });
     }
     return isFilled;
   }
@@ -207,14 +195,16 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     if (ref.watch(currentUserProvider) != null) {
       currentUser = ref.watch(currentUserProvider);
     }
+    final goalName = ref.watch(
+        generateGoalNameControllerProvider(goalDescriptionController.text));
     final theme = ref.watch(themeProvider);
     return Scaffold(
       backgroundColor: theme.colorScheme.onBackground,
       resizeToAvoidBottomInset: true,
       appBar: CustomAppBar(
         title: 'Add your Goal',
-        isClosePresent: isCloseVisible,
-        isBackPresent: widget.isDirectNavigation,
+        isClosePresent: widget.showBackButton == false ? isCloseVisible : true,
+        isBackPresent: widget.showBackButton ?? false,
         isCenterTitle: true,
       ),
       body: SafeArea(
@@ -245,7 +235,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                     SectionWidget(
                       isHeightGrow: true,
                       focusNode: taskDescriptionFocusNode,
-                      controller: taskDescriptionController,
+                      controller: goalDescriptionController,
                       hintText: 'Describe your goal',
                     )
                   ],
@@ -261,7 +251,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                       'Please enter the start date and end date for your goal.',
                   color: theme.colorScheme.onBackground,
                   children: [
-                    Column(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 5),
                         SectionWidget(
@@ -269,26 +260,26 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                           isDate: false,
                           isDatePicker: true,
                           controller: startDateController,
-                          hintText: 'Reminder',
+                          hintText: 'Start Date',
                           hasSuffixIcon: true,
                         ),
                         const SizedBox(
-                          height: 10,
+                          width: 15,
                         ),
                         const Icon(
-                          Icons.arrow_downward_sharp,
+                          Icons.arrow_forward,
                           color: Colors.grey,
-                          size: 35,
+                          size: 40,
                         ),
                         const SizedBox(
-                          height: 10,
+                          width: 15,
                         ),
                         SectionWidget(
                           focusNode: endDateFocusNode,
                           isDate: true,
                           isDatePicker: true,
                           controller: endDateController,
-                          hintText: 'Reminder',
+                          hintText: ' End Date',
                           hasSuffixIcon: true,
                         )
                       ],
@@ -368,7 +359,35 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                   descriptionOfTitle:
                       'Great! Your goal information has been captured. AI will now generate personalized tasks to help you achieve your goal. Check the next screen for your customized tasks.',
                   color: theme.colorScheme.onBackground,
-                  children: [],
+                  children: [
+                    goalName.when(
+                        data: (data) {
+                          if (data.isNotEmpty) {
+                            goalNameController.text = data;
+                            return Text(
+                              data,
+                              style: GoogleFonts.poppins(),
+                            );
+                          } else {
+                            return Column(
+                              children: [
+                                Text('What do you want to call your Goal'),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                SectionWidget(
+                                  isHeightGrow: false,
+                                  controller: goalNameController,
+                                  isRadioButton: false,
+                                  hintText: 'Goal Name',
+                                )
+                              ],
+                            );
+                          }
+                        },
+                        error: (error, stackTrace) => Text(''),
+                        loading: () => CircularProgressIndicator())
+                  ],
                 ),
               ],
             ),
@@ -388,48 +407,43 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: Visibility(
-                visible: _checkFieldsFilled() && _isAnyFieldFocused(),
-                child: GestureDetector(
-                  onTap: _checkFieldsFilled()
-                      ? () {
-                          HapticFeedback.selectionClick();
-                          nextPage();
-                        }
-                      : null,
-                  child: Container(
-                    width: 220,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          currentPage == totalPages - 1
-                              ? "Generate Tasks"
-                              : "Continue",
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                            color: theme.colorScheme.surface,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  nextPage();
+                },
+                child: Container(
+                  width: 220,
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
                         currentPage == totalPages - 1
-                            ? const Icon(
-                                Icons.check,
-                                color: Colors.white,
-                              )
-                            : const Icon(
-                                Icons.arrow_forward,
-                                color: Colors.white,
-                              )
-                      ],
-                    ),
+                            ? "Generate Tasks"
+                            : "Continue",
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          color: theme.colorScheme.surface,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      currentPage == totalPages - 1
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                            )
+                          : const Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
+                            )
+                    ],
                   ),
                 ),
               ),
@@ -532,8 +546,9 @@ class SectionWidget extends StatelessWidget {
         const SizedBox(height: 10),
         if (isDatePicker)
           SizedBox(
-            child: CustomDatePicker(
-              title: hintText,
+            child: DateCard(
+              isDatePicker: true,
+              hintText: hintText,
               controller: controller,
             ),
           )

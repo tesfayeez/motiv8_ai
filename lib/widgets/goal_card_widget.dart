@@ -24,15 +24,16 @@ class GoalCard extends ConsumerStatefulWidget {
   final String alarmTime;
   final String currentTime;
   final int percentage;
+  final VoidCallback onTap;
 
-  GoalCard({
-    this.goalTaskModel,
-    this.goalModel,
-    required this.goalDate,
-    required this.alarmTime,
-    required this.currentTime,
-    required this.percentage,
-  });
+  GoalCard(
+      {this.goalTaskModel,
+      this.goalModel,
+      required this.goalDate,
+      required this.alarmTime,
+      required this.currentTime,
+      required this.percentage,
+      required this.onTap});
 
   @override
   _GoalCardState createState() => _GoalCardState();
@@ -104,29 +105,19 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                   ],
                 ),
               ),
-            SimpleDialogOption(
-              onPressed: () {
-                // Duplicate goal
-                // Perform the action for duplicating the goal here
-                // ref.watch(goalControllerProvider.notifier).createGoal(
-                //     name: "${widget.goalModel.name} Duplicate",
-                //     description: widget.goalModel.description,
-                //     startDate: widget.goalModel.startDate,
-                //     endDate: widget.goalModel.endDate,
-                //     reminderFrequency: '',
-                //     tasks: [],
-                //     context: context,
-                //     userID: ref.watch(currentUserProvider)!.uid);
-                Navigator.of(context).pop();
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Duplicate goal', style: GoogleFonts.poppins()),
-                  const Icon(Icons.content_copy),
-                ],
+            if (widget.goalTaskModel != null)
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text('Add Reminder', style: GoogleFonts.poppins()),
+                    const Icon(Icons.notifications),
+                  ],
+                ),
               ),
-            ),
             SimpleDialogOption(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -137,25 +128,29 @@ class _GoalCardState extends ConsumerState<GoalCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('Complete goal', style: GoogleFonts.poppins()),
+                  Text(
+                      widget.goalTaskModel != null
+                          ? 'Complete task'
+                          : 'Complete goal',
+                      style: GoogleFonts.poppins()),
                   const Icon(Icons.check_circle),
                 ],
               ),
             ),
-            if (widget.goalTaskModel != null)
+            if (widget.goalModel != null)
               SimpleDialogOption(
                 onPressed: () {
                   // Delete goal
                   // Perform the action for deleting the goal here
-                  // ref.watch(goalControllerProvider.notifier).deleteGoal(
-                  //     goalId: widget.goalTaskModel.id, context: context);
-                  // Navigator.of(context).pop();
+                  ref.watch(goalControllerProvider.notifier).deleteGoal(
+                      goalId: widget.goalModel!.id, context: context);
+                  Navigator.of(context).pop();
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      'Delete Task',
+                      'Delete Goal',
                       style: GoogleFonts.poppins(color: Colors.red),
                     ),
                     const Icon(Icons.delete, color: Colors.red),
@@ -172,6 +167,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width * 0.93;
     final theme = ref.watch(themeProvider);
+    final isDark = theme.colorScheme.brightness == Brightness.dark;
     if (widget.percentage == 100) {
       _confettiController.play();
     }
@@ -191,6 +187,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
           showDialogForEditingGoal();
         },
         onTap: () {
+          widget.onTap();
           HapticFeedback.lightImpact();
 
           print("Clicked $name");
@@ -202,7 +199,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
               Container(
                 margin: const EdgeInsets.all(8),
                 decoration: goalCardDarkThemeDecoration(
-                    theme.colorScheme.onSecondaryContainer),
+                    theme.colorScheme.onSecondaryContainer, isDark),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: Column(
@@ -210,7 +207,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (widget.goalTaskModel != null)
                             CustomCheckbox(
@@ -223,7 +220,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                               },
                             ),
                           const SizedBox(width: 5.0),
-                          Flexible(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -281,96 +278,92 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                               ],
                             ),
                           ),
+                          if (widget.goalModel != null)
+                            Column(
+                              children: [
+                                SizedBox(
+                                  height: 30,
+                                ),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: CircularStepProgressIndicator(
+                                    totalSteps: 10,
+                                    currentStep: 5,
+                                    stepSize: 5,
+                                    selectedColor: theme.colorScheme.primary,
+                                    unselectedColor: Colors.transparent,
+                                    padding: 0,
+                                    width: 60,
+                                    height: 60,
+                                    selectedStepSize: 5,
+                                    roundedCap: (_, __) => true,
+                                    child: Center(
+                                      child: Text(
+                                        '10%',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.w600,
+                                          color: theme.colorScheme.surface,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Center(
+                                  child: Text(
+                                    'Progress',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.colorScheme.onTertiary,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
                         ],
                       ),
                       Divider(
                         color: theme.colorScheme.tertiary,
                       ),
                       Row(
-                        mainAxisAlignment: widget.goalModel != null
-                            ? MainAxisAlignment.center
-                            : MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          widget.goalModel != null
-                              ? Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Text(
-                                          'Progress',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 12,
-                                            color: theme.colorScheme.tertiary
-                                                .withOpacity(0.8),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: width * 0.75,
-                                        ),
-                                        Text(
-                                          '30%',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 12,
-                                            color: theme.colorScheme.tertiary
-                                                .withOpacity(0.8),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    const SizedBox(height: 5.0),
-                                    StepProgressIndicator(
-                                        roundedEdges: const Radius.circular(5),
-                                        unselectedColor: theme
-                                            .colorScheme.primary
-                                            .withOpacity(0.3),
-                                        selectedColor:
-                                            theme.colorScheme.primary,
-                                        totalSteps: 10,
-                                        currentStep: 1,
-                                        padding: 1,
-                                        unselectedSize: 10,
-                                        selectedSize: 10,
-                                        fallbackLength: width - 15),
-                                  ],
-                                )
-                              : Row(
-                                  children: [
-                                    Icon(
-                                      Icons.alarm,
-                                      color: theme.colorScheme.primary,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(
-                                      width: 2,
-                                    ),
-                                    Text(
-                                      widget.alarmTime,
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 10,
-                                          color: theme.colorScheme.tertiary),
-                                    ),
-                                    const SizedBox(width: 8.0),
-                                    Icon(
-                                      Icons.access_time,
-                                      color: theme.colorScheme.primary,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(
-                                      width: 2,
-                                    ),
-                                    Text(
-                                      widget.currentTime,
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 10,
-                                          color: theme.colorScheme.tertiary),
-                                    ),
-                                  ],
-                                ),
-                          const SizedBox(width: 10.0),
+                          Icon(
+                            Icons.alarm,
+                            color: theme.colorScheme.primary,
+                            size: 18,
+                          ),
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          Text(
+                            widget.alarmTime,
+                            style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                color: theme.colorScheme.tertiary),
+                          ),
+                          const SizedBox(width: 8.0),
+                          Icon(
+                            Icons.access_time,
+                            color: theme.colorScheme.primary,
+                            size: 18,
+                          ),
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          Text(
+                            widget.currentTime,
+                            style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                color: theme.colorScheme.tertiary),
+                          ),
                         ],
                       ),
+                      const SizedBox(width: 10.0),
                     ],
                   ),
                 ),

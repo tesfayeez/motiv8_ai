@@ -98,10 +98,12 @@
 //   }
 // }
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/utils.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 
-class CustomTextField extends StatefulWidget {
+class CustomTextField extends ConsumerStatefulWidget {
   final TextEditingController controller;
   final String hintText;
   final bool isObscure;
@@ -129,7 +131,7 @@ class CustomTextField extends StatefulWidget {
   _CustomTextFieldState createState() => _CustomTextFieldState();
 }
 
-class _CustomTextFieldState extends State<CustomTextField> {
+class _CustomTextFieldState extends ConsumerState<CustomTextField> {
   late bool _obscureText;
   late TextEditingController _controller;
 
@@ -145,8 +147,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+    final isDark = theme.colorScheme.brightness == Brightness.dark;
     return Container(
-      decoration: customAuthTextfieldDecoration(Colors.black),
+      decoration:
+          customAuthTextfieldDecoration(theme.colorScheme.onSecondaryContainer),
       height: widget.textFieldHeight,
       child: TextFormField(
         onTap: widget.onTap,
@@ -161,7 +166,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         decoration: InputDecoration(
           filled: true,
-          fillColor: Color.fromRGBO(170, 170, 170, 0.15),
+          fillColor: isDark
+              ? theme.colorScheme.onSecondaryContainer
+              : Color(0x26AAAAAA),
           prefixIcon: widget.leftIcon?.color == null
               ? widget.leftIcon
               : Icon(widget.leftIcon?.icon, color: Colors.grey),

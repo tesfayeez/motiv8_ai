@@ -121,7 +121,8 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
                       }
                     },
                     loading: () {
-                      return Center(child: AnimatedEmojiLoadingIndicator());
+                      return Center(
+                          child: AnimatedEmojiLoadingIndicator('tasks'));
                     },
                     error: (error, stackTrace) {
                       return const Center(child: Text("Error occurred"));

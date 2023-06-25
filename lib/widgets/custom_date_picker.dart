@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 
-class CustomDatePicker extends StatefulWidget {
-  CustomDatePicker({
-    Key? key,
-    this.title,
-    this.showDate = true,
-    this.focusNode,
-    required this.controller,
-  }) : super(key: key);
+class CustomDatePicker extends ConsumerStatefulWidget {
+  CustomDatePicker(
+      {Key? key,
+      this.showDate = true,
+      this.focusNode,
+      required this.controller,
+      this.hintText})
+      : super(key: key);
 
-  final String? title;
   final TextEditingController controller;
   final bool showDate;
   final FocusNode? focusNode;
+  final String? hintText;
 
   @override
   _CustomDatePickerState createState() => _CustomDatePickerState();
 }
 
-class _CustomDatePickerState extends State<CustomDatePicker> {
+class _CustomDatePickerState extends ConsumerState<CustomDatePicker> {
   late DateFormat _dateFormat;
   late DateFormat _timeFormat;
   DateTime? _dateTime;
@@ -44,6 +46,9 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
     final shouldRequestFocus =
         focusNode.hasFocus && widget.controller.text.isEmpty;
 
+    final theme = ref.watch(themeProvider);
+    final isDark = theme.colorScheme.brightness == Brightness.dark;
+
     if (shouldRequestFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).requestFocus(focusNode);
@@ -55,14 +60,14 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
       style: GoogleFonts.poppins(fontSize: 14),
       decoration: InputDecoration(
         suffixIcon: IconButton(
-          icon: const Icon(Icons.add, color: Colors.blue, size: 35),
+          icon: Icon(Icons.add, color: theme.colorScheme.primary, size: 35),
           onPressed: () async {
             showModalBottomSheet(
               context: context,
               builder: (BuildContext builder) {
                 return Container(
                   height: widget.showDate ? 250.0 : 200.0,
-                  color: Colors.white,
+                  color: theme.colorScheme.onSecondaryContainer,
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -70,7 +75,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                             ? CupertinoDatePicker(
                                 mode: CupertinoDatePickerMode.date,
                                 initialDateTime: _dateTime ?? DateTime.now(),
-                                minimumYear: 2021,
+                                minimumYear: 2023,
                                 maximumYear: 2101,
                                 onDateTimeChanged: (DateTime newDate) {
                                   setState(() {
@@ -110,7 +115,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                           child: Text(
                             'Done',
                             style: TextStyle(
-                              color: Colors.blue,
+                              color: theme.colorScheme.primary,
                             ),
                           ),
                           style: ButtonStyle(
@@ -129,7 +134,7 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         contentPadding:
             const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: theme.colorScheme.onSecondaryContainer,
         enabledBorder: customBorder.copyWith(
           borderSide: BorderSide(
             color: widget.controller.text.isNotEmpty
@@ -144,8 +149,10 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
                 : const Color.fromARGB(255, 175, 228, 254),
           ),
         ),
-        hintText: widget.showDate ? 'Select a date' : 'Select a time',
-        hintStyle: GoogleFonts.poppins(color: Colors.black45, fontSize: 14),
+        hintText: widget.hintText ??
+            (widget.showDate ? 'Select a date' : 'Select a time'),
+        hintStyle: GoogleFonts.poppins(
+            color: theme.colorScheme.onTertiary, fontSize: 14),
       ),
     );
   }

@@ -72,6 +72,7 @@ class MyApp extends ConsumerWidget {
     final scaffoldMessengerKey = ref.watch(scaffoldMessengerKeyProvider);
     final navigatorKey = ref.watch(navigatorKeyProvider);
     final themeData = ref.watch(themeProvider);
+    final isDark = themeData.colorScheme.brightness == Brightness.dark;
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,

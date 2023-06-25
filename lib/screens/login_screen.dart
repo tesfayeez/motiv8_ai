@@ -41,10 +41,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void onLogin() {
-    setState(() {
-      emailError = InputValidator.validateEmail(emailController.text);
-      passwordError = InputValidator.validatePassword(passwordController.text);
-    });
     ref.read(authControllerProvider.notifier).login(
           email: emailController.text,
           password: passwordController.text,
@@ -53,9 +49,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   bool checkIfValid() {
-    return emailError == null &&
-        passwordError == null &&
-        emailController.text.isNotEmpty &&
+    return emailController.text.isNotEmpty &&
         passwordController.text.isNotEmpty;
   }
 

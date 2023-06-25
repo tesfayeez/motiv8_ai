@@ -19,6 +19,8 @@ abstract class IChatAPI {
   FutureEither<List<GoalTask>> generateGoalTasks(Goal goal);
   Future<Either<Failure, List<String>>> getMotivationalQuotes(
       String goalName, int quoteCount);
+  FutureEither<List<String>> getGoalTaskSubtasks(GoalTask task);
+  FutureEither<String> summarizeGoalToGetGoalName(String goalDescriptionText);
 }
 
 class ChatAPI implements IChatAPI {
@@ -239,6 +241,54 @@ class ChatAPI implements IChatAPI {
         (r) => r,
       );
       return right(quote); // Return only one quote
+    } catch (e, st) {
+      return left(Failure(e.toString(), st));
+    }
+  }
+
+  @override
+  FutureEither<List<String>> getGoalTaskSubtasks(GoalTask task) async {
+    try {
+      final response = await sendMessage([
+        {
+          'role': 'user',
+          'content':
+              'Generate a subtasks to achieve my task of named ${task.name}  with a discription ${task.description} make it user freindly and dont number it just respond with text'
+        },
+      ]);
+
+      // Split the response string into subtasks
+      List<String> subtasks = response.fold(
+        (l) => <String>[], // Return an empty list on failure
+        (r) =>
+            r.split('\n'), // Split the response into multiple lines on success
+      );
+
+      return right(subtasks);
+    } catch (e, st) {
+      return left(Failure(e.toString(), st));
+    }
+  }
+
+  @override
+  FutureEither<String> summarizeGoalToGetGoalName(
+      String goalDescriptionText) async {
+    try {
+      final response = await sendMessage([
+        {
+          'role': 'user',
+          'content':
+              'Summarize this goal description $goalDescriptionText to get goal name and make it short as possible'
+        },
+      ]);
+
+      // Split the response string into subtasks
+      String goalName = response.fold(
+        (l) => '', // Return an empty list on failure
+        (r) => r, // Split the response into multiple lines on success
+      );
+
+      return right(goalName);
     } catch (e, st) {
       return left(Failure(e.toString(), st));
     }

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
@@ -146,18 +147,34 @@ BoxDecoration goalCardDecoration(Color color) {
   );
 }
 
-BoxDecoration goalCardDarkThemeDecoration(Color color) {
-  return BoxDecoration(
-    color: color,
-    boxShadow: const [
-      BoxShadow(
-        color: Color.fromRGBO(0, 0, 0, 0.25),
-        offset: Offset(0, 0),
-        blurRadius: 20,
-      ),
-    ],
-    borderRadius: BorderRadius.circular(10),
-  );
+BoxDecoration goalCardDarkThemeDecoration(Color color, bool isDark) {
+  if (isDark) {
+    return BoxDecoration(
+      color: color,
+      boxShadow: [
+        BoxShadow(
+          color: Color(0x3F000000),
+          offset: Offset(0, 0),
+          blurRadius: 20,
+          spreadRadius: 0,
+        ),
+      ],
+      borderRadius: BorderRadius.circular(10),
+    );
+  } else {
+    return BoxDecoration(
+      color: color,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.5),
+          spreadRadius: 3,
+          blurRadius: 7,
+          offset: Offset(0, 2), // changes position of shadow
+        ),
+      ],
+      borderRadius: BorderRadius.circular(10),
+    );
+  }
 }
 
 BoxDecoration customButtonDecoration(Color color) {
@@ -176,7 +193,6 @@ BoxDecoration customButtonDecoration(Color color) {
 
 BoxDecoration customAuthTextfieldDecoration(Color color) {
   return BoxDecoration(
-    color: const Color.fromRGBO(170, 170, 170, 0.15),
     borderRadius: BorderRadius.circular(12),
   );
 }
@@ -215,6 +231,31 @@ BoxDecoration goalCardTimeLineDateDisplayerBoxDecoration(
     borderRadius: const BorderRadius.only(
       topRight: Radius.circular(30.0),
       bottomRight: Radius.circular(30.0),
+    ),
+  );
+}
+
+Widget buildActionButton(String label, VoidCallback onTap, Color color) {
+  return GestureDetector(
+    onTap: () {
+      onTap();
+      HapticFeedback.lightImpact();
+    },
+    child: IntrinsicWidth(
+      child: Container(
+        constraints: BoxConstraints(minWidth: 90),
+        padding: EdgeInsets.all(5),
+        alignment: Alignment.center,
+        height: 35,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(color: Colors.white),
+        ),
+      ),
     ),
   );
 }

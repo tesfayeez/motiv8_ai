@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
@@ -69,8 +68,36 @@ final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeData>(
 );
 
 class ThemeNotifier extends StateNotifier<ThemeData> {
-  ThemeNotifier()
-      : super(themeData1); // Default theme can be any of the defined themes
+  ThemeNotifier() : super(themeData1) {
+    loadThemeFromPrefs();
+  } // Default theme can be any of the defined themes
+
+  void loadThemeFromPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? themeString = prefs.getString('theme');
+    if (themeString != null) {
+      AppTheme theme =
+          AppTheme.values.firstWhere((e) => e.toString() == themeString);
+      changeTheme(theme);
+    }
+  }
+
+  void saveThemeToPrefs(AppTheme theme) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('theme', theme.toString());
+  }
+
+  void changeTheme(AppTheme theme) {
+    switch (theme) {
+      case AppTheme.light:
+        state = themeData1;
+        break;
+      case AppTheme.dark:
+        state = themeData1Dark;
+        break;
+    }
+    saveThemeToPrefs(theme);
+  }
 
   static final ThemeData themeData1 = ThemeData(
     colorScheme: ColorScheme(
@@ -93,6 +120,8 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
           const Color(0xFFE4EDFF), //taskscreen goal header timeline card
     ),
   ).copyWith(
+    cupertinoOverrideTheme:
+        CupertinoThemeData().copyWith(brightness: Brightness.light),
     snackBarTheme: const SnackBarThemeData(
       backgroundColor: const Color(0xFF1988FF),
       behavior: SnackBarBehavior.floating,
@@ -124,6 +153,8 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
         tertiaryContainer: const Color.fromRGBO(170, 170, 170, 0.15),
         onSecondaryContainer: const Color.fromRGBO(170, 170, 170, 0.15)),
   ).copyWith(
+    cupertinoOverrideTheme:
+        CupertinoThemeData().copyWith(brightness: Brightness.dark),
     snackBarTheme: const SnackBarThemeData(
       backgroundColor: const Color(0xFF1988FF),
       behavior: SnackBarBehavior.floating,
@@ -133,18 +164,6 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
       ),
     ),
   );
-
-  void changeTheme(AppTheme theme) {
-    switch (theme) {
-      case AppTheme.light:
-        state = themeData1;
-        break;
-
-      case AppTheme.dark:
-        state = themeData1Dark;
-        break;
-    }
-  }
 }
 
 enum AppTheme { light, dark }

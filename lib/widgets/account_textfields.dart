@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/commons/utils.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 
-class AccountTextField extends StatefulWidget {
+class AccountTextField extends ConsumerStatefulWidget {
   final TextEditingController controller;
   final String hintText;
   final bool isObscure;
@@ -33,7 +36,7 @@ class AccountTextField extends StatefulWidget {
   _AccountTextFieldState createState() => _AccountTextFieldState();
 }
 
-class _AccountTextFieldState extends State<AccountTextField> {
+class _AccountTextFieldState extends ConsumerState<AccountTextField> {
   late bool _obscureText;
   late TextEditingController _controller;
 
@@ -48,15 +51,16 @@ class _AccountTextFieldState extends State<AccountTextField> {
   }
 
   static const OutlineInputBorder customBorder = OutlineInputBorder(
-    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+    borderRadius: BorderRadius.all(Radius.circular(12.0)),
     borderSide: BorderSide(color: Color.fromARGB(255, 175, 228, 254)),
   );
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+    final isDarkTheme = theme.brightness == Brightness.dark;
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration:
+          customAuthTextfieldDecoration(theme.colorScheme.onSecondaryContainer),
       height: widget.textFieldHeight,
       child: TextFormField(
           onTap: widget.onTap,
@@ -66,29 +70,31 @@ class _AccountTextFieldState extends State<AccountTextField> {
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Colors.grey,
+            color: theme.colorScheme.tertiary,
             fontStyle: FontStyle.normal,
           ),
           decoration: InputDecoration(
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10),
             filled: true,
-            fillColor: widget.fillColor,
+            fillColor: theme.colorScheme.onSecondaryContainer,
             border: customBorder,
             enabledBorder: customBorder.copyWith(
               borderSide: BorderSide(
                 color: _controller.text.isNotEmpty
-                    ? Colors.blue
-                    : Color.fromARGB(255, 175, 228, 254),
+                    ? theme.colorScheme.primary
+                    : isDarkTheme
+                        ? theme.colorScheme.onSecondaryContainer
+                        : Color.fromARGB(255, 175, 228, 254),
               ),
             ),
             focusedBorder: customBorder.copyWith(
               borderSide: BorderSide(
-                color: Colors.blue,
+                color: theme.colorScheme.primary,
               ),
             ),
-            hintStyle:
-                GoogleFonts.poppins(color: widget.hintColor, fontSize: 14),
+            hintStyle: GoogleFonts.poppins(
+                color: theme.colorScheme.onTertiary, fontSize: 14),
           )),
     );
   }

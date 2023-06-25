@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
 
 /// A custom text field for goal entry with flexible height and optional suffix icon.
-class GoalsTextField extends StatelessWidget {
+class GoalsTextField extends ConsumerWidget {
   final String hintText;
   final bool hasSuffixIcon;
   final TextEditingController controller;
@@ -26,8 +28,10 @@ class GoalsTextField extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final textField = _buildTextField();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
+    final textField = _buildTextField(theme);
+
     return isHeightGrow
         ? ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 200),
@@ -36,7 +40,8 @@ class GoalsTextField extends StatelessWidget {
         : SizedBox(height: 60, child: textField);
   }
 
-  TextField _buildTextField() {
+  TextField _buildTextField(ThemeData themeData) {
+    final isDarkTheme = themeData.brightness == Brightness.dark;
     return TextField(
       keyboardType: TextInputType.text,
       focusNode: focusNode,
@@ -52,24 +57,25 @@ class GoalsTextField extends StatelessWidget {
         isDense: true,
         contentPadding: const EdgeInsets.fromLTRB(10, 22.5, 10, 22.5),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: themeData.colorScheme.onSecondaryContainer,
         border: customBorder,
         enabledBorder: customBorder.copyWith(
           borderSide: BorderSide(
             color: controller.text.isNotEmpty
-                ? Colors.blue
-                : const Color.fromARGB(255, 175, 228, 254),
+                ? themeData.colorScheme.primary
+                : isDarkTheme
+                    ? themeData.colorScheme.onSecondaryContainer
+                    : themeData.colorScheme.secondary,
           ),
         ),
         focusedBorder: customBorder.copyWith(
-          borderSide: const BorderSide(
-            color: Colors.blue,
-          ),
+          borderSide: BorderSide(color: themeData.colorScheme.primary),
         ),
         hintText: hintText,
-        hintStyle: GoogleFonts.poppins(color: Colors.black45, fontSize: 16),
+        hintStyle: GoogleFonts.poppins(
+            color: themeData.colorScheme.onTertiary, fontSize: 18),
         suffixIcon: hasSuffixIcon
-            ? const Icon(Icons.add, color: Colors.blue, size: 35)
+            ? Icon(Icons.add, color: themeData.colorScheme.primary, size: 35)
             : null,
       ),
     );

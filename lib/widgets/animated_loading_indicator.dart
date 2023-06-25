@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AnimatedEmojiLoadingIndicator extends StatefulWidget {
+  final String hintText;
+
+  AnimatedEmojiLoadingIndicator(this.hintText);
   @override
   _AnimatedEmojiLoadingIndicatorState createState() =>
       _AnimatedEmojiLoadingIndicatorState();
@@ -39,7 +42,7 @@ class _AnimatedEmojiLoadingIndicatorState
       children: [
         const SizedBox(height: 50),
         Text(
-          'Genating your tasks...',
+          'Genating your ${widget.hintText} ...',
           style: GoogleFonts.poppins(fontSize: 15),
         ),
         const SizedBox(

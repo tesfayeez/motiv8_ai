@@ -6,6 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
+import 'package:motiv8_ai/screens/goal_creation_screen.dart';
+import 'package:motiv8_ai/screens/task_view_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal_card_widget.dart';
@@ -56,6 +58,10 @@ class MyGoalsScreen extends ConsumerWidget {
                         itemBuilder: (context, index) {
                           final goals = goal[index];
                           return GoalCard(
+                            onTap: () {
+                              Navigator.of(context)
+                                  .push(GoalOrTaskScreen.route(goal: goals));
+                            },
                             goalModel: goals,
                             goalDate: goals.startDate,
                             alarmTime: alarmTime,
@@ -69,9 +75,14 @@ class MyGoalsScreen extends ConsumerWidget {
                     return Center(
                       child: Column(
                         children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.2,
+                          ),
                           GestureDetector(
                             onTap: () {
-                              // navigateToGoalCreationScreen(context);
+                              Navigator.of(context).push(
+                                  GoalCreationScreen.route(
+                                      showBackButton: true));
                             },
                             child: SvgPicture.asset('assets/nogoals.svg',
                                 semanticsLabel: 'Acme Logo'),

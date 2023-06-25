@@ -1,11 +1,9 @@
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/api/chat_api.dart';
 import 'package:motiv8_ai/api/local_notifications_api.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
+import 'package:motiv8_ai/widgets/goal_header_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final taskListProvider =
@@ -14,6 +12,10 @@ final taskListProvider =
 final goalTaskListProvider =
     StateNotifierProvider<GoalTaskList, List<GoalTask>>(
         (ref) => GoalTaskList());
+
+final goalTaskSubtasksListProvider =
+    StateNotifierProvider<GoalTaskSubTaskList, List<String>>(
+        (ref) => GoalTaskSubTaskList());
 
 class TaskList extends StateNotifier<List<GoalTask>> {
   TaskList() : super([]);
@@ -55,6 +57,26 @@ class GoalTaskList extends StateNotifier<List<GoalTask>> {
   }
 }
 
+class GoalTaskSubTaskList extends StateNotifier<List<String>> {
+  GoalTaskSubTaskList() : super([]);
+
+  void addTask(String task) {
+    state = [...state, task];
+  }
+
+  void removeTask(String task) {
+    state = state.where((taskItem) => taskItem != task).toList();
+  }
+
+  void updateTasks(List<String> tasks) {
+    state = tasks;
+  }
+
+  void clear() {
+    state = [];
+  }
+}
+
 final chatAPIControllerProvider = StateNotifierProvider<ChatAPIController,
     AsyncValue<List<Map<String, dynamic>>>>((ref) {
   return ChatAPIController(ref.watch(chatApiProvider));
@@ -73,6 +95,14 @@ final chatAPIControllerProvider = StateNotifierProvider<ChatAPIController,
 //     (tasks) => tasks,
 //   );
 // });
+final generateGoalNameControllerProvider =
+    FutureProvider.family<String, String>((ref, goalDescriptionText) async {
+  final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
+  final goalName =
+      await chatAPIController.generateGoalName(goalDescriptionText);
+  // ref.read(taskListProvider.notifier).updateTasks(goalName);
+  return goalName;
+});
 
 final generateGoalTasksControllerProvider =
     FutureProvider.family<List<GoalTask>, Goal>((ref, goal) async {
@@ -80,6 +110,15 @@ final generateGoalTasksControllerProvider =
   final tasks = await chatAPIController.generateGoalTasksController(goal);
   ref.read(taskListProvider.notifier).updateTasks(tasks);
   return tasks;
+});
+
+final generateGoalTaskSubtasksControllerProvider =
+    FutureProvider.family<List<String>, GoalTask>((ref, task) async {
+  final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
+  final subtasks =
+      await chatAPIController.generateGoalTaskSubtasksController(task);
+  ref.read(goalTaskSubtasksListProvider.notifier).updateTasks(subtasks);
+  return subtasks;
 });
 
 final motivationalQuotesProvider =
@@ -194,6 +233,31 @@ Overall, Motiv8-AI is a powerful tool for young adults and professionals who are
     return result.fold(
       (failure) {
         return <GoalTask>[];
+      },
+      (tasks) {
+        return tasks;
+      },
+    );
+  }
+
+  Future<String> generateGoalName(String goalDescriptionText) async {
+    final result =
+        await _chatAPI.summarizeGoalToGetGoalName(goalDescriptionText);
+    return result.fold(
+      (failure) {
+        return '';
+      },
+      (goalName) {
+        return goalName;
+      },
+    );
+  }
+
+  Future<List<String>> generateGoalTaskSubtasksController(GoalTask task) async {
+    final result = await _chatAPI.getGoalTaskSubtasks(task);
+    return result.fold(
+      (failure) {
+        return <String>[];
       },
       (tasks) {
         return tasks;

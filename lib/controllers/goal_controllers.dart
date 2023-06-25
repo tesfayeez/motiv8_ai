@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:motiv8_ai/api/chat_api.dart';
 import 'package:motiv8_ai/api/goal_api.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/main.dart';
@@ -214,7 +213,6 @@ class GoalController extends StateNotifier<bool> {
         message,
         style: TextStyle(color: Colors.white),
       ),
-      backgroundColor: Colors.black.withOpacity(0.4),
     );
     _ref
         .watch(scaffoldMessengerKeyProvider)

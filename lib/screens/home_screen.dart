@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
@@ -18,11 +20,13 @@ import 'package:motiv8_ai/screens/add_goals_screen.dart';
 import 'package:motiv8_ai/screens/goal_creation_screen.dart';
 import 'package:motiv8_ai/screens/goal_task_screen.dart';
 import 'package:motiv8_ai/screens/goals_screen.dart';
+import 'package:motiv8_ai/screens/task_view_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/caledarView_widget.dart';
 import 'package:motiv8_ai/widgets/goal_card_widget.dart';
 import 'package:motiv8_ai/widgets/home_screen_appbar.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
+import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -72,6 +76,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     // final showNotificationOnClick = ref.read(notificationButtonProvider);
     final theme = ref.watch(themeProvider);
+    final isDark = theme.colorScheme.brightness == Brightness.dark;
 
     if (ref.watch(currentUserProvider) != null) {
       currentUser = ref.watch(currentUserProvider);
@@ -129,30 +134,126 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: SingleChildScrollView(
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: motivationalQuoteAsync.when(
-                loading: () => [const SizedBox()],
-                error: (error, stack) => [const SizedBox()],
-                data: (quote) => [
-                  if (quote.isNotEmpty) ...[
-                    _buildQuoteWidget(
-                      quote: quote,
-                      color: theme.colorScheme.tertiary,
+          SizedBox(
+            height: 5,
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 10),
+            decoration:
+                goalCardDarkThemeDecoration(theme.colorScheme.primary, isDark)
+                    .copyWith(borderRadius: BorderRadius.circular(30)),
+            height: MediaQuery.of(context).size.width * 0.28,
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: Opacity(
+                    opacity: 0.3,
+                    child: Image.asset(
+                      'assets/dogerblue.jpg',
+                      fit: BoxFit
+                          .cover, // Use this to have the image cover the entire Stack.
+                      height: double.infinity,
+                      width: double.infinity,
                     ),
-                  ] else ...[
-                    _buildQuoteWidget(
-                      quote:
-                          "\"Dream big, work hard, stay focused and surround yourself with positive people who believe in you'",
-                      color: theme.colorScheme.tertiary,
-                    ),
-                  ],
-                ],
-              ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 20.0, right: 20, top: 10),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "My Daily Progress",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.surface),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              "Total Tasks dones",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: theme.colorScheme.surface),
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "8",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.surface),
+                                ),
+                                Text(
+                                  "Tasks",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.surface),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                        CircularStepProgressIndicator(
+                          totalSteps: 10,
+                          currentStep: 8,
+                          stepSize: 8,
+                          selectedColor: theme.colorScheme.surface,
+                          unselectedColor: Colors.transparent,
+                          padding: 0,
+                          width: 80,
+                          height: 80,
+                          selectedStepSize: 7,
+                          roundedCap: (_, __) => true,
+                          child: Center(
+                              child: Text(
+                            '10%',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.surface,
+                              fontSize: 20,
+                            ),
+                          )),
+                        ),
+                      ]),
+                ),
+              ],
             ),
           ),
+          // Padding(
+          //   padding: const EdgeInsets.only(left: 8.0),
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: motivationalQuoteAsync.when(
+          //       loading: () => [const SizedBox()],
+          //       error: (error, stack) => [const SizedBox()],
+          //       data: (quote) => [
+          //         if (quote.isNotEmpty) ...[
+          //           _buildQuoteWidget(
+          //             quote: quote,
+          //             color: theme.colorScheme.tertiary,
+          //           ),
+          //         ] else ...[
+          //           _buildQuoteWidget(
+          //             quote:
+          //                 "\"Dream big, work hard, stay focused and surround yourself with positive people who believe in you'",
+          //             color: theme.colorScheme.tertiary,
+          //           ),
+          //         ],
+          //       ],
+          //     ),
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Divider(
@@ -162,6 +263,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 10.0),
           CalendarView(key: widget.key),
+
           const SizedBox(height: 10.0),
           ref.watch(getGoalTaskStreamProvider(currentUser!.uid)).when(
                 data: (goalTasks) {
@@ -182,16 +284,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Padding(
                             padding: const EdgeInsets.only(left: 10.0),
                             child: Text(
-                              'My Tasks',
+                              'Today',
                               style: GoogleFonts.poppins(
-                                fontSize: 25,
+                                fontSize: 20,
                                 color: theme.colorScheme.tertiary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10.0),
+                            child: Row(
+                              children: [
+                                SvgPicture.asset(
+                                  "assets/uit_calender.svg",
+                                  color: theme.colorScheme.onTertiary,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  DateFormat('EEEE, MMM d, yyyy')
+                                      .format(DateTime.now()),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: theme.colorScheme.onTertiary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           const SizedBox(
-                            height: 10,
+                            height: 5,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10.0),
+                            child: Text(
+                              'My Tasks',
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                color: theme.colorScheme.tertiary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
                           ListView.builder(
                             shrinkWrap:
@@ -202,6 +341,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             itemBuilder: (context, index) {
                               final goalTask = goalTasks[index];
                               return GoalCard(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                      GoalOrTaskScreen.route(
+                                          goalTask: goalTask));
+                                },
                                 goalTaskModel: goalTask,
                                 goalDate: goalTask.date,
                                 alarmTime: alarmTime,
