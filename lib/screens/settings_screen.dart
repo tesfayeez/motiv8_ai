@@ -36,72 +36,156 @@ class SettingsScreen extends ConsumerWidget {
       body: SafeArea(
           child: SingleChildScrollView(
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(
-                height: 15,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Account Settings',
-                  style: GoogleFonts.poppins(
-                    color: theme.colorScheme.tertiary,
-                    fontSize: 16,
-                  ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              height: 15,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Premium',
+                style: GoogleFonts.poppins(
+                  color: theme.colorScheme.tertiary,
+                  fontSize: 16,
                 ),
               ),
-              const SizedBox(
-                height: 5,
-              ),
-              CustomContainer(
-                tileItemColor: theme.colorScheme.primary,
-                containerColor: theme.colorScheme.primaryContainer,
-                listTileData: [
-                  ListTileData(
-                    iconName: 'Profile.svg',
-                    text: 'Account',
-                    onPressed: () => Navigator.of(context).push(
-                      AccountScreen.route(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'App Settings',
-                  style: GoogleFonts.poppins(
-                    color: theme.colorScheme.tertiary,
-                    fontSize: 16,
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            CustomContainer(
+              tileItemColor: theme.colorScheme.primary,
+              containerColor: theme.colorScheme.primaryContainer,
+              listTileData: [
+                ListTileData(
+                  iconData: Icons.restart_alt,
+                  text: 'Restore Purchases',
+                  onPressed: () => Navigator.of(context).push(
+                    AccountScreen.route(),
                   ),
                 ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Account Settings',
+                style: GoogleFonts.poppins(
+                  color: theme.colorScheme.tertiary,
+                  fontSize: 16,
+                ),
               ),
-              CustomContainer(
-                tileItemColor: theme.colorScheme.primary,
-                containerColor: theme.colorScheme.primaryContainer,
-                listTileData: [
-                  ListTileData(
-                    iconName: 'notification.svg',
-                    text: 'Notifications',
-                    onPressed: () => Navigator.of(context).push(
-                      NotificationsScreen.route(),
-                    ),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            CustomContainer(
+              tileItemColor: theme.colorScheme.primary,
+              containerColor: theme.colorScheme.primaryContainer,
+              listTileData: [
+                ListTileData(
+                  iconName: 'Profile.svg',
+                  text: 'Account',
+                  onPressed: () => Navigator.of(context).push(
+                    AccountScreen.route(),
                   ),
-                  ListTileData(
-                    iconName: 'theme.svg',
-                    text: 'App Theme',
-                    onPressed: () => Navigator.of(context).push(
-                      ThemeScreen.route(),
-                    ),
-                  )
-                ],
-              )
-            ]),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'App Settings',
+                style: GoogleFonts.poppins(
+                  color: theme.colorScheme.tertiary,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            CustomContainer(
+              tileItemColor: theme.colorScheme.primary,
+              containerColor: theme.colorScheme.primaryContainer,
+              listTileData: [
+                ListTileData(
+                  iconName: 'notification.svg',
+                  text: 'Notifications',
+                  onPressed: () => Navigator.of(context).push(
+                    NotificationsScreen.route(),
+                  ),
+                ),
+                ListTileData(
+                  iconName: 'theme.svg',
+                  text: 'App Theme',
+                  onPressed: () => Navigator.of(context).push(
+                    ThemeScreen.route(),
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Help & Support',
+                style: GoogleFonts.poppins(
+                  color: theme.colorScheme.tertiary,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            CustomContainer(
+              tileItemColor: theme.colorScheme.primary,
+              containerColor: theme.colorScheme.primaryContainer,
+              listTileData: [
+                ListTileData(
+                  text: 'Rate Motive8 5 Stars',
+                  iconData: Icons.star,
+                  onPressed: () => Navigator.of(context).push(
+                    NotificationsScreen.route(),
+                  ),
+                ),
+                ListTileData(
+                  text: 'Share with a friend',
+                  iconData: Icons.share_sharp,
+                  onPressed: () => Navigator.of(context).push(
+                    ThemeScreen.route(),
+                  ),
+                ),
+                ListTileData(
+                  text: 'Contact Support',
+                  iconData: Icons.support,
+                  onPressed: () => Navigator.of(context).push(
+                    ThemeScreen.route(),
+                  ),
+                ),
+                ListTileData(
+                  text: 'Request a feature',
+                  iconData: Icons.help,
+                  onPressed: () => Navigator.of(context).push(
+                    ThemeScreen.route(),
+                  ),
+                )
+              ],
+            ),
+            Center(
+              child: Text(
+                'v1.0.0',
+                style: GoogleFonts.poppins(
+                  color: theme.colorScheme.onTertiary,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
+              ),
+            )
+          ],
+        ),
       )),
     );
   }
@@ -133,13 +217,16 @@ class CustomContainer extends ConsumerWidget {
         children: listTileData.map((data) {
           if (isIOS) {
             return CupertinoListTile(
-              svgName: data.iconName,
+              iconData: data.iconData,
+              svgName: data.iconName ?? '',
               text: data.text,
               onPressed: data.onPressed,
             );
           } else {
             return ListTile(
-              leading: SvgPicture.asset('assets/${data.iconName}'),
+              leading: data.iconData == null
+                  ? SvgPicture.asset('assets/${data.iconName}')
+                  : Icon(data.iconData),
               title: Text(
                 data.text,
                 style: GoogleFonts.poppins(
@@ -163,27 +250,30 @@ class CustomContainer extends ConsumerWidget {
 
 class ListTileData {
   final String text;
-  final String iconName;
+  final String? iconName;
   final VoidCallback onPressed;
+  final IconData? iconData;
 
   ListTileData({
     required this.text,
-    required this.iconName,
+    this.iconName,
     required this.onPressed,
+    this.iconData,
   });
 }
 
 class CupertinoListTile extends StatelessWidget {
   final String text;
   final String svgName;
+  final IconData? iconData;
 
   final VoidCallback onPressed;
 
-  CupertinoListTile({
-    required this.text,
-    required this.svgName,
-    required this.onPressed,
-  });
+  CupertinoListTile(
+      {required this.text,
+      required this.svgName,
+      required this.onPressed,
+      this.iconData});
 
   @override
   Widget build(BuildContext context) {
@@ -193,13 +283,24 @@ class CupertinoListTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
         child: Row(
           children: <Widget>[
-            SvgPicture.asset(
-              'assets/$svgName',
-              color: const Color(0xFF1988FF),
-            ),
+            if (iconData != null)
+              Icon(
+                iconData,
+                size: 28,
+                color: const Color(0xFF1988FF),
+              ),
+            if (iconData == null)
+              SvgPicture.asset(
+                'assets/$svgName',
+                color: const Color(0xFF1988FF),
+              ),
             SizedBox(width: 10.0),
             Expanded(
-                child: Text(text, style: GoogleFonts.poppins(fontSize: 16.0))),
+              child: Text(
+                text,
+                style: GoogleFonts.poppins(fontSize: 16.0),
+              ),
+            ),
             Icon(Icons.chevron_right, size: 28.0),
           ],
         ),

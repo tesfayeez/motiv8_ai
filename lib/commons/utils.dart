@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/screens/add_goals_modal_Screen.dart';
 
 bool isSameDay(DateTime? date1, DateTime? date2) {
   if (date1 == null || date2 == null) {
@@ -330,4 +331,26 @@ Widget buildActionButton(String label, VoidCallback onTap, Color color) {
       ),
     ),
   );
+}
+
+void showAddGoalModal(BuildContext context) {
+  showModalBottomSheet(
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      builder: (BuildContext context) {
+        return ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: FractionallySizedBox(
+            heightFactor: .9,
+            child: AddGoalsModalScreen(),
+          ),
+        );
+      });
 }

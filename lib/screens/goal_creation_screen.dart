@@ -14,6 +14,7 @@ import 'package:motiv8_ai/widgets/CustomRadioButtons.dart';
 import 'package:motiv8_ai/widgets/add_goals_text_field.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
+import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:uuid/uuid.dart';
 
@@ -435,7 +436,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                           }
                         },
                         error: (error, stackTrace) => Text(''),
-                        loading: () => CircularProgressIndicator())
+                        loading: () => CustomProgressIndicator())
                   ],
                 ),
               ],

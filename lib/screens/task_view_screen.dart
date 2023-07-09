@@ -12,6 +12,7 @@ import 'package:motiv8_ai/widgets/animated_loading_indicator.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal%20header%20widgets/goal_header_master_widget.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
+import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 
 class GoalOrTaskScreen extends ConsumerWidget {
   final GoalTask? goalTask;
@@ -309,8 +310,7 @@ class SubtaskGenerator extends ConsumerWidget {
         return const Center(child: Text("Error occurred"));
       },
       loading: () {
-        return Center(
-            child: AnimatedEmojiLoadingIndicator(hintText: 'subtasks'));
+        return Center(child: CustomProgressIndicator());
       },
     );
   }

@@ -5,8 +5,8 @@ class CustomProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spinkit = SpinKitFadingCircle(
-      color: Colors.blue,
-      size: 40,
+      color: const Color(0xFF1988FF),
+      size: 35,
     );
 
     return Container(

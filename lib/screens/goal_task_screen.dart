@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
+import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/animated_loading_indicator.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
+import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/time_line_widget.dart';
 import '../controllers/goal_controllers.dart';
 
@@ -28,6 +30,7 @@ class GoalTasksScreen extends ConsumerStatefulWidget {
 }
 
 class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
+  AsyncValue<List<GoalTask>>? taskListAsyncValue;
   void addGoal(Goal goal, BuildContext context) {
     ref.read(goalControllerProvider.notifier).createGoal(
           goal: goal,
@@ -78,51 +81,57 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
               const SizedBox(height: 25),
               Consumer(
                 builder: (context, ref, child) {
-                  final taskListAsyncValue = ref
+                  taskListAsyncValue = ref
                       .watch(generateGoalTasksControllerProvider(widget.goal));
                   final taskList = ref.watch(taskListProvider);
 
-                  return taskListAsyncValue.when(
-                    data: (_) {
-                      if (taskList.isNotEmpty) {
-                        return Timeline(tasks: taskList);
-                      } else {
-                        return Center(
-                            child: Column(
-                          children: [
-                            Text(
-                              "No Tasks Available",
-                              style: GoogleFonts.poppins(
-                                  color: theme.colorScheme.onTertiary),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            InkWell(
-                              splashColor: Colors.white,
-                              onTap: () {},
-                              child: Text(
-                                '💡🗒️ AI Tasks',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 14,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            )
-                          ],
-                        ));
-                      }
-                    },
-                    loading: () {
-                      return Center(
-                        child: AnimatedEmojiLoadingIndicator(hintText: 'tasks'),
-                      );
-                    },
-                    error: (error, stackTrace) {
-                      return const Center(child: Text("Error occurred"));
-                    },
-                  );
+                  return taskListAsyncValue != null
+                      ? taskListAsyncValue!.when(
+                          data: (_) {
+                            if (taskList.isNotEmpty) {
+                              return Timeline(tasks: taskList);
+                            } else {
+                              return Center(
+                                  child: Column(
+                                children: [
+                                  Text(
+                                    "No Tasks Available",
+                                    style: GoogleFonts.poppins(
+                                        color: theme.colorScheme.onTertiary),
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  InkWell(
+                                    splashColor: Colors.white,
+                                    onTap: () {
+                                      taskListAsyncValue = ref.watch(
+                                          generateGoalTasksControllerProvider(
+                                              widget.goal));
+                                    },
+                                    child: Text(
+                                      '💡🗒️ Regenerate AI Tasks',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 14,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ));
+                            }
+                          },
+                          loading: () {
+                            return Center(
+                              child: CustomProgressIndicator(),
+                            );
+                          },
+                          error: (error, stackTrace) {
+                            return const Center(child: Text("Error occurred"));
+                          },
+                        )
+                      : Container();
                 },
               ),
             ],

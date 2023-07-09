@@ -205,7 +205,7 @@ class ChatAPI implements IChatAPI {
         {
           'role': 'user',
           'content':
-              'Generate $quoteCount motivational quotes to achieve any goal'
+              'Generate $quoteCount motivational quotes to achieve any goal and just give me the quotes dont number it or anything'
         },
       ]);
 

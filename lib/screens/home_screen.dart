@@ -54,29 +54,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showAddGoalModal(BuildContext context) {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      isDismissible: true,
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      builder: (BuildContext context) {
-        return ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          child: FractionallySizedBox(
-            heightFactor: .9,
-            child: AddGoalsModalScreen(),
-          ),
-        );
-      },
-    );
-  }
-
   void _showAddGoalTaskModal(BuildContext context) {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -103,9 +80,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     print('init state');
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   await scheduleNotifications();
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await scheduleNotifications();
+    });
+  }
+
+  Future<void> scheduleNotifications() async {
+    final quotesAsyncValue = ref.watch(getMotivationalQuotesProvider(''));
+    quotesAsyncValue.whenData((quotes) async {
+      print(quotes);
+      for (int i = 0; i < quotes.length; i++) {
+        String quote = quotes[i];
+        print(quote);
+        var scheduledTime = DateTime.now().add(Duration(minutes: 1 * i));
+
+        // Schedule the notification
+        await ref.read(notificationServiceProvider).showNotificationAtTime(
+              id: i,
+              title: 'Motivational Quote',
+              body: quote,
+              scheduledTime: scheduledTime,
+            );
+      }
+    });
   }
 
   @override
@@ -149,7 +146,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             HapticFeedback.heavyImpact();
             // navigateToGoalCreationScreen(context);
-            _showAddGoalModal(context);
+            showAddGoalModal(context);
           },
           child: Icon(
             Icons.add,
@@ -169,6 +166,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // FutureBuilder<List<String>>(
+              //   future: ref.watch(getMotivationalQuotesProvider('').future),
+              //   builder: (context, snapshot) {
+              //     if (snapshot.connectionState == ConnectionState.waiting) {
+              //       // Show a loading indicator while fetching the quotes
+              //       return Center(
+              //         child: CustomProgressIndicator(),
+              //       );
+              //     } else if (snapshot.hasError) {
+              //       // Show an error message if an error occurred
+              //       return Text('Error occurred: ${snapshot.error}');
+              //     } else {
+              //       // Quotes data is available, schedule notifications
+              //       final quotes = snapshot.data;
+              //       if (quotes != null) {
+              //         for (int i = 0; i < quotes.length; i++) {
+              //           String quote = quotes[i];
+              //           var now = DateTime.now();
+              //           var scheduledTime = now.add(Duration(minutes: 5 * i));
+
+              //           // Schedule the notification
+              //           ref
+              //               .read(notificationServiceProvider)
+              //               .showNotificationAtTime(
+              //                 id: i,
+              //                 title: 'Motivation',
+              //                 body: quote,
+              //                 scheduledTime: scheduledTime,
+              //               );
+              //         }
+              //       }
+
+              //       // Return the desired widget after scheduling notifications
+              //       return Container();
+              //     }
+              //   },
+              // ),
               SizedBox(
                 height: 5,
               ),

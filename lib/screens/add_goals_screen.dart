@@ -42,6 +42,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
   final TextEditingController timeController = TextEditingController();
   final TextEditingController targetDateController = TextEditingController();
   final TextEditingController startingDateController = TextEditingController();
+  bool isGoalEmpty = false;
   String goalId = '';
   bool allFieldsAreValid = false;
   final TextStyle textStyle = GoogleFonts.poppins(
@@ -131,7 +132,13 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                       ),
                     ],
                   );
-                return Container();
+                else {
+                  setState(() {
+                    isGoalEmpty = true;
+                  });
+
+                  return Container();
+                }
               },
               loading: () {
                 // Data is still loading, return a loading indicator
@@ -143,38 +150,67 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
               },
             ),
             const SizedBox(height: 10),
-            SectionWidget(
-              title: 'Name',
-              controller: titleController,
-              hintText: 'Enter Task name',
-            ),
-            SectionWidget(
-              title: 'Description',
-              controller: descriptionController,
-              hintText: 'Enter Task Description',
-              isHeightGrow: true,
-            ),
-            SectionWidget(
-              hintText: 'Select Date',
-              title: 'Task Date',
-              controller: targetDateController,
-              isDatePicker: true,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            // SubtaskGenerator(
-            //   goalTask: setAllValues(),
-            // ),
-            SizedBox(
-              height: 10,
-            ),
-            CustomButton(
-              text: 'Add Task',
-              onPressed: () {
-                print("object");
-              },
-            ),
+            if (!isGoalEmpty) ...[
+              SectionWidget(
+                title: 'Name',
+                controller: titleController,
+                hintText: 'Enter Task name',
+              ),
+              SectionWidget(
+                title: 'Description',
+                controller: descriptionController,
+                hintText: 'Enter Task Description',
+                isHeightGrow: true,
+              ),
+              SectionWidget(
+                hintText: 'Select Date',
+                title: 'Task Date',
+                controller: targetDateController,
+                isDatePicker: true,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              // SubtaskGenerator(
+              //   goalTask: setAllValues(),
+              // ),
+              SizedBox(
+                height: 10,
+              ),
+              CustomButton(
+                text: 'Add Task',
+                onPressed: () {
+                  print("object");
+                },
+              ),
+            ] else ...[
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      'Please add goals before adding tasks',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        color: theme.colorScheme.onTertiary,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 25,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 50),
+                      child: CustomButton(
+                        text: 'Add Goal',
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          showAddGoalModal(context);
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ]
           ],
         ),
       ),
@@ -328,7 +364,7 @@ class GoalsDropdown extends StatelessWidget {
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       return CupertinoPicker(
-        itemExtent: 60.0,
+        itemExtent: 100.0,
         onSelectedItemChanged: (int index) {
           onGoalChanged(items[index]);
         },
@@ -337,7 +373,7 @@ class GoalsDropdown extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               capitalize(goal.name),
-              style: GoogleFonts.poppins(fontSize: 16),
+              style: GoogleFonts.poppins(fontSize: 18),
             ),
           );
         }).toList(),

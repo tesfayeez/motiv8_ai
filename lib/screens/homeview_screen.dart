@@ -24,6 +24,7 @@ class _HomeViewScreenState extends ConsumerState<HomeViewScreen> {
     'assets/Home.svg',
     'assets/mygoals.svg',
     'assets/Setting.svg',
+    'assets/quotes.svg',
     'assets/Profile.svg',
   ];
 
@@ -66,6 +67,7 @@ class _HomeViewScreenState extends ConsumerState<HomeViewScreen> {
           return BottomNavigationBarItem(
             icon: SvgPicture.asset(
               asset,
+              height: asset == 'assets/quotes.svg' ? 25 : null,
               colorFilter: ColorFilter.mode(
                 _page == index
                     ? theme.colorScheme.primary
@@ -89,6 +91,8 @@ class _HomeViewScreenState extends ConsumerState<HomeViewScreen> {
       case 2:
         return 'Settings';
       case 3:
+        return 'Quotes';
+      case 4:
         return 'Profile';
       default:
         return '';
