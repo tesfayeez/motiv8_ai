@@ -42,6 +42,78 @@ Path drawCircle(Size size) {
   return path;
 }
 
+TimeOfDay fromFirestore(String timeString) {
+  final timeFormat = DateFormat('hh:mm a');
+  final DateTime time = timeFormat.parse(timeString);
+  return TimeOfDay(hour: time.hour, minute: time.minute);
+}
+
+TimeOfDay parseTime(String time) {
+  try {
+    final format = DateFormat.jm('en_US');
+    final dt = format.parse(time);
+    return TimeOfDay.fromDateTime(dt);
+  } catch (e) {
+    print('Invalid time format: $time');
+    return TimeOfDay(hour: 10, minute: 0); // returning 10 AM as default
+  }
+}
+
+String convertTo24HourFormatString(String time12HourFormat) {
+  // Split the string into hours, minutes, and period
+  List<String> timeParts = time12HourFormat.split(':');
+  List<String> periodParts = timeParts[1].split(' ');
+
+  int hour = int.parse(timeParts[0]);
+  int minute = int.parse(periodParts[0]);
+  String period = periodParts[1].trim();
+
+  // Adjust the hour based on the period
+  if (period.toUpperCase() == "PM" && hour != 12) hour += 12;
+  if (period.toUpperCase() == "AM" && hour == 12) hour = 0;
+
+  return "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+}
+
+TimeOfDay convertTo24HourFormat(String time12HourFormat) {
+  // Split the string into hours, minutes, and period
+  List<String> timeParts = time12HourFormat.split(':');
+  List<String> periodParts = timeParts[1].split(' ');
+
+  int hour = int.parse(timeParts[0]);
+  int minute = int.parse(periodParts[0]);
+  String period = periodParts[1].trim();
+
+  // Adjust the hour based on the period
+  if (period.toUpperCase() == "PM" && hour != 12) hour += 12;
+  if (period.toUpperCase() == "AM" && hour == 12) hour = 0;
+
+  return TimeOfDay(hour: hour, minute: minute);
+}
+
+TimeOfDay stringToTimeOfDay(String timeStr) {
+  if (timeStr == null || timeStr.isEmpty) {
+    print('The input string is null or empty!');
+    return TimeOfDay.now();
+  }
+
+  final format = DateFormat.jm(); // Assuming time format is in AM/PM
+
+  // Replace non-breaking spaces and trim other whitespace
+  String cleanedTimeStr = timeStr.replaceAll('\u{A0}', ' ').trim();
+
+  print('Cleaned Time String: $cleanedTimeStr');
+
+  try {
+    DateTime dateTime = format.parse(cleanedTimeStr);
+    print('Parsed DateTime: $dateTime');
+    return TimeOfDay.fromDateTime(dateTime);
+  } catch (e) {
+    print('Error occurred while parsing the time: $e');
+    return TimeOfDay.now();
+  }
+}
+
 DateTime parseDate(String dateString, {bool regularDate = false}) {
   final DateFormat inputFormat = DateFormat('EEEE, MMM d, yyyy');
   try {

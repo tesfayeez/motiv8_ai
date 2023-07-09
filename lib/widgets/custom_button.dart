@@ -27,7 +27,7 @@ class CustomButton extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             text,
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               color: Colors.white,
               fontStyle: FontStyle.normal,
               fontSize: 16,

@@ -6,13 +6,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 
 class CustomDatePicker extends ConsumerStatefulWidget {
-  CustomDatePicker(
-      {Key? key,
-      this.showDate = true,
-      this.focusNode,
-      required this.controller,
-      this.hintText})
-      : super(key: key);
+  CustomDatePicker({
+    Key? key,
+    this.showDate = true,
+    this.focusNode,
+    required this.controller,
+    this.hintText,
+  }) : super(key: key);
 
   final TextEditingController controller;
   final bool showDate;

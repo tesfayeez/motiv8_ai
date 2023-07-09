@@ -15,21 +15,25 @@ class HeaderRow extends StatelessWidget {
   final bool showAddTask;
   final bool showAddGoal;
   final bool showSubTask;
+  final bool showMarkComplete;
 
-  const HeaderRow(
-      {required this.title,
-      required this.actionButtonColor,
-      this.addTaskCallback,
-      this.addGoalCallback,
-      this.addSubTaskCallback,
-      this.showAddTask = true,
-      this.showAddGoal = true,
-      this.showSubTask = false});
+  const HeaderRow({
+    required this.title,
+    required this.actionButtonColor,
+    this.addTaskCallback,
+    this.addGoalCallback,
+    this.addSubTaskCallback,
+    this.showAddTask = true,
+    this.showAddGoal = true,
+    this.showSubTask = false,
+    this.showMarkComplete = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -45,6 +49,10 @@ class HeaderRow extends StatelessWidget {
             if (showSubTask)
               buildActionButton("Add Subtask", () => addSubTaskCallback?.call(),
                   actionButtonColor),
+            const SizedBox(width: 10),
+            if (showMarkComplete)
+              buildActionButton("Complete", () => addSubTaskCallback?.call(),
+                  actionButtonColor)
           ],
         ),
         SizedBox(
@@ -115,7 +123,9 @@ class GoalDateRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         DateCard(
+          hintText: 'Start Date',
           date: startDate,
+          justDisplayer: true,
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -126,7 +136,9 @@ class GoalDateRow extends StatelessWidget {
           ),
         ),
         DateCard(
+          hintText: 'End Date',
           date: endDate,
+          justDisplayer: true,
         ),
       ],
     );

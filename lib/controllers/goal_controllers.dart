@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/api/goal_api.dart';
+import 'package:motiv8_ai/commons/snack_bar_provider.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/widgets/caledarView_widget.dart';
 import 'package:uuid/uuid.dart';
+
+final selectedTaskProvider = StateProvider<GoalTask?>((ref) => null);
+final getGoalProgressStreamProvider =
+    StreamProvider.autoDispose.family<GoalProgress, String>((ref, userID) {
+  final goalController = ref.watch(goalControllerProvider.notifier);
+  final selectedDate = ref.watch(calendarStateProvider).selectedDay;
+  // print("Selected date $selectedDate");
+  return goalController.getGoalTaskProgressStream(userID, selectedDate);
+});
 
 final goalControllerProvider =
     StateNotifierProvider<GoalController, bool>((ref) {
@@ -40,6 +50,14 @@ final getGoalTaskStreamProvider =
   return goalController.getGoalTaskStream(userID, selectedDate);
 });
 
+final getGoalTaskSubtasksProvider =
+    FutureProvider.autoDispose.family<List<String>, GoalTask>((ref, task) {
+  final goalController = ref.watch(goalControllerProvider.notifier);
+
+  // print("Selected date $selectedDate");
+  return goalController.getGoalTaskSubtasks(task);
+});
+
 // final getGoalTaskStreamProvider =
 //     StreamProvider.family<List<GoalTask>, String>((ref, goalId) {
 //   final goalController = ref.watch(goalControllerProvider.notifier);
@@ -69,30 +87,45 @@ class GoalController extends StateNotifier<bool> {
   }) async {
     state = true;
     final addedGoalTaskList = _ref.read(goalTaskListProvider);
-    Goal userGoal =
-        goal.copyWith(id: const Uuid().v4(), tasks: addedGoalTaskList);
+    final String newGoalId = const Uuid().v4(); // Generate new Goal id
+
+    // Check if addedGoalTaskList is not empty
+    List<GoalTask>? updatedGoalTaskList;
+    if (addedGoalTaskList.isNotEmpty) {
+      // Update each GoalTask with the new Goal id
+      updatedGoalTaskList = addedGoalTaskList.map((task) {
+        DateTime combinedDateTime = DateTime(task.date.year, task.date.month,
+            task.date.day, goal.reminderTime.hour, goal.reminderTime.minute);
+        return task.copyWith(
+          goalId: newGoalId,
+          taskReminderTime: combinedDateTime,
+        );
+      }).toList();
+    }
+
+    Goal userGoal = goal.copyWith(id: newGoalId, tasks: updatedGoalTaskList);
 
     final res = await _goalAPI.createGoal(userGoal);
     res.fold(
-      (l) => showSnackBar(l.message),
+      (l) => showSnackBar(l.message, context),
       (r) {
         goal = r;
-        showSnackBar('Goal created');
+        showSnackBar('Goal created', context);
       },
     );
 
     state = false;
   }
 
-  Future<void> createGoalTask({
-    required String goalId,
-    required GoalTask goalTask,
-  }) async {
+  Future<void> createGoalTask(
+      {required String goalId,
+      required GoalTask goalTask,
+      required BuildContext context}) async {
     state = true;
 
     final res = await _goalAPI.createGoalTask(goalId, goalTask);
-    res.fold((l) => showSnackBar(l.message), (r) {
-      showSnackBar('Task Added');
+    res.fold((l) => showSnackBar(l.message, context), (r) {
+      showSnackBar('Task Added', context);
     });
 
     state = false;
@@ -104,8 +137,8 @@ class GoalController extends StateNotifier<bool> {
   }) async {
     state = true;
     final res = await _goalAPI.updateGoal(goal);
-    res.fold((l) => showSnackBar(l.message), (r) {
-      showSnackBar('Goal updated');
+    res.fold((l) => showSnackBar(l.message, context), (r) {
+      showSnackBar('Goal updated', context);
     });
     state = false;
   }
@@ -116,8 +149,8 @@ class GoalController extends StateNotifier<bool> {
   }) async {
     state = true;
     final res = await _goalAPI.deleteGoal(goalId);
-    res.fold((l) => showSnackBar(l.message), (r) {
-      showSnackBar('Goal deleted');
+    res.fold((l) => showSnackBar(l.message, context), (r) {
+      showSnackBar('Goal deleted', context);
     });
     state = false;
   }
@@ -207,137 +240,171 @@ class GoalController extends StateNotifier<bool> {
     });
   }
 
-  void showSnackBar(String message) {
-    final snackBar = SnackBar(
-      content: Text(
-        message,
-        style: TextStyle(color: Colors.white),
-      ),
-    );
-    _ref
-        .watch(scaffoldMessengerKeyProvider)
-        .currentState
-        ?.showSnackBar(snackBar);
+  Future<List<String>> getGoalTaskSubtasks(GoalTask goalTask) async {
+    try {
+      final goalSnapshot =
+          await _goalAPI.singleGoalStream(goalTask.goalId).first;
+      final goalData = goalSnapshot.data();
+
+      if (goalData == null || !goalData.containsKey('tasks')) {
+        return []; // Return an empty list if the goal document or tasks field doesn't exist
+      }
+
+      final List<Map<String, dynamic>> tasks =
+          List.from(goalData['tasks'] ?? []);
+
+      // Find the specific task with the provided taskId
+      final List<GoalTask> matchingTasks = tasks
+          .map((taskData) => GoalTask.fromMap(taskData))
+          .where((task) => task.id == goalTask.id)
+          .toList();
+
+      final GoalTask? matchingGoalTask =
+          matchingTasks.isNotEmpty ? matchingTasks.first : null;
+
+      if (matchingGoalTask == null || matchingGoalTask.subtasks == null) {
+        return []; // Return an empty list if the task's subtasks don't exist
+      }
+
+      return matchingGoalTask.subtasks!;
+    } catch (e) {
+      print('Failed to get subtasks: $e');
+      return [];
+    }
   }
-  //TODO: fix this current implementation of showSnackBar
+
+  Future<void> updateGoalTaskSubtasks(
+      {required String goalId,
+      required String taskId,
+      required List<String> subtasks,
+      required BuildContext context}) async {
+    state = true;
+
+    final res = await _goalAPI.updateGoalTaskSubtasks(goalId, taskId, subtasks);
+    res.fold((l) => showSnackBar(l.message, context), (r) {
+      showSnackBar('Subtasks Saved', context);
+    });
+
+    state = false;
+  }
+
+  // Future<void> completeGoalTask({
+  //   required Goal goal,
+  //   required GoalTask goalTask,
+  //   required bool isComplete,
+  //   required BuildContext context,
+  // }) async {
+  //   state = true;
+
+  //   // Update the 'completed' field of the goalTask
+  //   GoalTask updatedTask = goalTask.copyWith(isCompleted: isComplete);
+
+  //   // Update the task in the goal
+  //   Goal updatedGoal = goal.copyWith(
+  //     tasks: goal.tasks?.map((task) {
+  //       return task.id == updatedTask.id ? updatedTask : task;
+  //     }).toList(),
+  //   );
+
+  //   // Update the goal in the database
+  //   await updateGoal(goal: updatedGoal, context: context);
+
+  //   state = false;
+  // }
+  Future<void> completeGoalTask({
+    required GoalTask goalTask,
+    required bool isComplete,
+    required BuildContext context,
+  }) async {
+    state = true;
+
+    // Get the goal that the task belongs to
+    final goalRes = await _goalAPI.getGoal(goalTask.goalId);
+    Goal goal = goalRes.fold((l) {
+      showSnackBar(l.message, context);
+      throw Exception('Failed to get goal');
+    }, (r) => r);
+
+    // Check if the tasks list in the goal is null
+    if (goal.tasks == null) {
+      // Handle the case when goal.tasks is null
+      state = false;
+      return;
+    }
+
+    // Find the index of the goalTask in the tasks list
+    final taskIndex = goal.tasks!.indexWhere((task) => task.id == goalTask.id);
+    if (taskIndex == -1) {
+      // Handle the case when the task is not found
+      state = false;
+      return;
+    }
+
+    // Create a copy of the tasks list and update the specific task
+    final updatedTasks = List<GoalTask>.from(goal.tasks!);
+    updatedTasks[taskIndex] = goalTask.copyWith(isCompleted: isComplete);
+
+    // Calculate the completed tasks count
+    final completedTasksCount =
+        updatedTasks.where((task) => task.isCompleted).length;
+    print("$completedTasksCount completed task count");
+
+    // Update the completed tasks count and tasks list in the goal
+    final updatedGoal = goal.copyWith(
+      completedTasks: completedTasksCount,
+      tasks: updatedTasks,
+    );
+
+    // Update the goal in the database
+    final res = await _goalAPI.updateGoal(updatedGoal);
+    res.fold((l) => showSnackBar(l.message, context), (r) {});
+
+    state = false;
+  }
+
+  // state = false;
+  Stream<GoalProgress> getGoalTaskProgressStream(
+      String userID, DateTime? selectedDate) {
+    return _goalAPI.goalsStream(userID).map((snapshot) {
+      List<GoalTask> goalTasks = [];
+      int completedTaskCount = 0;
+
+      snapshot.docs.forEach((doc) {
+        final goal = Goal.fromMap(doc.data()..['id'] = doc.id);
+        final tasks = goal.tasks ?? []; // Retrieve the tasks from the goal
+
+        final filteredTasks = tasks.where((task) =>
+            task.date.day == selectedDate?.day &&
+            task.date.month == selectedDate?.month &&
+            task.date.year == selectedDate?.year);
+
+        goalTasks
+            .addAll(filteredTasks); // Add filtered tasks to the goalTasks list
+
+        // Increment the completedTaskCount if the task is completed
+        filteredTasks.forEach((task) {
+          if (task.isCompleted == true) {
+            completedTaskCount++;
+          }
+        });
+      });
+
+      // goalTasks.forEach((goalTask) => print(goalTask)); // Print each goal task
+
+      return GoalProgress(
+          tasks: goalTasks, completedTaskCount: completedTaskCount);
+    });
+  }
+
+  void showSnackBar(String message, BuildContext context) {
+    final snackbarController = _ref.watch(snackbarProvider.notifier);
+    snackbarController.show(context, message);
+  }
 }
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:motiv8_ai/api/goal_api.dart';
-// import 'package:motiv8_ai/commons/utils.dart';
-// import 'package:motiv8_ai/controllers/auth_controllers.dart';
-// import 'package:motiv8_ai/database/goals_db.dart';
-// import 'package:motiv8_ai/main.dart';
-// import 'package:motiv8_ai/models/goals_model.dart';
-// import 'package:motiv8_ai/screens/add_goals_screen.dart';
-// import 'package:motiv8_ai/widgets/caledarView_widget.dart';
-// import 'package:uuid/uuid.dart';
 
-// final goalsProvider = StreamProvider<List<Goal>>((ref) {
-//   final goalController = ref.watch(goalControllerProvider.notifier);
-//   final selectedDate = ref.watch(calendarStateProvider).selectedDay;
-//   final userID = ref.watch(currentUserProvider)!.uid;
+class GoalProgress {
+  final List<GoalTask> tasks;
+  final int completedTaskCount;
 
-//   return goalController.getGoalsStream(userID, selectedDate);
-// });
-
-// final goalControllerProvider =
-//     StateNotifierProvider<GoalController, bool>((ref) {
-//   return GoalController(
-//     ref: ref,
-//     goalAPI: ref.watch(goalApiProvider),
-//     goalDatabase: ref.watch(goalDatabaseProvider),
-//   );
-// });
-
-// class GoalController extends StateNotifier<bool> {
-//   final GoalAPI _goalAPI;
-//   final GoalDatabase _goalDatabase;
-//   final Ref _ref;
-
-//   GoalController({
-//     required Ref ref,
-//     required GoalAPI goalAPI,
-//     required GoalDatabase goalDatabase,
-//   })  : _ref = ref,
-//         _goalAPI = goalAPI,
-//         _goalDatabase = goalDatabase,
-//         super(false);
-
-//   Future<void> createGoal({
-//     required String name,
-//     required String description,
-//     required DateTime? startDate,
-//     required DateTime? endDate,
-//     required String reminderFrequency,
-//     required List<String> tasks,
-//     required BuildContext context,
-//     required String userID,
-//   }) async {
-//     state = true;
-//     Goal goal = Goal(
-//       id: const Uuid().v4(),
-//       userID: userID,
-//       name: name,
-//       description: description,
-//       startDate: startDate,
-//       endDate: endDate,
-//       reminderFrequency: '',
-//       tasks: tasks,
-//     );
-
-//     final int id = await _goalDatabase.createGoal(goal);
-//     goal = goal.copyWith(id: id.toString());
-
-//     showSnackBar('Goal created');
-//     state = false;
-//   }
-
-//   Future<void> updateGoal({
-//     required Goal goal,
-//     required BuildContext context,
-//   }) async {
-//     state = true;
-//     await _goalDatabase.updateGoal(goal);
-
-//     showSnackBar('Goal updated');
-//     state = false;
-//   }
-
-//   Future<void> deleteGoal({
-//     required String goalId,
-//     required BuildContext context,
-//   }) async {
-//     state = true;
-//     await _goalDatabase.deleteGoal(goalId);
-
-//     showSnackBar('Goal deleted');
-//     state = false;
-//   }
-
-//   Stream<List<Goal>> getGoalsStream(
-//       String userID, DateTime? selectedDate) async* {
-//     print("selected date is $selectedDate");
-//     final List<Goal> goals = await _goalDatabase.getAllGoals(userID);
-//     print(goals);
-
-//     if (selectedDate != null) {
-//       final filteredGoals = goals.where((goal) =>
-//           goal.startDate?.year == selectedDate.year &&
-//           goal.startDate?.month == selectedDate.month &&
-//           goal.startDate?.day == selectedDate.day);
-
-//       yield filteredGoals.toList();
-//     } else {
-//       yield goals;
-//     }
-//   }
-
-//   void showSnackBar(String message) {
-//     final snackBar = SnackBar(content: Text(message));
-//     _ref
-//         .watch(scaffoldMessengerKeyProvider)
-//         .currentState
-//         ?.showSnackBar(snackBar);
-//   }
-// }
+  GoalProgress({required this.tasks, required this.completedTaskCount});
+}

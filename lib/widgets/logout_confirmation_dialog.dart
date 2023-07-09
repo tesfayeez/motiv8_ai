@@ -11,9 +11,9 @@ class LogoutConfirmationDialog {
         context: context,
         builder: (BuildContext context) {
           return CupertinoActionSheet(
-            title: const Text(
+            title: Text(
               'Are you sure you want to log out?',
-              style: TextStyle(fontSize: 14),
+              style: GoogleFonts.poppins(fontSize: 14),
             ),
             actions: [
               CupertinoActionSheetAction(

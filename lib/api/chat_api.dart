@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,8 +16,7 @@ final chatApiProvider = Provider((ref) {
 abstract class IChatAPI {
   FutureEither<String> sendMessage(List<Map<String, dynamic>> messages);
   FutureEither<List<GoalTask>> generateGoalTasks(Goal goal);
-  Future<Either<Failure, List<String>>> getMotivationalQuotes(
-      String goalName, int quoteCount);
+  Future<Either<Failure, List<String>>> getMotivationalQuotes(int quoteCount);
   FutureEither<List<String>> getGoalTaskSubtasks(GoalTask task);
   FutureEither<String> summarizeGoalToGetGoalName(String goalDescriptionText);
 }
@@ -172,11 +170,12 @@ class ChatAPI implements IChatAPI {
 
             if (date != null && taskName != null && description != null) {
               final task = GoalTask(
-                id: const Uuid().v4(),
-                name: taskName,
-                description: description,
-                date: date,
-              );
+                  goalId: '',
+                  id: const Uuid().v4(),
+                  name: taskName,
+                  description: description,
+                  date: date,
+                  taskReminderTime: DateTime.now());
               generatedTasks.add(task);
               print("Created task: $taskName, $description, $date");
               // Reset fields for next task
@@ -200,24 +199,24 @@ class ChatAPI implements IChatAPI {
 
   @override
   Future<Either<Failure, List<String>>> getMotivationalQuotes(
-      String goalName, int quoteCount) async {
-    print(goalName);
+      int quoteCount) async {
     try {
-      List<String> quotes = [];
-      for (var i = 0; i < quoteCount; i++) {
-        final response = await sendMessage([
-          {
-            'role': 'user',
-            'content':
-                'Generate a motivational quote for me to achieve my goal of $goalName.'
-          },
-        ]);
+      final response = await sendMessage([
+        {
+          'role': 'user',
+          'content':
+              'Generate $quoteCount motivational quotes to achieve any goal'
+        },
+      ]);
 
-        // Extract the motivational quote from the response
-        quotes.add(response.fold(
-            (l) => '', // Return an empty string on failure
-            (r) => r));
-      }
+      // Split the response string into subtasks
+      List<String> quotes = response.fold(
+        (l) => <String>[], // Return an empty list on failure
+        (r) => r
+            .split('\n') // Split the response into multiple lines on success
+            .where((line) => line.trim().isNotEmpty)
+            .toList(),
+      );
 
       return right(quotes);
     } catch (e, st) {
@@ -260,8 +259,10 @@ class ChatAPI implements IChatAPI {
       // Split the response string into subtasks
       List<String> subtasks = response.fold(
         (l) => <String>[], // Return an empty list on failure
-        (r) =>
-            r.split('\n'), // Split the response into multiple lines on success
+        (r) => r
+            .split('\n') // Split the response into multiple lines on success
+            .where((line) => line.trim().isNotEmpty)
+            .toList(),
       );
 
       return right(subtasks);

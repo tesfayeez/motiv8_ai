@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:motiv8_ai/api/auth_api.dart';
+import 'package:motiv8_ai/commons/snack_bar_provider.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
@@ -15,6 +16,7 @@ final authControllerProvider =
     StateNotifierProvider<AuthController, bool>((ref) {
   return AuthController(
     authAPI: ref.watch(authAPIProvider),
+    ref: ref,
     scaffoldMessengerKey: ref.watch(scaffoldMessengerKeyProvider),
     navigatorKey: ref.watch(navigatorKeyProvider),
   );
@@ -38,13 +40,16 @@ class AuthController extends StateNotifier<bool> {
   final AuthAPI _authAPI;
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey;
   final GlobalKey<NavigatorState> _navigatorKey;
+  final Ref _ref;
   AuthController({
+    required Ref ref,
     required AuthAPI authAPI,
     required GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey,
     required GlobalKey<NavigatorState> navigatorKey,
   })  : _authAPI = authAPI,
         _scaffoldMessengerKey = scaffoldMessengerKey,
         _navigatorKey = navigatorKey,
+        _ref = ref,
         super(false);
 
   User? getCurrentUser() => _authAPI.getCurrentUser();
@@ -64,7 +69,7 @@ class AuthController extends StateNotifier<bool> {
     res.fold(
       (l) {
         print(l.stackTrace.toString());
-        showSnackBar(l.message);
+        showSnackBar(l.message, context);
       },
       (r) {
         print("Account Created succesfully");
@@ -87,7 +92,7 @@ class AuthController extends StateNotifier<bool> {
     res.fold(
       (l) {
         print(l.stackTrace.toString());
-        showSnackBar(l.message);
+        showSnackBar(l.message, context);
       },
       (r) {
         print("Home View");
@@ -126,11 +131,12 @@ class AuthController extends StateNotifier<bool> {
     res.fold(
       (l) {
         print(l.stackTrace.toString());
-        showSnackBar(l.message);
+        showSnackBar(l.message, context);
       },
       (r) {
         showSnackBar(
-            "Password reset email has been sent to $email. Please check your inbox.");
+            "Password reset email has been sent to $email. Please check your inbox.",
+            context);
         print("Password reset email sent");
         // Navigate to login screen or show a dialog notifying the user about the password reset email
       },
@@ -144,9 +150,7 @@ class AuthController extends StateNotifier<bool> {
 
     result.fold(
       (failure) {
-        _scaffoldMessengerKey.currentState?.showSnackBar(
-          SnackBar(content: Text(failure.message)),
-        );
+        showSnackBar(failure.message, context);
       },
       (user) async {
         String? users = user.user!.email;
@@ -156,8 +160,7 @@ class AuthController extends StateNotifier<bool> {
         UserWalkthroughScreen.route();
         if (user.user!.email == 'ezex.55@gmail.com') {
           print("its here at email");
-          Navigator.of(context)
-              .pushReplacement(SpecialUserWalkthroughScreen.route());
+          Navigator.of(context).pushReplacement(UserWalkthroughScreen.route());
         } else {
           Navigator.of(context).pushReplacement(UserWalkthroughScreen.route());
         }
@@ -169,9 +172,9 @@ class AuthController extends StateNotifier<bool> {
     );
   }
 
-  void showSnackBar(String message) {
-    final snackBar = SnackBar(content: Text(message));
-    _scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
+  void showSnackBar(String message, BuildContext context) {
+    final snackbarController = _ref.watch(snackbarProvider.notifier);
+    snackbarController.show(context, message);
   }
 
   Future<bool> checkIfFirstTimeLogin() async {

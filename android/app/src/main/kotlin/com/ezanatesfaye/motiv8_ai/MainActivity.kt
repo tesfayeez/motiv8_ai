@@ -1,4 +1,4 @@
-package com.example.motiv8_ai
+package com.ezanatesfaye.motiv8_ai
 
 import io.flutter.embedding.android.FlutterActivity
 

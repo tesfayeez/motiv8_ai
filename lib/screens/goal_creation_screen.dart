@@ -17,9 +17,6 @@ import 'package:motiv8_ai/widgets/goal_header_widget.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:uuid/uuid.dart';
 
-final goalNameProvider = Provider<String>((ref) => throw UnimplementedError());
-final funFactProvider = Provider<String>((ref) => throw UnimplementedError());
-
 class GoalCreationScreen extends ConsumerStatefulWidget {
   final bool? showBackButton;
 
@@ -43,6 +40,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       TextEditingController();
   final TextEditingController startDateController = TextEditingController();
   final TextEditingController endDateController = TextEditingController();
+  final TextEditingController reminderController = TextEditingController();
 
   final TextEditingController taskBreakdownPreferenceController =
       TextEditingController();
@@ -71,7 +69,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   Goal? currentGoal;
   User? currentUser;
   int currentPage = 0;
-  int totalPages = 6;
+  int totalPages = 7;
   bool isCloseVisible = true;
   @override
   void initState() {
@@ -102,6 +100,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     timelineFlexibilityController.dispose();
     timeCommitmentController.dispose();
     milestonesController.dispose();
+    reminderController.dispose();
 
     super.dispose();
   }
@@ -118,6 +117,8 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
 
     DateTime endDate = parseDate(endDateController.text, regularDate: true);
     DateTime startDate = parseDate(startDateController.text, regularDate: true);
+    print(reminderController.text);
+    // TimeOfDay reminderTime = stringToTimeOfDay(reminderController.text);
     print("the dates");
     print(startDateController.text);
     print(endDateController.text);
@@ -136,6 +137,7 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       taskBreakdownPreference: taskBreakdownPreference,
       timeCommitment: timeCommitment,
       timelineFlexibility: timelineFlexibility,
+      reminderTime: TimeOfDay.now(),
     );
     return currentGoal;
   }
@@ -150,9 +152,10 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
 
   void nextPage() {
     if (currentPage < totalPages - 1) {
-      // if (currentPage == 0) {
-      //   FocusScope.of(context).requestFocus(taskDescriptionFocusNode);
-      // } else if (currentPage == 1) {
+      if (currentPage == 0) {
+        FocusScope.of(context).requestFocus(taskDescriptionFocusNode);
+      }
+      // else if (currentPage == 1) {
       //   FocusScope.of(context).requestFocus(startDateFocusNode);
       // } else if (currentPage == 2) {
       //   FocusScope.of(context).requestFocus(milestonesFocusNode);
@@ -166,8 +169,26 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
           duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
     } else {
       // Handle form submission
+      Goal sampleGoal = Goal(
+          id: Uuid().v4(),
+          userID: "KTAw1OzxFGZPKj5eeFtooYJLB8S2",
+          name: "",
+          description: "Complete a half marathon",
+          startDate: DateTime.now(),
+          endDate: DateTime.now().add(Duration(days: 180)),
+          reminderFrequency: "Daily",
+          tasks: [],
+          milestones: "5k run, 10k run, 15k run",
+          taskBreakdownPreference: "By weeks",
+          definitionOfSuccess:
+              "Successfully running a half marathon within 3 hours",
+          strategiesApproaches: "Follow a structured training plan",
+          timelineFlexibility: "Some flexibility",
+          timeCommitment: "1 hour daily",
+          reminderTime: TimeOfDay.now());
+
       Goal currentGoal = setAllValues();
-      Navigator.of(context).push(GoalTasksScreen.route(currentGoal));
+      Navigator.of(context).push(GoalTasksScreen.route(sampleGoal));
     }
   }
 
@@ -187,6 +208,17 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         isFilled = false;
       });
     }
+    if (reminderController.text.isEmpty && currentPage == 2) {
+      setState(() {
+        isFilled = false;
+      });
+    }
+    if (taskBreakdownPreferenceController.text.isEmpty && currentPage == 4) {
+      setState(() {
+        isFilled = false;
+      });
+    }
+
     return isFilled;
   }
 
@@ -257,10 +289,11 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                         const SizedBox(height: 5),
                         SectionWidget(
                           focusNode: startDateFocusNode,
-                          isDate: false,
+                          isDate: true,
                           isDatePicker: true,
                           controller: startDateController,
                           hintText: 'Start Date',
+                          isTimePicker: false,
                           hasSuffixIcon: true,
                         ),
                         const SizedBox(
@@ -278,11 +311,27 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
                           focusNode: endDateFocusNode,
                           isDate: true,
                           isDatePicker: true,
+                          isTimePicker: false,
                           controller: endDateController,
                           hintText: ' End Date',
                           hasSuffixIcon: true,
                         )
                       ],
+                    ),
+                  ],
+                ),
+                buildPage(
+                  height: MediaQuery.of(context).size.height * 0.07,
+                  title: 'Time Your Task Reminder ⏰',
+                  exampleOfTitle: 'Task Time: 2:00 PM.',
+                  descriptionOfTitle:
+                      "Indicate the exact time for your task. This will initiate a reminder, ensuring you don't miss your task.",
+                  color: theme.colorScheme.onBackground,
+                  children: [
+                    SectionWidget(
+                      isTimePicker: true,
+                      controller: reminderController,
+                      hintText: 'Reminder',
                     ),
                   ],
                 ),
@@ -523,6 +572,7 @@ class SectionWidget extends StatelessWidget {
   final bool isHeightGrow;
   final bool hasSuffixIcon;
   final bool isDatePicker;
+  final bool isTimePicker;
   final bool isDate;
   final bool isRadioButton;
   final FocusNode? focusNode;
@@ -534,7 +584,8 @@ class SectionWidget extends StatelessWidget {
     this.hasSuffixIcon = false,
     this.isDatePicker = false,
     this.isRadioButton = false,
-    this.isDate = true,
+    this.isTimePicker = false,
+    this.isDate = false,
     this.focusNode,
   });
 
@@ -544,12 +595,19 @@ class SectionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        if (isDatePicker)
+        if (isDate)
           SizedBox(
             child: DateCard(
-              isDatePicker: true,
+              isDatePicker: isDatePicker,
               hintText: hintText,
               controller: controller,
+            ),
+          )
+        else if (isTimePicker)
+          SizedBox(
+            child: TimeCard(
+              controller: controller,
+              hintText: 'Reminder',
             ),
           )
         else if (isHeightGrow)

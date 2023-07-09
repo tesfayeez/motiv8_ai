@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
@@ -27,7 +28,7 @@ class GoalHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isGoalPresent = goal != null;
-    final theme = ref.read(themeProvider);
+    final theme = ref.watch(themeProvider);
     final goalTaskList = ref.watch(goalTaskListProvider);
     final isDarkTheme = theme.brightness == Brightness.dark;
 
@@ -69,63 +70,160 @@ class GoalHeader extends ConsumerWidget {
   }
 }
 
-// class DateCard extends StatelessWidget {
-//   final DateTime date;
-//   final Color mainDateColor;
-//   final Color secondDateColor;
-//   final Color boxColor;
-//   final bool isDarkTheme;
-//   final VoidCallback? onTap;
+class TimeCard extends ConsumerStatefulWidget {
+  final String hintText;
 
-//   const DateCard({
-//     required this.date,
-//     required this.mainDateColor,
-//     required this.secondDateColor,
-//     required this.boxColor,
-//     required this.isDarkTheme,
-//     this.onTap,
-//   });
+  final TextEditingController? controller;
 
-//   @override
-//   Widget build(BuildContext context) {
-//     String day = date.day.toString();
-//     String monthYear = DateFormat('MMM yyyy').format(date);
+  TimeCard({
+    this.controller,
+    this.hintText = '',
+  });
 
-//     return GestureDetector(
-//       onTap: onTap,
-//       child: Container(
-//         width: 90,
-//         height: 75,
-//         decoration: goalCardTimeLineboxDecoration(
-//           isDarkTheme,
-//           boxColor,
-//         ),
-//         child: Container(
-//           padding: const EdgeInsets.symmetric(horizontal: 5),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Text(
-//                 day,
-//                 style: GoogleFonts.poppins(fontSize: 30, color: mainDateColor),
-//               ),
-//               Text(
-//                 monthYear,
-//                 style:
-//                     GoogleFonts.poppins(fontSize: 12, color: secondDateColor),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  @override
+  _TimeCardState createState() => _TimeCardState();
+}
+
+class _TimeCardState extends ConsumerState<TimeCard> {
+  late TimeOfDay time;
+
+  @override
+  void initState() {
+    super.initState();
+
+    time = TimeOfDay.fromDateTime(DateTime.now());
+  }
+
+  // String _formatTime(TimeOfDay timeOfDay) {
+  //   final hours =
+  //       timeOfDay.hour == 0 || timeOfDay.hour == 12 ? 12 : timeOfDay.hour % 12;
+  //   return '${hours.toString().padLeft(2, '0')}:${timeOfDay.minute.toString().padLeft(2, '0')}';
+  // }
+  String _formatTime(TimeOfDay timeOfDay) {
+    final hours =
+        timeOfDay.hour == 0 || timeOfDay.hour == 12 ? 12 : timeOfDay.hour % 12;
+    final period = timeOfDay.hour >= 12 ? 'PM' : 'AM';
+    return '${hours.toString().padLeft(2, '0')}:${timeOfDay.minute.toString().padLeft(2, '0')} $period';
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    if (Theme.of(context).platform == TargetPlatform.iOS || kIsWeb) {
+      await _showCupertinoTimePicker(context);
+    } else {
+      await _showMaterialTimePicker(context);
+    }
+  }
+
+  Future<void> _showMaterialTimePicker(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: time,
+    );
+
+    if (picked != null && picked != time) {
+      setState(() {
+        time = picked;
+        widget.controller!.text = _formatTime(picked);
+      });
+    }
+  }
+
+  Future<void> _showCupertinoTimePicker(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (BuildContext builder) {
+        return Container(
+          height: MediaQuery.of(context).copyWith().size.height / 3,
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            use24hFormat: false, // Use 12-hour format
+            initialDateTime: DateTime(DateTime.now().year, DateTime.now().month,
+                DateTime.now().day, time.hour, time.minute),
+            onDateTimeChanged: (DateTime picked) {
+              setState(() {
+                time = TimeOfDay.fromDateTime(picked);
+                widget.controller!.text = _formatTime(time);
+              });
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  // your build method here
+  @override
+  Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
+    final isDarkTheme = theme.colorScheme.brightness == Brightness.dark;
+    TimeOfDay selectedTime = time;
+    return Center(
+      child: GestureDetector(
+        onTap: () => _selectTime(context),
+        child: Container(
+          alignment: Alignment.center,
+          decoration: goalCardTimeLineboxDecoration(
+            isDarkTheme,
+            theme.colorScheme.onSecondaryContainer,
+          ),
+          height: MediaQuery.of(context).size.width * 0.15,
+          width: MediaQuery.of(context).size.width * 0.3,
+          child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Column(children: [
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  widget.hintText,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: theme.colorScheme.onTertiary.withOpacity(0.4),
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/clock.svg',
+                      width: 20,
+                      height: 20,
+                      color: theme.colorScheme.onTertiary,
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text(
+                      _formatTime(selectedTime),
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, color: theme.colorScheme.onTertiary),
+                    ),
+                    // SizedBox(
+                    //   width: 5,
+                    // ),
+                    // Text(
+                    //   selectedTime.period == DayPeriod.am ? 'AM' : 'PM',
+                    //   style: GoogleFonts.poppins(
+                    //       fontSize: 20, color: theme.colorScheme.primary),
+                    // )
+                  ],
+                )
+              ])),
+        ),
+      ),
+    );
+  }
+}
 
 class DateCard extends ConsumerStatefulWidget {
   final DateTime? date;
   final bool isDatePicker;
   final String hintText;
+  final bool justDisplayer;
   final TextEditingController? controller;
 
   DateCard({
@@ -133,6 +231,7 @@ class DateCard extends ConsumerStatefulWidget {
     this.controller,
     this.isDatePicker = false,
     this.hintText = '',
+    this.justDisplayer = false,
   });
 
   @override
@@ -150,6 +249,9 @@ class _DateCardState extends ConsumerState<DateCard> {
     } else {
       date = DateTime.now();
     }
+    if (widget.isDatePicker) {
+      widget.controller!.text = _formatDate(date);
+    }
   }
 
   String _formatDate(DateTime dateTime) {
@@ -157,78 +259,51 @@ class _DateCardState extends ConsumerState<DateCard> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    if (Theme.of(context).platform == TargetPlatform.iOS || kIsWeb) {
-      await showModalBottomSheet(
-        context: context,
-        builder: (BuildContext builder) {
-          return Container(
-            height: MediaQuery.of(context).copyWith().size.height / 3.5,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: CupertinoDatePicker(
-                    initialDateTime: DateTime.now(),
-                    mode: CupertinoDatePickerMode.date,
-                    showDayOfWeek: true,
-                    onDateTimeChanged: (picked) {
-                      if (picked != null && picked != date) {
-                        setState(() {
-                          date = picked;
-                          widget.controller!.text = _formatDate(picked);
-                        });
-                      }
-                    },
-                    minimumYear: 2023,
-                    maximumYear: 2030,
-                  ),
-                ),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      'Done',
-                      style: GoogleFonts.poppins(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    style: ButtonStyle(
-                      overlayColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.transparent),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          );
-        },
-      );
-    } else {
-      final picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2022),
-        lastDate: DateTime(2030),
-      );
-
-      if (picked != null && picked != widget.date) {
-        setState(() {
-          date = picked;
-          widget.controller!.text = _formatDate(picked);
-        });
+    if (widget.isDatePicker) {
+      if (Theme.of(context).platform == TargetPlatform.iOS || kIsWeb) {
+        await _showCupertinoDatePicker(context);
+      } else {
+        await _showMaterialDatePicker(context);
       }
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    if (widget.isDatePicker) {
-      widget.controller!.dispose();
+  Future<void> _showCupertinoDatePicker(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (BuildContext builder) {
+        return Container(
+          height: MediaQuery.of(context).copyWith().size.height / 3,
+          child: CupertinoDatePicker(
+            initialDateTime: date,
+            mode: CupertinoDatePickerMode.date,
+            onDateTimeChanged: (picked) {
+              if (picked != null && picked != date) {
+                setState(() {
+                  date = picked;
+                  widget.controller!.text = _formatDate(picked);
+                });
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showMaterialDatePicker(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: date,
+      firstDate: DateTime.now().subtract(Duration(days: 365)),
+      lastDate: DateTime.now().add(Duration(days: 365)),
+    );
+
+    if (picked != null && picked != date) {
+      setState(() {
+        date = picked;
+        widget.controller!.text = _formatDate(picked);
+      });
     }
   }
 
@@ -239,54 +314,100 @@ class _DateCardState extends ConsumerState<DateCard> {
     String day = date.day.toString();
     String monthYear = DateFormat('MMM yyyy').format(date);
 
-    return GestureDetector(
-      onTap: widget.isDatePicker ? () => _selectDate(context) : null,
-      child: Container(
-        width: !widget.isDatePicker ? 90 : 120,
-        height: !widget.isDatePicker ? 90 : 120,
-        decoration: goalCardTimeLineboxDecoration(
-          isDarkTheme,
-          theme.colorScheme.onSecondaryContainer,
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.isDatePicker)
-                Text(
-                  widget.hintText,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: theme.colorScheme.onTertiary.withOpacity(0.4),
-                  ),
+    return (widget.justDisplayer)
+        ? Container(
+            decoration: goalCardTimeLineboxDecoration(
+              isDarkTheme,
+              theme.colorScheme.onSecondaryContainer,
+            ),
+            width: 120,
+            height: 120,
+            child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.hintText,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: theme.colorScheme.onTertiary.withOpacity(0.4),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        day,
+                        style: GoogleFonts.poppins(
+                            fontSize: !widget.isDatePicker ? 30 : 40,
+                            color: !widget.isDatePicker
+                                ? theme.colorScheme.onTertiary
+                                : theme.colorScheme.primary),
+                      ),
+                      Text(
+                        monthYear,
+                        style: GoogleFonts.poppins(
+                            fontSize: !widget.isDatePicker ? 12 : 14,
+                            color: theme.colorScheme.onTertiary),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      )
+                    ])),
+          )
+        : GestureDetector(
+            onTap: () => _selectDate(context),
+            child: Container(
+              width: widget.isDatePicker ? 120 : 100,
+              height: widget.isDatePicker ? 70 : 100,
+              decoration: goalCardTimeLineboxDecoration(
+                isDarkTheme,
+                theme.colorScheme.onSecondaryContainer,
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (widget.isDatePicker)
+                      Text(
+                        widget.hintText,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: theme.colorScheme.onTertiary.withOpacity(0.4),
+                        ),
+                      ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    if (widget.isDatePicker) ...[
+                      Row(
+                        children: [
+                          Text(
+                            day,
+                            style: GoogleFonts.poppins(
+                                fontSize: !widget.isDatePicker ? 30 : 16,
+                                color: !widget.isDatePicker
+                                    ? theme.colorScheme.onTertiary
+                                    : theme.colorScheme.primary),
+                          ),
+                          Text(
+                            monthYear,
+                            style: GoogleFonts.poppins(
+                                fontSize: !widget.isDatePicker ? 12 : 16,
+                                color: theme.colorScheme.onTertiary),
+                          )
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
-              SizedBox(
-                height: 5,
               ),
-              Text(
-                day,
-                style: GoogleFonts.poppins(
-                    fontSize: !widget.isDatePicker ? 30 : 40,
-                    color: !widget.isDatePicker
-                        ? theme.colorScheme.onTertiary
-                        : theme.colorScheme.primary),
-              ),
-              Text(
-                monthYear,
-                style: GoogleFonts.poppins(
-                    fontSize: !widget.isDatePicker ? 12 : 14,
-                    color: theme.colorScheme.onTertiary),
-              ),
-              SizedBox(
-                height: 5,
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          );
   }
 }
 

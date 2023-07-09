@@ -46,12 +46,6 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
     final theme = ref.watch(themeProvider);
     return Scaffold(
       backgroundColor: theme.colorScheme.onBackground,
-      appBar: CustomAppBar(
-        isCenterTitle: true,
-        title: 'Goal Builder 🧠',
-        isBackPresent: true,
-        isClosePresent: false,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -122,7 +116,8 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
                     },
                     loading: () {
                       return Center(
-                          child: AnimatedEmojiLoadingIndicator('tasks'));
+                        child: AnimatedEmojiLoadingIndicator(hintText: 'tasks'),
+                      );
                     },
                     error: (error, stackTrace) {
                       return const Center(child: Text("Error occurred"));

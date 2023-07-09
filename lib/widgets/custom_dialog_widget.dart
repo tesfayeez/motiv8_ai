@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomDialog {
   static void show(BuildContext context) {
@@ -54,11 +55,12 @@ class CustomDialog {
                 height: 150.0,
               ),
               SizedBox(height: 16.0),
-              const Text(
-                'You completed your goal.Yay!!!',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w700,
+              Text(
+                "Congratulations on completing your task! Every step brings you closer to your goal. Keep it up!",
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w300,
                 ),
               ),
               const SizedBox(height: 24.0),

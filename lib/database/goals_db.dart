@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:motiv8_ai/commons/global_providers.dart';
 import 'package:motiv8_ai/database/init_db.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:path_provider/path_provider.dart';

@@ -12,15 +12,16 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final bool isClosePresent;
   final bool isCenterTitle;
   final bool isBottomLinePresent;
+  final bool isCloseOnTheRight;
 
-  CustomAppBar({
-    required this.title,
-    this.backgroundColor = Colors.white,
-    this.isBackPresent = true,
-    this.isClosePresent = false,
-    this.isCenterTitle = false,
-    this.isBottomLinePresent = false,
-  });
+  CustomAppBar(
+      {required this.title,
+      this.backgroundColor = Colors.white,
+      this.isBackPresent = true,
+      this.isClosePresent = false,
+      this.isCenterTitle = false,
+      this.isBottomLinePresent = false,
+      this.isCloseOnTheRight = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,6 +32,20 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       elevation: 0.0,
       actions: [
+        if (isCloseOnTheRight) ...[
+          GestureDetector(
+            child: Icon(
+              Icons.close,
+              color: theme.colorScheme.onTertiary,
+              size: 30,
+            ),
+            onTap: () => Navigator.of(context).pop(),
+          ),
+          SizedBox(
+            width: 10,
+          )
+        ]
+
         // TextButton(
         //   onPressed: () {
         //     ref.read(themeProvider.notifier).changeTheme(AppTheme.dark);
@@ -45,28 +60,28 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
         // )
       ],
       leading: isBackPresent
-          ? IconButton(
-              icon: Icon(
+          ? GestureDetector(
+              child: Icon(
                 Icons.arrow_back,
                 color: theme.colorScheme.onTertiary,
                 size: 30,
               ),
-              onPressed: () => navigatorKey.currentState!.pop(),
+              onTap: () => Navigator.of(context).pop(),
             )
           : isClosePresent
-              ? IconButton(
-                  icon: Icon(
+              ? GestureDetector(
+                  child: Icon(
                     Icons.close,
                     color: theme.colorScheme.onTertiary,
                     size: 30,
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onTap: () => Navigator.of(context).pop(),
                 )
               : null,
       title: Text(
         title,
         style: GoogleFonts.poppins(
-            fontSize: 22, color: theme.colorScheme.tertiary),
+            fontSize: 18, color: theme.colorScheme.tertiary),
       ),
       centerTitle: isCenterTitle,
       bottom: isBottomLinePresent

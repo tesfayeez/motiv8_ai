@@ -37,11 +37,12 @@ class NotificationService {
         iOS: DarwinNotificationDetails());
   }
 
-  Future showNotification(
-      {required int id,
-      required String? title,
-      required String? body,
-      required String? payload}) async {
+  Future showNotification({
+    required int id,
+    required String? title,
+    required String? body,
+    required String? payload,
+  }) async {
     return notificationsPlugin.show(id, title, body, notificationDetails(),
         payload: payload);
   }
@@ -58,5 +59,11 @@ class NotificationService {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         payload: payload);
+  }
+
+  Future onSelectNotification(String? payload) async {
+    // Handle what happens when a notification is tapped by the user
+    // For example, you could navigate to a specific screen or open a dialog
+    // The payload parameter contains any data you attached to the notification when you showed it
   }
 }

@@ -1,20 +1,16 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:introduction_screen/introduction_screen.dart';
-import 'package:motiv8_ai/commons/utils.dart';
-import 'package:motiv8_ai/main.dart';
-import 'package:motiv8_ai/screens/general_login_screen.dart';
-import 'package:motiv8_ai/screens/login_screen.dart';
-import 'package:motiv8_ai/screens/signup_screen.dart';
-import 'package:motiv8_ai/screens/themes_screen.dart';
-import 'package:motiv8_ai/widgets/presenting_animation_widget.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import 'homeview_screen.dart';
+import 'package:motiv8_ai/commons/utils.dart';
+
+import 'package:motiv8_ai/screens/general_login_screen.dart';
+
+import 'package:motiv8_ai/screens/themes_screen.dart';
+
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 final onboardingScreenpageProvider = StateProvider<int>((ref) => 0);
 

@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -25,7 +28,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -43,19 +49,9 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyC4TQv65JAhaRa5dPLQjJ_2QyBhlQLyjSg',
-    appId: '1:245333633905:web:7b82958a2fbab40a3ca4d0',
-    messagingSenderId: '245333633905',
-    projectId: 'motiv8-cfcf1',
-    authDomain: 'motiv8-cfcf1.firebaseapp.com',
-    storageBucket: 'motiv8-cfcf1.appspot.com',
-    measurementId: 'G-GG53N47WX7',
-  );
-
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA7C3VQTW7pyFeoCKYSikWbS3gsLmnm3Sg',
-    appId: '1:245333633905:android:c47f648dfd68edd73ca4d0',
+    appId: '1:245333633905:android:d05e4d7333d7f2d33ca4d0',
     messagingSenderId: '245333633905',
     projectId: 'motiv8-cfcf1',
     storageBucket: 'motiv8-cfcf1.appspot.com',
@@ -63,21 +59,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBDZxLZmxmAhhicCgRUKzTdnixlHhEBZK8',
-    appId: '1:245333633905:ios:6c22075ad96e06613ca4d0',
+    appId: '1:245333633905:ios:63237a3bbbcbe53c3ca4d0',
     messagingSenderId: '245333633905',
     projectId: 'motiv8-cfcf1',
     storageBucket: 'motiv8-cfcf1.appspot.com',
     iosClientId: '245333633905-a2su7c1s2e8d7pn7650sr8pjdm6km5jt.apps.googleusercontent.com',
     iosBundleId: 'com.ezanatesfaye.motiv8',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBDZxLZmxmAhhicCgRUKzTdnixlHhEBZK8',
-    appId: '1:245333633905:ios:ca9772c2d7dd97993ca4d0',
-    messagingSenderId: '245333633905',
-    projectId: 'motiv8-cfcf1',
-    storageBucket: 'motiv8-cfcf1.appspot.com',
-    iosClientId: '245333633905-fhet4olm7vmrf4c9bseeqmsebq78jhoi.apps.googleusercontent.com',
-    iosBundleId: 'com.example.motiv8Ai.RunnerTests',
   );
 }

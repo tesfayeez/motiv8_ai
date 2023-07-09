@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
+import 'package:motiv8_ai/screens/task_view_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 
 class GoalHeaderTimeline extends ConsumerWidget {
@@ -74,9 +75,13 @@ class GoalHeaderTimeline extends ConsumerWidget {
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 20.0, top: 20),
-                child: GoalTaskCardForHeaderWidget(
-                  color: randomColor,
-                  goalTask: task,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context)
+                      .push(GoalOrTaskScreen.route(goalTask: task)),
+                  child: GoalTaskCardForHeaderWidget(
+                    color: randomColor,
+                    goalTask: task,
+                  ),
                 ),
               ),
             ],

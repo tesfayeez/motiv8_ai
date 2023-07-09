@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,34 +29,60 @@ class ThemeScreen extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Consumer(
-                builder: (context, ref, child) {
-                  final theme = ref.watch(themeProvider);
-                  return Text(
-                    'Current theme: ${theme.primaryColor}',
-                    style: Theme.of(context).textTheme.headline6,
-                  );
-                },
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ThemeButton(
+                    color: Color(0xFF1988FF),
+                    onPressed: () {
+                      ref
+                          .read(themeProvider.notifier)
+                          .changeTheme(AppTheme.light);
+                    },
+                    text: 'Light',
+                  ),
+                  const SizedBox(height: 16),
+                  ThemeButton(
+                    onPressed: () {
+                      ref
+                          .read(themeProvider.notifier)
+                          .changeTheme(AppTheme.dark);
+                    },
+                    text: 'Dark',
+                    color: const Color(0x00000040),
+                  )
+                ],
               ),
               const SizedBox(height: 16),
-              ThemeButton(
-                color: Color(0xFF1988FF),
-                onPressed: () {
-                  ref.read(themeProvider.notifier).changeTheme(AppTheme.light);
-                },
-                text: 'Light',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ThemeButton(
+                    color: Colors.deepPurple,
+                    onPressed: () {
+                      ref
+                          .read(themeProvider.notifier)
+                          .changeTheme(AppTheme.light);
+                    },
+                    text: 'Purple',
+                  ),
+                  const SizedBox(height: 16),
+                  ThemeButton(
+                    onPressed: () {
+                      ref
+                          .read(themeProvider.notifier)
+                          .changeTheme(AppTheme.dark);
+                    },
+                    text: 'Tan',
+                    color: Color(0xFFE8C5A1),
+                  )
+                ],
               ),
-              const SizedBox(height: 16),
-              ThemeButton(
-                onPressed: () {
-                  ref.read(themeProvider.notifier).changeTheme(AppTheme.dark);
-                },
-                text: 'Dark',
-                color: const Color(0x00000040),
-              ),
-              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -123,11 +151,12 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
     cupertinoOverrideTheme:
         CupertinoThemeData().copyWith(brightness: Brightness.light),
     snackBarTheme: const SnackBarThemeData(
+      showCloseIcon: true,
       backgroundColor: const Color(0xFF1988FF),
       behavior: SnackBarBehavior.floating,
       elevation: 8.0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
     ),
   );
@@ -155,12 +184,14 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
   ).copyWith(
     cupertinoOverrideTheme:
         CupertinoThemeData().copyWith(brightness: Brightness.dark),
-    snackBarTheme: const SnackBarThemeData(
+    snackBarTheme: SnackBarThemeData(
+      showCloseIcon: true,
+      contentTextStyle: GoogleFonts.poppins(color: Colors.white),
       backgroundColor: const Color(0xFF1988FF),
       behavior: SnackBarBehavior.floating,
       elevation: 8.0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
+        borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
     ),
   );
@@ -186,12 +217,16 @@ class ThemeButton extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Column(children: [
-          Material(
-            color: color,
-            elevation: 5.0,
+          Container(
+            decoration: cardBoxDecoration(color, true).copyWith(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+            ),
             child: Container(
               height: 50,
-              width: double.infinity,
+              width: MediaQuery.of(context).size.width / 2.5,
               alignment: Alignment.center,
               child: Text(
                 text,
@@ -206,8 +241,14 @@ class ThemeButton extends StatelessWidget {
             color: Colors.grey.shade100,
             elevation: 5.0,
             child: Container(
+              decoration:
+                  cardBoxDecoration(Colors.grey.shade100, true).copyWith(
+                      borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              )),
               height: 80,
-              width: double.infinity,
+              width: MediaQuery.of(context).size.width / 2.5,
               alignment: Alignment.center,
               child: const Padding(
                 padding: EdgeInsets.all(20.0),

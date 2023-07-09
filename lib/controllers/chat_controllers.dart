@@ -3,7 +3,7 @@ import 'package:motiv8_ai/api/chat_api.dart';
 import 'package:motiv8_ai/api/local_notifications_api.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
-import 'package:motiv8_ai/widgets/goal_header_widget.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 final taskListProvider =
@@ -159,8 +159,7 @@ final motivationalQuotesProvider =
 final getMotivationalQuotesProvider =
     FutureProvider.family<List<String>, String>((ref, goalName) async {
   final chatAPIController = ref.read(chatAPIControllerProvider.notifier);
-  return chatAPIController.getMotivationalQuotes(
-      goalName, 2); // Return the quotes
+  return chatAPIController.getMotivationalQuotes(10); // Return the quotes
 });
 
 final getMotivationalQuoteProvider =
@@ -171,21 +170,23 @@ final getMotivationalQuoteProvider =
   final currentDate = DateTime.now()
       .toString()
       .substring(0, 10); // Get the current date in the format 'yyyy-MM-dd'
+  final result = await chatAPIController.getMotivationalQuote(goalName);
+  return result;
 
-  if (lastCalledDate != currentDate) {
-    // Call the getMotivationalQuote function
-    final result = await chatAPIController.getMotivationalQuote(goalName);
-    print("coming hre $result");
-    // Update the last called date in shared preferences
-    await sharedPreferences.setString('lastCalledDate', currentDate);
-    await sharedPreferences.setString('cachedQuote', result);
-    return result;
-  } else {
-    // Return the previously cached quote
-    String quotew = sharedPreferences.getString('cachedQuote') ?? '';
-    // print("cached quote $quotew");
-    return sharedPreferences.getString('cachedQuote') ?? '';
-  }
+  // if (lastCalledDate != currentDate) {
+  //   // Call the getMotivationalQuote function
+  //   final result = await chatAPIController.getMotivationalQuote(goalName);
+  //   print("coming hre $result");
+  //   // Update the last called date in shared preferences
+  //   await sharedPreferences.setString('lastCalledDate', currentDate);
+  //   await sharedPreferences.setString('cachedQuote', result);
+  //   return result;
+  // } else {
+  //   // Return the previously cached quote
+  //   String quotew = sharedPreferences.getString('cachedQuote') ?? '';
+  //   // print("cached quote $quotew");
+  //   return sharedPreferences.getString('cachedQuote') ?? '';
+  // }
 });
 
 class ChatAPIController
@@ -265,10 +266,9 @@ Overall, Motiv8-AI is a powerful tool for young adults and professionals who are
     );
   }
 
-  Future<List<String>> getMotivationalQuotes(
-      String goalName, int quoteCount) async {
+  Future<List<String>> getMotivationalQuotes(int quoteCount) async {
     state = const AsyncValue.loading();
-    final result = await _chatAPI.getMotivationalQuotes(goalName, quoteCount);
+    final result = await _chatAPI.getMotivationalQuotes(quoteCount);
     return result.fold(
       (error) {
         state = AsyncValue.error(error.message, error.stackTrace);

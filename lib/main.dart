@@ -1,6 +1,7 @@
-import 'dart:convert';
+import 'dart:math';
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -10,6 +11,7 @@ import 'package:motiv8_ai/api/local_notifications_api.dart';
 import 'package:motiv8_ai/commons/global_providers.dart';
 import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
+import 'package:motiv8_ai/controllers/chat_controllers.dart';
 
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
@@ -41,6 +43,15 @@ void main() async {
   tz.initializeTimeZones();
   FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   final localNotificationService = container.read(notificationServiceProvider);
   localNotificationService.initNotification();
   // NotificationServices().initNotification();
@@ -162,28 +173,3 @@ Future<bool> checkIfFirstTime() async {
 
   return isFirstTime;
 }
-// class MyApp extends ConsumerWidget {
-//   const MyApp({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     return MaterialApp(
-//       scaffoldMessengerKey: scaffoldMessengerKey,
-//       navigatorKey: navigatorKey,
-//       theme: themeData,
-//       title: 'Motiv8',
-//       home: ref.watch(currentUserProviderStream).when(
-//             data: (user) {
-//               if (user != null) {
-//                 return const HomeViewScreen();
-//               }
-//               return const GeneralLoginScreen();
-//             },
-//             error: (error, st) => ErrorText(error: error.toString()),
-//             loading: () => const LoadingPage(),
-//           ),
-//     );
-//   }
-// }
-
-

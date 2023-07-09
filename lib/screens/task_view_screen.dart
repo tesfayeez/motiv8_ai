@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
+import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
@@ -27,27 +28,18 @@ class GoalOrTaskScreen extends ConsumerWidget {
     );
   }
 
-  dynamic getGoalOrTask() {
-    if (goalTask != null) {
-      return goalTask;
-    } else if (goal != null) {
-      return goal;
-    } else {
-      print('Both goal and goalTask cannot be null');
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final goalOrTask = getGoalOrTask();
     final isGoal = goal != null;
     final isGoalTask = goalTask != null;
-    final theme = ref.read(themeProvider);
+    final theme = ref.watch(themeProvider);
     final isDarkTheme = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: goalOrTask.name ?? 'Your Goal',
+        title: isGoal
+            ? goal!.name ?? 'Your Goal'
+            : (goalTask?.name ?? 'Your Task'),
         isBackPresent: true,
         isBottomLinePresent: true,
         isCenterTitle: true,
@@ -65,6 +57,7 @@ class GoalOrTaskScreen extends ConsumerWidget {
                     showSubTask: isGoalTask,
                     showAddTask: isGoal,
                     showAddGoal: false,
+                    showMarkComplete: isGoalTask,
                   ),
                   const SizedBox(height: 8.0),
                   GoalDescriptionText(
@@ -105,15 +98,40 @@ class GoalOrTaskScreen extends ConsumerWidget {
 class SubtaskNotifier extends StateNotifier<AsyncValue<List<String>>> {
   final GoalTask goalTask;
   final ProviderContainer container;
+  bool areSubtasksSaved = false;
+  bool areSubtasksGenerated = false;
+  SubtaskNotifier(this.container, this.goalTask) : super(AsyncValue.data([])) {
+    getSubtasks();
+  }
+  void markSubtasksAsSaved() {
+    areSubtasksSaved = true;
+    areSubtasksGenerated = false;
+    print(
+        "markSubtasksAsSaved has been called. areSubtasksSaved is now: $areSubtasksSaved");
+  }
 
-  SubtaskNotifier(this.container, this.goalTask) : super(AsyncValue.data([]));
+  void getSubtasks() async {
+    state = const AsyncValue.loading();
+    final tasksFuture =
+        container.read(getGoalTaskSubtasksProvider(goalTask).future);
+    final result = await AsyncValue.guard(() => tasksFuture);
+    state = result;
+  }
 
   void generateSubtasks() async {
     state = const AsyncValue.loading();
     final tasksFuture = container
         .read(generateGoalTaskSubtasksControllerProvider(goalTask).future);
     state = await AsyncValue.guard(() => tasksFuture);
+    areSubtasksGenerated = true;
   }
+
+  // void getSubtasks() async {
+  //   state = const AsyncValue.loading();
+  //   final tasksFuture = container
+  //       .read(generateGoalTaskSubtasksControllerProvider(goalTask).future);
+  //   state = await AsyncValue.guard(() => tasksFuture);
+  // }
 
   void addOneSubtask(String subtask) {
     state.whenData((subtasks) {
@@ -139,6 +157,10 @@ class SubtaskNotifier extends StateNotifier<AsyncValue<List<String>>> {
       state = AsyncValue.data(newSubtasks);
     });
   }
+
+  void clearSubtasks() {
+    state = AsyncValue.data([]);
+  }
 }
 
 final subtaskNotifierProvider = StateNotifierProvider.family<SubtaskNotifier,
@@ -148,24 +170,55 @@ final subtaskNotifierProvider = StateNotifierProvider.family<SubtaskNotifier,
 
 class SubtaskGenerator extends ConsumerWidget {
   final GoalTask goalTask;
+  final bool showAddSubtask;
+  final bool generateSubtasks;
 
-  const SubtaskGenerator({Key? key, required this.goalTask}) : super(key: key);
+  const SubtaskGenerator({
+    Key? key,
+    required this.goalTask,
+    this.showAddSubtask = false,
+    this.generateSubtasks = false,
+  }) : super(key: key);
 
-  void saveSubTasks(bool isLocally, List<String> subtasks) {
+  void saveSubTasks(
+      WidgetRef ref,
+      bool isLocally,
+      List<String> subtasks,
+      BuildContext context,
+      StateNotifierProvider<SubtaskNotifier, AsyncValue<List<String>>>
+          subtaskProvider) {
     if (isLocally) {
       final newGoalTask = goalTask.copyWith(subtasks: subtasks);
+    } else {
+      final goalController = ref.read(goalControllerProvider.notifier);
+      goalController.updateGoalTaskSubtasks(
+          goalId: goalTask.goalId,
+          taskId: goalTask.id,
+          subtasks: subtasks,
+          context: context);
     }
+    ref.watch(subtaskProvider.notifier).markSubtasksAsSaved();
+    print(
+        "saveSubTasks has been called. markSubtasksAsSaved should have been called.");
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = ref.read(themeProvider);
+    bool isChecked = false;
+    final theme = ref.watch(themeProvider);
     var subtaskProvider = subtaskNotifierProvider(goalTask);
     final subtaskNotifier = ref.watch(subtaskProvider);
+    final areSubtasksTasksSaved =
+        ref.watch(subtaskProvider.notifier).areSubtasksSaved;
+
+    final areSubtasksGenerated =
+        ref.watch(subtaskProvider.notifier).areSubtasksGenerated;
 
     return subtaskNotifier.when(
       data: (subtasks) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             if (subtasks.isEmpty)
               Center(
@@ -179,19 +232,29 @@ class SubtaskGenerator extends ConsumerWidget {
                   },
                 ),
               ),
-            if (subtasks.isNotEmpty) ...[
+            if (subtasks.isNotEmpty &&
+                !areSubtasksTasksSaved &&
+                areSubtasksGenerated) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                      onPressed: () {
-                        ref
-                            .watch(subtaskProvider.notifier)
-                            .addSubtasks(subtasks);
-                      },
-                      child: Text('Save Subtasks')),
+                    onPressed: () {
+                      saveSubTasks(
+                          ref, false, subtasks, context, subtaskProvider);
+                    },
+                    child: Text(
+                      'Save Subtasks',
+                      style: GoogleFonts.poppins(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ],
               ),
+            ],
+            if (subtasks.isNotEmpty) ...[
               for (String subtask in subtasks)
                 Container(
                   margin: EdgeInsets.only(left: 10, right: 10, top: 5),
@@ -202,11 +265,22 @@ class SubtaskGenerator extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
+                      if (!areSubtasksGenerated)
+                        Checkbox(
+                          value:
+                              isChecked, // determines whether the checkbox is checked
+                          onChanged: (bool? value) {
+                            // called when the user taps the checkbox
+                          },
+                        ),
                       Expanded(
                         child: Text(
                           subtask,
                           style: GoogleFonts.poppins(fontSize: 14),
                         ),
+                      ),
+                      SizedBox(
+                        width: 5,
                       ),
                       InkWell(
                         child: Ink(
@@ -223,7 +297,7 @@ class SubtaskGenerator extends ConsumerWidget {
                   ),
                 ),
             ],
-            if (subtasks.isEmpty)
+            if (subtasks.isEmpty && showAddSubtask)
               Text(
                 "No subtasks Available",
                 style: GoogleFonts.poppins(color: theme.colorScheme.onTertiary),
@@ -235,7 +309,8 @@ class SubtaskGenerator extends ConsumerWidget {
         return const Center(child: Text("Error occurred"));
       },
       loading: () {
-        return Center(child: AnimatedEmojiLoadingIndicator('subtasks'));
+        return Center(
+            child: AnimatedEmojiLoadingIndicator(hintText: 'subtasks'));
       },
     );
   }

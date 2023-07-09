@@ -821,3 +821,43 @@
 //     });
 //   }
 // }
+
+
+
+// void navigateToGoalCreationScreen(BuildContext context) {
+//     Navigator.of(context).push(
+//       PageRouteBuilder(
+//         pageBuilder: (context, animation, secondaryAnimation) =>
+//             GoalCreationScreen(),
+//         transitionsBuilder: (context, animation, secondaryAnimation, child) {
+//           return SlideTransition(
+//             position: Tween<Offset>(
+//               begin: const Offset(0, 1),
+//               end: Offset.zero,
+//             ).animate(animation),
+//             child: child,
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+
+// Future<void> scheduleNotifications() async {
+//     final quotesAsyncValue = ref.watch(getMotivationalQuotesProvider(''));
+//     quotesAsyncValue.whenData((quotes) async {
+//       for (int i = 0; i < quotes.length; i++) {
+//         String quote = quotes[i];
+//         print(quote);
+//         var scheduledTime = DateTime.now().add(Duration(minutes: 1 * i));
+
+//         // Schedule the notification
+//         await ref.read(notificationServiceProvider).showNotificationAtTime(
+//               id: i,
+//               title: 'Motivational Quote',
+//               body: quote,
+//               scheduledTime: scheduledTime,
+//             );
+//       }
+//     });
+//   }

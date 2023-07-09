@@ -14,13 +14,14 @@ class GoalTaskCard extends StatelessWidget {
   final VoidCallback? addTaskCallback;
   final bool isNotAddable;
 
-  const GoalTaskCard(
-      {this.goalTask,
-      this.goal,
-      this.goalTaskCallback,
-      this.addTaskCallback,
-      this.goalTasksList,
-      this.isNotAddable = false});
+  const GoalTaskCard({
+    this.goalTask,
+    this.goal,
+    this.goalTaskCallback,
+    this.addTaskCallback,
+    this.goalTasksList,
+    this.isNotAddable = false,
+  });
 
   @override
   Widget build(BuildContext context) {

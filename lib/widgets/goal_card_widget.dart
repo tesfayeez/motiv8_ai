@@ -1,10 +1,11 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/api/local_notifications_api.dart';
 import 'package:motiv8_ai/commons/utils.dart';
-import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
@@ -12,7 +13,6 @@ import 'package:motiv8_ai/screens/add_task_dialog.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_checkbox.dart';
 import 'package:motiv8_ai/widgets/custom_dialog_widget.dart';
-import 'package:motiv8_ai/widgets/progress.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
@@ -26,14 +26,15 @@ class GoalCard extends ConsumerStatefulWidget {
   final int percentage;
   final VoidCallback onTap;
 
-  GoalCard(
-      {this.goalTaskModel,
-      this.goalModel,
-      required this.goalDate,
-      required this.alarmTime,
-      required this.currentTime,
-      required this.percentage,
-      required this.onTap});
+  GoalCard({
+    this.goalTaskModel,
+    this.goalModel,
+    required this.goalDate,
+    required this.alarmTime,
+    required this.currentTime,
+    required this.percentage,
+    required this.onTap,
+  });
 
   @override
   _GoalCardState createState() => _GoalCardState();
@@ -108,6 +109,13 @@ class _GoalCardState extends ConsumerState<GoalCard> {
             if (widget.goalTaskModel != null)
               SimpleDialogOption(
                 onPressed: () {
+                  ref.read(notificationServiceProvider).showNotificationAtTime(
+                        id: Random().nextInt(63),
+                        title: 'Hey!did you complete your task?',
+                        body: widget.goalTaskModel!.description,
+                        scheduledTime: widget.goalTaskModel!.taskReminderTime,
+                      );
+
                   Navigator.of(context).pop();
                 },
                 child: Row(
@@ -118,25 +126,32 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                   ],
                 ),
               ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.of(context).pop();
-                CustomDialog.show(context);
-                // Complete goal
-                // Perform the action for completing the goal here
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                      widget.goalTaskModel != null
-                          ? 'Complete task'
-                          : 'Complete goal',
-                      style: GoogleFonts.poppins()),
-                  const Icon(Icons.check_circle),
-                ],
+            if (widget.goalTaskModel != null &&
+                !widget.goalTaskModel!.isCompleted)
+              SimpleDialogOption(
+                onPressed: () {
+                  ref.read(goalControllerProvider.notifier).completeGoalTask(
+                        goalTask: widget.goalTaskModel!,
+                        isComplete: !widget.goalTaskModel!.isCompleted,
+                        context: context,
+                      );
+                  Navigator.of(context).pop();
+                  CustomDialog.show(context);
+                  // Complete goal
+                  // Perform the action for completing the goal here
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                        widget.goalTaskModel != null
+                            ? 'Complete task'
+                            : 'Complete goal',
+                        style: GoogleFonts.poppins()),
+                    const Icon(Icons.check_circle),
+                  ],
+                ),
               ),
-            ),
             if (widget.goalModel != null)
               SimpleDialogOption(
                 onPressed: () {
@@ -157,6 +172,24 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                   ],
                 ),
               ),
+            if (widget.goalTaskModel != null)
+              SimpleDialogOption(
+                onPressed: () {
+                  // Edit goal
+                  // Perform the action for editing the goal here
+                  showDialog(
+                    context: context,
+                    builder: (context) => AddTaskDialog(),
+                  );
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text('Edit Task', style: GoogleFonts.poppins()),
+                    const Icon(Icons.edit),
+                  ],
+                ),
+              )
           ],
         );
       },
@@ -166,17 +199,27 @@ class _GoalCardState extends ConsumerState<GoalCard> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width * 0.93;
+    int percentage;
     final theme = ref.watch(themeProvider);
     final isDark = theme.colorScheme.brightness == Brightness.dark;
-    if (widget.percentage == 100) {
-      _confettiController.play();
-    }
+    final bool isTaskCompleted = widget.goalTaskModel?.isCompleted ?? false;
 
     final String name =
         widget.goalTaskModel?.name ?? widget.goalModel?.name ?? '';
     final String description = widget.goalTaskModel?.description ??
         widget.goalModel?.description ??
         '';
+
+    if (widget.goalModel != null) {
+      if (widget.goalModel!.tasks!.length > 0) {
+        percentage = (widget.goalModel!.completedTasks /
+                widget.goalModel!.tasks!.length *
+                100)
+            .round();
+      } else {
+        percentage = 0;
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.all(5.0),
@@ -212,8 +255,21 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                           if (widget.goalTaskModel != null)
                             CustomCheckbox(
                               color: theme.colorScheme.tertiary,
-                              value: _isSelected,
+                              value: widget.goalTaskModel!.isCompleted,
                               onChanged: (bool newValue) {
+                                if (newValue) {
+                                  // Check the new value instead of the old one
+                                  HapticFeedback.vibrate();
+                                  _confettiController.play();
+                                }
+
+                                ref
+                                    .read(goalControllerProvider.notifier)
+                                    .completeGoalTask(
+                                      goalTask: widget.goalTaskModel!,
+                                      isComplete: newValue,
+                                      context: context,
+                                    );
                                 setState(() {
                                   _isSelected = newValue;
                                 });
@@ -228,6 +284,9 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                 Text(
                                   capitalize(name),
                                   style: GoogleFonts.poppins(
+                                    decoration: isTaskCompleted
+                                        ? TextDecoration.lineThrough
+                                        : null,
                                     fontSize: 16,
                                     color: theme.colorScheme.tertiary,
                                     fontWeight: FontWeight.w500,
@@ -237,6 +296,9 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                 Text(
                                   capitalize(description),
                                   style: GoogleFonts.poppins(
+                                    decoration: isTaskCompleted
+                                        ? TextDecoration.lineThrough
+                                        : null,
                                     color: theme.colorScheme.tertiary,
                                     fontSize: 14,
                                   ),
@@ -287,8 +349,9 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                 Align(
                                   alignment: Alignment.center,
                                   child: CircularStepProgressIndicator(
-                                    totalSteps: 10,
-                                    currentStep: 5,
+                                    totalSteps: 5,
+                                    currentStep:
+                                        widget.goalModel!.completedTasks,
                                     stepSize: 5,
                                     selectedColor: theme.colorScheme.primary,
                                     unselectedColor: Colors.transparent,
@@ -299,7 +362,8 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                     roundedCap: (_, __) => true,
                                     child: Center(
                                       child: Text(
-                                        '10%',
+                                        "10%",
+                                        // "${(widget.goalModel!.completedTasks / widget.goalModel!.tasks!.length * 100).round()}%",
                                         style: GoogleFonts.poppins(
                                           fontWeight: FontWeight.w600,
                                           color: theme.colorScheme.surface,
@@ -332,35 +396,60 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Icon(
-                            Icons.alarm,
-                            color: theme.colorScheme.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(
-                            width: 2,
-                          ),
-                          Text(
-                            widget.alarmTime,
-                            style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                color: theme.colorScheme.tertiary),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Icon(
-                            Icons.access_time,
-                            color: theme.colorScheme.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(
-                            width: 2,
-                          ),
-                          Text(
-                            widget.currentTime,
-                            style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                color: theme.colorScheme.tertiary),
-                          ),
+                          // Chip(
+                          //   autofocus: true,
+                          //   label: Text(
+                          //     'High Priority',
+                          //     style: GoogleFonts.poppins(
+                          //       color: Colors.red,
+                          //       fontWeight: FontWeight.w500,
+                          //     ),
+                          //   ),
+                          // ),
+                          Row(
+                            children: [
+                              // Icon(
+                              //   Icons.alarm,
+                              //   color: theme.colorScheme.primary,
+                              //   size: 18,
+                              // ),
+                              // const SizedBox(
+                              //   width: 2,
+                              // ),
+                              // Text(
+                              //   widget.alarmTime,
+                              //   style: GoogleFonts.poppins(
+                              //       fontSize: 12,
+                              //       color: theme.colorScheme.tertiary),
+                              // ),
+                              // const SizedBox(width: 8.0),
+
+                              SvgPicture.asset(
+                                'assets/alarm.svg',
+                                width: 12,
+                                color: theme.colorScheme.primary,
+                              ),
+
+                              const SizedBox(
+                                width: 3,
+                              ),
+                              Text(
+                                widget.goalTaskModel != null
+                                    ? DateFormat('h:mm aaaa')
+                                        .format(widget
+                                            .goalTaskModel!.taskReminderTime)
+                                        .toLowerCase()
+                                    : widget.goalModel!.reminderTime
+                                        .format(context),
+                                style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: theme.colorScheme.tertiary),
+                              ),
+                              const SizedBox(
+                                width: 4,
+                              ),
+                            ],
+                          )
                         ],
                       ),
                       const SizedBox(width: 10.0),

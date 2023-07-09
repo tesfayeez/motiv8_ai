@@ -18,6 +18,9 @@ abstract class IGoalAPI {
   Stream<DocumentSnapshot<Map<String, dynamic>>> singleGoalStream(
       String goalID);
   Stream<QuerySnapshot<Map<String, dynamic>>> goalsStream(String userID);
+  FutureEither<void> updateGoalTaskSubtasks(
+      String goalId, String taskId, List<String> subtasks);
+  Future<Either<Failure, Goal>> getGoal(String goalId);
 }
 
 class GoalAPI implements IGoalAPI {
@@ -103,6 +106,66 @@ class GoalAPI implements IGoalAPI {
       return right(task);
     } catch (e, st) {
       return left(Failure(e.toString(), st));
+    }
+  }
+
+  @override
+  FutureEither<void> updateGoalTaskSubtasks(
+      String goalId, String taskId, List<String> subtasks) async {
+    try {
+      final goalDocument = _goalsCollection.doc(goalId);
+      final goalSnapshot = await goalDocument.get();
+
+      if (!goalSnapshot.exists) {
+        return left(const Failure('Goal does not exist'));
+      }
+
+      final goalData = goalSnapshot.data()!;
+      final List<Map<String, dynamic>> tasks =
+          List.from(goalData['tasks'] ?? []);
+
+      // Find the task with the provided taskId
+      final taskIndex =
+          tasks.indexWhere((taskData) => taskData['id'] == taskId);
+
+      if (taskIndex == -1) {
+        return left(const Failure('Task not found'));
+      }
+
+      // Update the subtasks of the found task
+      tasks[taskIndex]['subtasks'] = subtasks;
+
+      await goalDocument.update({'tasks': tasks});
+      return right(unit);
+    } catch (e, st) {
+      return left(Failure(e.toString(), st));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Goal>> getGoal(String goalId) async {
+    try {
+      DocumentSnapshot documentSnapshot =
+          await _goalsCollection.doc(goalId).get();
+
+      if (!documentSnapshot.exists) {
+        return Left(Failure('Goal not found'));
+      }
+
+      Map<String, dynamic>? data =
+          documentSnapshot.data() as Map<String, dynamic>?;
+
+      if (data == null) {
+        return Left(Failure('Failed to retrieve goal data'));
+      }
+
+      data['id'] = documentSnapshot.id;
+
+      Goal goal = Goal.fromMap(data);
+
+      return Right(goal);
+    } catch (e) {
+      return Left(Failure(e.toString()));
     }
   }
 }

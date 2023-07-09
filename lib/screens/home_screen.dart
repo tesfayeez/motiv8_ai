@@ -7,19 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/api/local_notifications_api.dart';
 import 'package:motiv8_ai/commons/utils.dart';
-
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
-
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
-import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
-
+import 'package:motiv8_ai/screens/add_goals_modal_Screen.dart';
 import 'package:motiv8_ai/screens/add_goals_screen.dart';
 import 'package:motiv8_ai/screens/goal_creation_screen.dart';
-import 'package:motiv8_ai/screens/goal_task_screen.dart';
-import 'package:motiv8_ai/screens/goals_screen.dart';
 import 'package:motiv8_ai/screens/task_view_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/caledarView_widget.dart';
@@ -43,7 +39,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SvgPicture.asset("assets/quotes.svg"),
+        SvgPicture.asset(
+          "assets/quotes.svg",
+          color: Colors.white,
+          height: 25,
+        ),
         const SizedBox(height: 5.0),
         Text(
           quote,
@@ -54,22 +54,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void navigateToGoalCreationScreen(BuildContext context) {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            GoalCreationScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 1),
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          );
-        },
+  void _showAddGoalModal(BuildContext context) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
       ),
+      builder: (BuildContext context) {
+        return ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: FractionallySizedBox(
+            heightFactor: .9,
+            child: AddGoalsModalScreen(),
+          ),
+        );
+      },
     );
+  }
+
+  void _showAddGoalTaskModal(BuildContext context) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      builder: (BuildContext context) {
+        return ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: FractionallySizedBox(
+            heightFactor: .7,
+            child: AddGoalScreen(),
+          ),
+        );
+      },
+    );
+  }
+
+  void initState() {
+    super.initState();
+    print('init state');
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   await scheduleNotifications();
+    // });
   }
 
   @override
@@ -82,8 +118,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       currentUser = ref.watch(currentUserProvider);
     }
 
+    bool noTasks = false;
+
+    final goalTaskProgress =
+        ref.watch(getGoalProgressStreamProvider(currentUser!.uid));
+
+    int tasks = goalTaskProgress.value?.tasks.length ?? 0;
+
+    int completedTaskCount = goalTaskProgress.value?.completedTaskCount ?? 0;
+
+    int? previousPercentage;
     final motivationalQuoteAsync =
-        ref.watch(getMotivationalQuoteProvider('Random'));
+        ref.watch(getMotivationalQuoteProvider('Lose 5lbs'));
+// Calculate the current percentage
+    int currentPercentage =
+        tasks != 0 ? ((completedTaskCount / tasks) * 100).round() : 0;
+
+    final isDarkTheme = theme.colorScheme.brightness == Brightness.dark;
     return Scaffold(
       floatingActionButton: SizedBox(
         height: 50,
@@ -95,27 +146,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           backgroundColor: theme.colorScheme.primary,
           onPressed: () {
             // Add your onPressed code here!
-            Goal sampleGoal = Goal(
-              id: '1',
-              name: 'Fitness Journey',
-              userID: '123',
-              description: 'Achieve a healthy and fit lifestyle',
-              startDate: DateTime(2023, 1, 1),
-              endDate: DateTime(2023, 12, 31),
-              reminderFrequency: 'Daily',
-              tasks: [],
-              milestones: 'Lose 10 pounds',
-              taskBreakdownPreference: 'Weekly',
-              definitionOfSuccess: 'Improved stamina and strength',
-              strategiesApproaches: 'Work with a personal trainer',
-              timelineFlexibility: 'Moderate',
-              timeCommitment: '1 hour per day',
-            );
-            HapticFeedback.heavyImpact();
-            // Navigator.of(context).push(GoalTasksScreen.route(sampleGoal));
-            // Navigator.of(context).push(GoalCreationScreen.route());
 
-            navigateToGoalCreationScreen(context);
+            HapticFeedback.heavyImpact();
+            // navigateToGoalCreationScreen(context);
+            _showAddGoalModal(context);
           },
           child: Icon(
             Icons.add,
@@ -132,262 +166,359 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(
-            height: 5,
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 10),
-            decoration:
-                goalCardDarkThemeDecoration(theme.colorScheme.primary, isDark)
-                    .copyWith(borderRadius: BorderRadius.circular(30)),
-            height: MediaQuery.of(context).size.width * 0.28,
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: Opacity(
-                    opacity: 0.3,
-                    child: Image.asset(
-                      'assets/dogerblue.jpg',
-                      fit: BoxFit
-                          .cover, // Use this to have the image cover the entire Stack.
-                      height: double.infinity,
-                      width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 5,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 10),
+                decoration: goalCardDarkThemeDecoration(
+                        theme.colorScheme.primary, isDark)
+                    .copyWith(borderRadius: BorderRadius.circular(20)),
+                height: MediaQuery.of(context).size.width * 0.3,
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Opacity(
+                        opacity: 0.3,
+                        child: Image.asset(
+                          'assets/dogerblue.jpg',
+                          fit: BoxFit
+                              .cover, // Use this to have the image cover the entire Stack.
+                          height: double.infinity,
+                          width: double.infinity,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 20.0, right: 20, top: 10),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "My Daily Progress",
-                              style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.surface),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              "Total Tasks dones",
-                              style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: theme.colorScheme.surface),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "8",
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.surface),
-                                ),
-                                Text(
-                                  "Tasks",
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.surface),
+                    if (completedTaskCount == 0) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.all(5),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: motivationalQuoteAsync.when(
+                              loading: () => [const SizedBox()],
+                              error: (error, stack) => [const SizedBox()],
+                              data: (quote) => [
+                                _buildQuoteWidget(
+                                  quote:
+                                      "\"Dream big, work hard, stay focused and surround yourself with positive people who believe in you'",
+                                  color: isDarkTheme
+                                      ? theme.colorScheme.tertiary
+                                      : Colors.white,
                                 )
+                                // if (quote.isNotEmpty) ...[
+                                //   _buildQuoteWidget(
+                                //     quote: quote,
+                                //     color: isDarkTheme
+                                //         ? theme.colorScheme.tertiary
+                                //         : Colors.white,
+                                //   ),
+                                // ] else ...[
+                                //   _buildQuoteWidget(
+                                //     quote:
+                                //         "\"Dream big, work hard, stay focused and surround yourself with positive people who believe in you'",
+                                //     color: isDarkTheme
+                                //         ? theme.colorScheme.tertiary
+                                //         : Colors.white,
+                                //   ),
+                                // ],
                               ],
-                            )
-                          ],
-                        ),
-                        CircularStepProgressIndicator(
-                          totalSteps: 10,
-                          currentStep: 8,
-                          stepSize: 8,
-                          selectedColor: theme.colorScheme.surface,
-                          unselectedColor: Colors.transparent,
-                          padding: 0,
-                          width: 80,
-                          height: 80,
-                          selectedStepSize: 7,
-                          roundedCap: (_, __) => true,
-                          child: Center(
-                              child: Text(
-                            '10%',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.surface,
-                              fontSize: 20,
                             ),
-                          )),
+                          ),
                         ),
-                      ]),
-                ),
-              ],
-            ),
-          ),
-          // Padding(
-          //   padding: const EdgeInsets.only(left: 8.0),
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: motivationalQuoteAsync.when(
-          //       loading: () => [const SizedBox()],
-          //       error: (error, stack) => [const SizedBox()],
-          //       data: (quote) => [
-          //         if (quote.isNotEmpty) ...[
-          //           _buildQuoteWidget(
-          //             quote: quote,
-          //             color: theme.colorScheme.tertiary,
-          //           ),
-          //         ] else ...[
-          //           _buildQuoteWidget(
-          //             quote:
-          //                 "\"Dream big, work hard, stay focused and surround yourself with positive people who believe in you'",
-          //             color: theme.colorScheme.tertiary,
-          //           ),
-          //         ],
-          //       ],
-          //     ),
-          //   ),
-          // ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Divider(
-              thickness: 0.9,
-              color: theme.colorScheme.tertiary,
-            ),
-          ),
-          const SizedBox(height: 10.0),
-          CalendarView(key: widget.key),
-
-          const SizedBox(height: 10.0),
-          ref.watch(getGoalTaskStreamProvider(currentUser!.uid)).when(
-                data: (goalTasks) {
-                  if (goalTasks.isNotEmpty) {
-                    Random random = Random();
-                    int randomHour = random.nextInt(24);
-                    int randomMinute = random.nextInt(60);
-                    int percentage = random.nextInt(10);
-                    DateTime goalDate =
-                        DateTime.now().add(Duration(days: goalTasks.length));
-                    String alarmTime = "${randomHour}:${randomMinute} pm";
-                    String currentTime =
-                        "${DateTime.now().hour}:${DateTime.now().minute} pm";
-                    return Column(children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(
-                              'Today',
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                color: theme.colorScheme.tertiary,
-                                fontWeight: FontWeight.w500,
+                      ),
+                    ],
+                    if (completedTaskCount >= 1) ...[
+                      GestureDetector(
+                        onLongPress: () {},
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              left: 20.0, right: 20, top: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "My Daily Progress",
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.surface),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    "Tasks for the day",
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.surface),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        tasks.toString(),
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 35,
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.surface),
+                                      ),
+                                      Text(
+                                        tasks == 1 ? "Task" : "Tasks",
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 20,
+                                            color: theme.colorScheme.surface),
+                                      )
+                                    ],
+                                  )
+                                ],
                               ),
-                            ),
+                              CircularStepProgressIndicator(
+                                  totalSteps: tasks == 0 ? 1 : tasks,
+                                  currentStep: completedTaskCount,
+                                  stepSize: 8,
+                                  selectedColor: theme.colorScheme.surface,
+                                  unselectedColor: Colors.transparent,
+                                  padding: 0,
+                                  width: 95,
+                                  height: 95,
+                                  selectedStepSize: 7,
+                                  roundedCap: (_, __) => true,
+                                  child: Center(
+                                    child: AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      child: Text(
+                                        "$currentPercentage%",
+                                        key: ValueKey<int>(
+                                            currentPercentage), // Unique key is required for AnimatedSwitcher to distinguish between different children
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.w600,
+                                          color: theme.colorScheme.surface,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                      transitionBuilder: (Widget child,
+                                          Animation<double> animation) {
+                                        previousPercentage = currentPercentage;
+                                        return TweenAnimationBuilder<int>(
+                                          tween: IntTween(
+                                              begin: previousPercentage,
+                                              end: currentPercentage),
+                                          duration: Duration(milliseconds: 500),
+                                          builder: (BuildContext context,
+                                              int? value, Widget? child) {
+                                            return Text(
+                                              value != null ? "$value%" : '0%',
+                                              style: GoogleFonts.poppins(
+                                                fontWeight: FontWeight.w600,
+                                                color:
+                                                    theme.colorScheme.surface,
+                                                fontSize: 20,
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ))
+                            ],
                           ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Row(
-                              children: [
-                                SvgPicture.asset(
-                                  "assets/uit_calender.svg",
+                        ),
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              //   child: Divider(
+              //     thickness: 0.9,
+              //     color: theme.colorScheme.tertiary,
+              //   ),
+              // ),
+              // const SizedBox(height: 10.0),
+              // CalendarView(key: widget.key),
+              const SizedBox(height: 10.0),
+              ref.watch(getGoalTaskStreamProvider(currentUser!.uid)).when(
+                    data: (goalTasks) {
+                      if (goalTasks.isNotEmpty) {
+                        Random random = Random();
+                        int randomHour = random.nextInt(24);
+                        int randomMinute = random.nextInt(60);
+
+                        String alarmTime = "${randomHour}:${randomMinute} pm";
+                        String currentTime =
+                            "${DateTime.now().hour}:${DateTime.now().minute} pm";
+                        return Column(children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10.0),
+                                        child: Text(
+                                          'Today',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 20,
+                                            color: theme.colorScheme.tertiary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10.0),
+                                        child: Row(
+                                          children: [
+                                            SvgPicture.asset(
+                                              "assets/uit_calender.svg",
+                                              color:
+                                                  theme.colorScheme.onTertiary,
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text(
+                                              DateFormat('EEEE, MMM d, yyyy')
+                                                  .format(DateTime.now()),
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 12,
+                                                color: theme
+                                                    .colorScheme.onTertiary,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10.0),
+                                        child: Text(
+                                          'My Tasks',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 20,
+                                            color: theme.colorScheme.tertiary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10.0),
+                                    child: InkWell(
+                                      // onTap: () => throw Exception(),
+                                      onTap: () {
+                                        HapticFeedback.lightImpact();
+                                        _showAddGoalTaskModal(context);
+                                      },
+
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        decoration: cardBoxDecoration(
+                                            theme.colorScheme.onPrimary,
+                                            isDark),
+                                        height: 40,
+                                        width: 100,
+                                        child: Text(
+                                          "Add Task",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              ListView.builder(
+                                shrinkWrap:
+                                    true, // If you want to keep the list constrained to the minimum possible height
+                                physics:
+                                    const NeverScrollableScrollPhysics(), // If you don't want the ListView to be scrollable
+                                itemCount: goalTasks.length,
+                                itemBuilder: (context, index) {
+                                  final goalTask = goalTasks[index];
+                                  return GoalCard(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                          GoalOrTaskScreen.route(
+                                              goalTask: goalTask));
+                                    },
+                                    goalTaskModel: goalTask,
+                                    goalDate: goalTask.date,
+                                    alarmTime: alarmTime,
+                                    currentTime: currentTime,
+                                    percentage: 100,
+                                  );
+                                },
+                              ),
+                            ],
+                          )
+                        ]);
+                      } else {
+                        setState(() {
+                          noTasks = true;
+                        });
+                        return Center(
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  // navigateToGoalCreationScreen(context);
+                                  _showAddGoalTaskModal(context);
+                                },
+                                child: SvgPicture.asset('assets/nogoals.svg',
+                                    semanticsLabel: 'no goals Logo'),
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                "Tap + to add your Task",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
                                   color: theme.colorScheme.onTertiary,
                                 ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  DateFormat('EEEE, MMM d, yyyy')
-                                      .format(DateTime.now()),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: theme.colorScheme.onTertiary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              )
+                            ],
                           ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(
-                              'My Tasks',
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                color: theme.colorScheme.tertiary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          ListView.builder(
-                            shrinkWrap:
-                                true, // If you want to keep the list constrained to the minimum possible height
-                            physics:
-                                const NeverScrollableScrollPhysics(), // If you don't want the ListView to be scrollable
-                            itemCount: goalTasks.length,
-                            itemBuilder: (context, index) {
-                              final goalTask = goalTasks[index];
-                              return GoalCard(
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                      GoalOrTaskScreen.route(
-                                          goalTask: goalTask));
-                                },
-                                goalTaskModel: goalTask,
-                                goalDate: goalTask.date,
-                                alarmTime: alarmTime,
-                                currentTime: currentTime,
-                                percentage: 100,
-                              );
-                            },
-                          ),
-                        ],
-                      )
-                    ]);
-                  } else {
-                    return Center(
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              navigateToGoalCreationScreen(context);
-                            },
-                            child: SvgPicture.asset('assets/nogoals.svg',
-                                semanticsLabel: 'Acme Logo'),
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            "Tap + to add your Goal",
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: theme.colorScheme.tertiary,
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  }
-                },
-                loading: () => Center(child: CustomProgressIndicator()),
-                error: (error, _) => Text('Error: $error'),
-              )
-        ])),
+                        );
+                      }
+                    },
+                    loading: () => SizedBox(),
+                    error: (error, _) => Text('Error: $error'),
+                  ),
+            ],
+          ),
+        ),
       ),
     );
   }

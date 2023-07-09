@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
+import 'package:motiv8_ai/commons/snack_bar_provider.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/user_controllers.dart';
@@ -69,9 +70,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         _isEditing = false;
       });
 
-      scaffolMessengerKey.currentState!.showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
-      );
+      final snackbarController = ref.watch(snackbarProvider.notifier);
+      snackbarController.show(context, 'Profile updated successfully');
     }
   }
 

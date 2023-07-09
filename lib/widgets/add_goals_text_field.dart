@@ -43,6 +43,7 @@ class GoalsTextField extends ConsumerWidget {
   TextField _buildTextField(ThemeData themeData) {
     final isDarkTheme = themeData.brightness == Brightness.dark;
     return TextField(
+      autocorrect: false,
       keyboardType: TextInputType.text,
       focusNode: focusNode,
       cursorHeight: 20,
@@ -52,7 +53,7 @@ class GoalsTextField extends ConsumerWidget {
       maxLines: isHeightGrow ? null : 1,
       maxLengthEnforcement: MaxLengthEnforcement.enforced,
       controller: controller,
-      style: GoogleFonts.poppins(fontSize: 18),
+      style: GoogleFonts.poppins(fontSize: 16),
       decoration: InputDecoration(
         isDense: true,
         contentPadding: const EdgeInsets.fromLTRB(10, 22.5, 10, 22.5),
@@ -73,7 +74,7 @@ class GoalsTextField extends ConsumerWidget {
         ),
         hintText: hintText,
         hintStyle: GoogleFonts.poppins(
-            color: themeData.colorScheme.onTertiary, fontSize: 18),
+            color: themeData.colorScheme.onTertiary, fontSize: 14),
         suffixIcon: hasSuffixIcon
             ? Icon(Icons.add, color: themeData.colorScheme.primary, size: 35)
             : null,

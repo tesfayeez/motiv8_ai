@@ -116,9 +116,11 @@ class _UserWalkthroughScreenState extends ConsumerState<UserWalkthroughScreen> {
                           height: 5,
                         ),
                         Text(
-                            "To make this journey personal to you, we'd like to know a bit about you. What's your name, and what's a fun fact about you?",
-                            style: GoogleFonts.poppins(
-                                fontSize: 16, color: Colors.white)),
+                          "To make this journey personal to you, we'd like to know a bit about you. What's your name, and what's a fun fact about you?",
+                          style: GoogleFonts.poppins(
+                              fontSize: 16, color: Colors.white),
+                        ),
+                        TextField()
                       ],
                     ),
                   ),
@@ -290,7 +292,6 @@ class _UserWalkthroughScreenState extends ConsumerState<UserWalkthroughScreen> {
             ],
           ),
           // Add other screens here...
-
           Positioned(
             top: 70,
             left: 150,
@@ -335,19 +336,22 @@ class _UserWalkthroughScreenState extends ConsumerState<UserWalkthroughScreen> {
                         30), // Use borderRadius to make it circular
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text(
                         _currentPage == 8 ? "Get Started" : "Next",
                         style: GoogleFonts.poppins(
-                            fontSize: 18, fontWeight: FontWeight.w400),
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                       const SizedBox(
                         width: 10,
                       ),
                       const Icon(
                         Icons.arrow_forward,
-                        color: Colors.black,
+                        color: Colors.grey,
                         size: 35,
                       ),
                     ],

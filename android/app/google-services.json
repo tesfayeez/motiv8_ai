@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:245333633905:android:c47f648dfd68edd73ca4d0",
+        "mobilesdk_app_id": "1:245333633905:android:d05e4d7333d7f2d33ca4d0",
         "android_client_info": {
-          "package_name": "com.ezanatesfaye.motive8"
+          "package_name": "com.ezanatesfaye.motiv8_ai"
         }
       },
       "oauth_client": [

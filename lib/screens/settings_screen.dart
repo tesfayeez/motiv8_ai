@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/account_screen.dart';
+import 'package:motiv8_ai/screens/notifications_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 
@@ -44,9 +47,8 @@ class SettingsScreen extends ConsumerWidget {
                 child: Text(
                   'Account Settings',
                   style: GoogleFonts.poppins(
-                    color: theme.colorScheme.primary,
+                    color: theme.colorScheme.tertiary,
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -58,7 +60,7 @@ class SettingsScreen extends ConsumerWidget {
                 containerColor: theme.colorScheme.primaryContainer,
                 listTileData: [
                   ListTileData(
-                    icon: Icons.person,
+                    iconName: 'Profile.svg',
                     text: 'Account',
                     onPressed: () => Navigator.of(context).push(
                       AccountScreen.route(),
@@ -74,9 +76,8 @@ class SettingsScreen extends ConsumerWidget {
                 child: Text(
                   'App Settings',
                   style: GoogleFonts.poppins(
-                    color: theme.colorScheme.primary,
+                    color: theme.colorScheme.tertiary,
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -85,14 +86,14 @@ class SettingsScreen extends ConsumerWidget {
                 containerColor: theme.colorScheme.primaryContainer,
                 listTileData: [
                   ListTileData(
-                    icon: Icons.alarm,
-                    text: 'Notification',
+                    iconName: 'notification.svg',
+                    text: 'Notifications',
                     onPressed: () => Navigator.of(context).push(
-                      AccountScreen.route(),
+                      NotificationsScreen.route(),
                     ),
                   ),
                   ListTileData(
-                    icon: Icons.colorize,
+                    iconName: 'theme.svg',
                     text: 'App Theme',
                     onPressed: () => Navigator.of(context).push(
                       ThemeScreen.route(),
@@ -106,7 +107,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-class CustomContainer extends StatelessWidget {
+class CustomContainer extends ConsumerWidget {
   final Color containerColor;
   final Color tileItemColor;
 
@@ -119,32 +120,26 @@ class CustomContainer extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+    final theme = ref.watch(themeProvider);
+    final isDark = theme.colorScheme.brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(10.0),
-      decoration: const BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x00000040),
-            offset: Offset(0, 0),
-            blurRadius: 20,
-            spreadRadius: 0,
-          )
-        ],
-      ),
+      decoration: goalCardDarkThemeDecoration(
+          theme.colorScheme.onSecondaryContainer, isDark),
       child: Column(
         children: listTileData.map((data) {
           if (isIOS) {
             return CupertinoListTile(
-              icon: data.icon,
+              svgName: data.iconName,
               text: data.text,
               onPressed: data.onPressed,
             );
           } else {
             return ListTile(
-              leading: Icon(data.icon),
+              leading: SvgPicture.asset('assets/${data.iconName}'),
               title: Text(
                 data.text,
                 style: GoogleFonts.poppins(
@@ -168,24 +163,25 @@ class CustomContainer extends StatelessWidget {
 
 class ListTileData {
   final String text;
-  final IconData icon;
+  final String iconName;
   final VoidCallback onPressed;
 
   ListTileData({
     required this.text,
-    required this.icon,
+    required this.iconName,
     required this.onPressed,
   });
 }
 
 class CupertinoListTile extends StatelessWidget {
   final String text;
-  final IconData icon;
+  final String svgName;
+
   final VoidCallback onPressed;
 
   CupertinoListTile({
     required this.text,
-    required this.icon,
+    required this.svgName,
     required this.onPressed,
   });
 
@@ -197,9 +193,13 @@ class CupertinoListTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
         child: Row(
           children: <Widget>[
-            Icon(icon, size: 28.0),
+            SvgPicture.asset(
+              'assets/$svgName',
+              color: const Color(0xFF1988FF),
+            ),
             SizedBox(width: 10.0),
-            Expanded(child: Text(text, style: TextStyle(fontSize: 20.0))),
+            Expanded(
+                child: Text(text, style: GoogleFonts.poppins(fontSize: 16.0))),
             Icon(Icons.chevron_right, size: 28.0),
           ],
         ),
