@@ -278,7 +278,7 @@ class _DateCardState extends ConsumerState<DateCard> {
             initialDateTime: date,
             mode: CupertinoDatePickerMode.date,
             onDateTimeChanged: (picked) {
-              if (picked != null && picked != date) {
+              if (picked != date) {
                 setState(() {
                   date = picked;
                   widget.controller!.text = _formatDate(picked);

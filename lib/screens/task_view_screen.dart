@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
@@ -8,7 +7,6 @@ import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
-import 'package:motiv8_ai/widgets/animated_loading_indicator.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal%20header%20widgets/goal_header_master_widget.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
@@ -38,17 +36,15 @@ class GoalOrTaskScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: isGoal
-            ? goal!.name ?? 'Your Goal'
-            : (goalTask?.name ?? 'Your Task'),
+        title: isGoal ? goal!.name : (goalTask?.name ?? 'Your Task'),
         isBackPresent: true,
-        isBottomLinePresent: true,
+        isBottomLinePresent: false,
         isCenterTitle: true,
       ),
       body: SafeArea(
           child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(left: 5.0, right: 5, top: 10),
+          padding: const EdgeInsets.only(left: 5.0, right: 5, top: 5),
           child: Column(children: [
             StyledContainer(
                 child: PaddedColumn(children: [
@@ -266,34 +262,12 @@ class SubtaskGenerator extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      if (!areSubtasksGenerated)
-                        Checkbox(
-                          value:
-                              isChecked, // determines whether the checkbox is checked
-                          onChanged: (bool? value) {
-                            // called when the user taps the checkbox
-                          },
-                        ),
                       Expanded(
                         child: Text(
                           subtask,
                           style: GoogleFonts.poppins(fontSize: 14),
                         ),
                       ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      InkWell(
-                        child: Ink(
-                          child: SvgPicture.asset(
-                            'assets/delete.svg',
-                            height: 20,
-                            width: 20,
-                            color: Colors.red,
-                          ),
-                        ),
-                        onTap: () {},
-                      )
                     ],
                   ),
                 ),

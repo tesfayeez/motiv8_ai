@@ -12,16 +12,12 @@ import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
-import 'package:motiv8_ai/models/goals_model.dart';
-import 'package:motiv8_ai/screens/add_goals_modal_Screen.dart';
+import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/add_goals_screen.dart';
-import 'package:motiv8_ai/screens/goal_creation_screen.dart';
 import 'package:motiv8_ai/screens/task_view_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
-import 'package:motiv8_ai/widgets/caledarView_widget.dart';
 import 'package:motiv8_ai/widgets/goal_card_widget.dart';
 import 'package:motiv8_ai/widgets/home_screen_appbar.dart';
-import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -54,35 +50,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showAddGoalTaskModal(BuildContext context) {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      isDismissible: true,
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      builder: (BuildContext context) {
-        return ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          child: FractionallySizedBox(
-            heightFactor: .7,
-            child: AddGoalScreen(),
-          ),
-        );
-      },
-    );
-  }
-
   void initState() {
     super.initState();
     print('init state');
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await scheduleNotifications();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   await scheduleNotifications();
+    // });
   }
 
   Future<void> scheduleNotifications() async {
@@ -472,7 +445,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       // onTap: () => throw Exception(),
                                       onTap: () {
                                         HapticFeedback.lightImpact();
-                                        _showAddGoalTaskModal(context);
+                                        showAddGoalTaskModal(context, null);
                                       },
 
                                       child: Container(
@@ -526,7 +499,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               GestureDetector(
                                 onTap: () {
                                   // navigateToGoalCreationScreen(context);
-                                  _showAddGoalTaskModal(context);
+                                  showAddGoalTaskModal(context, null);
                                 },
                                 child: SvgPicture.asset('assets/nogoals.svg',
                                     semanticsLabel: 'no goals Logo'),

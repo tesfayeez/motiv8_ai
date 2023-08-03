@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
-import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/account_screen.dart';
 import 'package:motiv8_ai/screens/notifications_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
+import 'package:motiv8_ai/widgets/logout_confirmation_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   final bool isDirectNavigation;
@@ -174,6 +173,24 @@ class SettingsScreen extends ConsumerWidget {
                 )
               ],
             ),
+            CustomContainer(
+              tileItemColor: theme.colorScheme.primary,
+              containerColor: theme.colorScheme.primaryContainer,
+              listTileData: [
+                ListTileData(
+                  text: 'Logout',
+                  iconData: Icons.logout,
+                  onPressed: () {
+                    LogoutConfirmationDialog.show(
+                      context,
+                      () {
+                        logout(context, ref);
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
             Center(
               child: Text(
                 'v1.0.0',
@@ -287,7 +304,7 @@ class CupertinoListTile extends StatelessWidget {
               Icon(
                 iconData,
                 size: 28,
-                color: const Color(0xFF1988FF),
+                color: text == 'Logout' ? Colors.red : const Color(0xFF1988FF),
               ),
             if (iconData == null)
               SvgPicture.asset(
@@ -298,7 +315,9 @@ class CupertinoListTile extends StatelessWidget {
             Expanded(
               child: Text(
                 text,
-                style: GoogleFonts.poppins(fontSize: 16.0),
+                style: GoogleFonts.poppins(
+                    fontSize: 16.0,
+                    color: text == 'Logout' ? Colors.red : null),
               ),
             ),
             Icon(Icons.chevron_right, size: 28.0),

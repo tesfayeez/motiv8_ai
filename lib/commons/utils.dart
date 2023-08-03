@@ -1,12 +1,17 @@
 import 'dart:io';
-import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/add_goals_modal_Screen.dart';
+import 'package:motiv8_ai/screens/add_goals_screen.dart';
+import 'package:motiv8_ai/screens/add_reminder_screen.dart';
+import 'package:motiv8_ai/screens/themes_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 bool isSameDay(DateTime? date1, DateTime? date2) {
   if (date1 == null || date2 == null) {
@@ -93,7 +98,7 @@ TimeOfDay convertTo24HourFormat(String time12HourFormat) {
 }
 
 TimeOfDay stringToTimeOfDay(String timeStr) {
-  if (timeStr == null || timeStr.isEmpty) {
+  if (timeStr.isEmpty) {
     print('The input string is null or empty!');
     return TimeOfDay.now();
   }
@@ -353,4 +358,205 @@ void showAddGoalModal(BuildContext context) {
           ),
         );
       });
+}
+
+void showAddReminderModal({
+  required BuildContext context,
+  required GoalTask task,
+  bool isitReschedule = false,
+}) {
+  showModalBottomSheet(
+      isScrollControlled: true,
+      isDismissible: true,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      builder: (BuildContext context) {
+        return ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: FractionallySizedBox(
+            heightFactor: .5,
+            child: AddReminderScreen(
+              goalTask: task,
+              isitReschedule: isitReschedule,
+            ),
+          ),
+        );
+      });
+}
+
+void showAddGoalTaskModal(BuildContext context, GoalTask? task) {
+  showModalBottomSheet(
+    isScrollControlled: true,
+    isDismissible: true,
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20.0),
+    ),
+    builder: (BuildContext context) {
+      return ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: FractionallySizedBox(
+          heightFactor: .7,
+          child: AddGoalScreen(
+            task: task,
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Future<void> saveUserIdToPrefs(String userId) async {
+  final prefs = await SharedPreferences.getInstance();
+  final existingUserId = prefs.getString('userId');
+
+  if (existingUserId == null) {
+    prefs.setString('userId', userId);
+  }
+}
+
+Future<String?> loadUserIdFromPrefs() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString(
+      'userId'); // Will return null if 'userId' is not in the preferences
+}
+
+void showPlatformAlertDialog({
+  required BuildContext context,
+  required String title,
+  required String description,
+  required bool reschedule,
+  VoidCallback? onTapReschedule,
+  String positiveButtonText = 'OK',
+  VoidCallback? onPositive,
+  String negativeButtonText = 'Cancel',
+  VoidCallback? onNegative,
+}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Platform.isIOS
+          ? _buildCupertinoAlertDialog(
+              context: context,
+              title: title,
+              description: description,
+              reschedule: reschedule,
+              onTapReschedule: onTapReschedule,
+              positiveButtonText: positiveButtonText,
+              onPositive: onPositive,
+              negativeButtonText: negativeButtonText,
+              onNegative: onNegative,
+            )
+          : _buildMaterialAlertDialog(
+              context: context,
+              title: title,
+              description: description,
+              positiveButtonText: positiveButtonText,
+              onPositive: onPositive,
+              negativeButtonText: negativeButtonText,
+              onNegative: onNegative,
+            );
+    },
+  );
+}
+
+Widget _buildCupertinoAlertDialog({
+  required BuildContext context,
+  required String title,
+  required String description,
+  required bool reschedule,
+  VoidCallback? onTapReschedule,
+  required String positiveButtonText,
+  VoidCallback? onPositive,
+  required String negativeButtonText,
+  VoidCallback? onNegative,
+}) {
+  return CupertinoAlertDialog(
+    title: Text(
+      title,
+      style: GoogleFonts.poppins(
+        color: Colors.red,
+        fontSize: 14,
+      ),
+    ),
+    content: Text(description),
+    actions: [
+      if (reschedule)
+        CupertinoDialogAction(
+          onPressed: () {
+            onTapReschedule?.call();
+            Navigator.pop(context);
+          },
+          child:
+              Text('Reschedule', style: GoogleFonts.poppins(color: Colors.red)),
+        ),
+      CupertinoDialogAction(
+        onPressed: () {
+          onPositive?.call();
+          Navigator.pop(context);
+        },
+        child: Text(positiveButtonText,
+            style: GoogleFonts.poppins(color: const Color(0xFF1988FF))),
+      ),
+      CupertinoDialogAction(
+        onPressed: () {
+          onNegative?.call();
+          Navigator.pop(context);
+        },
+        child: Text(negativeButtonText,
+            style: GoogleFonts.poppins(color: Colors.red)),
+      ),
+    ],
+  );
+}
+
+Widget _buildMaterialAlertDialog({
+  required BuildContext context,
+  required String title,
+  required String description,
+  required String positiveButtonText,
+  VoidCallback? onPositive,
+  required String negativeButtonText,
+  VoidCallback? onNegative,
+}) {
+  return AlertDialog(
+    title: Text(
+      title,
+      style: GoogleFonts.poppins(),
+    ),
+    content: Text(
+      description,
+      style: GoogleFonts.poppins(),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () {
+          onPositive?.call();
+          Navigator.pop(context);
+        },
+        child: Text(
+          positiveButtonText,
+          style: GoogleFonts.poppins(color: const Color(0xFF1988FF)),
+        ),
+      ),
+      TextButton(
+        onPressed: () {
+          onNegative?.call();
+          Navigator.pop(context);
+        },
+        child: Text(
+          negativeButtonText,
+          style: GoogleFonts.poppins(),
+        ),
+      ),
+    ],
+  );
 }

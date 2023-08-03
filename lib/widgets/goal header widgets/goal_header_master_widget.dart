@@ -51,8 +51,8 @@ class HeaderRow extends StatelessWidget {
                   actionButtonColor),
             const SizedBox(width: 10),
             if (showMarkComplete)
-              buildActionButton("Complete", () => addSubTaskCallback?.call(),
-                  actionButtonColor)
+              buildActionButton(
+                  "Complete", () => addSubTaskCallback?.call(), Colors.green)
           ],
         ),
         SizedBox(

@@ -5,6 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 
+final GlobalKey<_CustomDatePickerState> datePickerKey =
+    GlobalKey<_CustomDatePickerState>();
+final GlobalKey<_CustomDatePickerState> timePickerKey =
+    GlobalKey<_CustomDatePickerState>();
+
 class CustomDatePicker extends ConsumerStatefulWidget {
   CustomDatePicker({
     Key? key,
@@ -12,12 +17,16 @@ class CustomDatePicker extends ConsumerStatefulWidget {
     this.focusNode,
     required this.controller,
     this.hintText,
+    this.date,
+    this.time,
   }) : super(key: key);
 
   final TextEditingController controller;
   final bool showDate;
   final FocusNode? focusNode;
   final String? hintText;
+  final DateTime? date;
+  final DateTime? time;
 
   @override
   _CustomDatePickerState createState() => _CustomDatePickerState();
@@ -33,11 +42,74 @@ class _CustomDatePickerState extends ConsumerState<CustomDatePicker> {
     borderSide: BorderSide(color: Color.fromARGB(255, 175, 228, 254)),
   );
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _dateFormat = DateFormat('EEEE, MMM d, yyyy');
+  //   _timeFormat = DateFormat('hh:mm a');
+  //   _dateTime = widget.showDate ? DateTime.now() : null;
+  //   _timeOfDay = widget.showDate ? null : TimeOfDay.now();
+  // }
   @override
   void initState() {
     super.initState();
+
     _dateFormat = DateFormat('EEEE, MMM d, yyyy');
     _timeFormat = DateFormat('hh:mm a');
+    _dateTime = widget.date ?? (widget.showDate ? DateTime.now() : null);
+    _timeOfDay = widget.showDate ? null : TimeOfDay.now();
+
+    if (widget.date != null) {
+      widget.controller.text = _dateFormat.format(widget.date!);
+    } else if (widget.time != null) {
+      final formattedTime = _timeFormat.format(
+        DateTime(
+          0,
+          0,
+          0,
+          widget.time!.hour,
+          widget.time!.minute,
+        ),
+      );
+      widget.controller.text = formattedTime;
+    }
+  }
+
+  @override
+  void didUpdateWidget(CustomDatePicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller.text != oldWidget.controller.text) {
+      setState(() {
+        try {
+          if (widget.showDate) {
+            _dateTime = _dateFormat.parse(widget.controller.text);
+          } else {
+            final parsedTime = _timeFormat.parse(widget.controller.text);
+            _timeOfDay = TimeOfDay.fromDateTime(parsedTime);
+          }
+        } catch (e) {
+          _dateTime = null;
+          _timeOfDay = null;
+        }
+
+        if (widget.controller.text.isEmpty) {
+          if (widget.showDate && widget.date != null) {
+            _dateTime = widget.date;
+            widget.controller.text = _dateFormat.format(_dateTime!);
+          } else if (!widget.showDate && widget.time != null) {
+            _timeOfDay = TimeOfDay.fromDateTime(widget.time!);
+            final formattedTime = _timeFormat.format(DateTime(
+              0,
+              0,
+              0,
+              _timeOfDay!.hour,
+              _timeOfDay!.minute,
+            ));
+            widget.controller.text = formattedTime;
+          }
+        }
+      });
+    }
   }
 
   @override
@@ -80,8 +152,9 @@ class _CustomDatePickerState extends ConsumerState<CustomDatePicker> {
                                 onDateTimeChanged: (DateTime newDate) {
                                   setState(() {
                                     _dateTime = newDate;
-                                    widget.controller.text =
+                                    final formattedDate =
                                         _dateFormat.format(_dateTime!);
+                                    widget.controller.text = formattedDate;
                                   });
                                 },
                               )
@@ -98,9 +171,10 @@ class _CustomDatePickerState extends ConsumerState<CustomDatePicker> {
                                   setState(() {
                                     _timeOfDay =
                                         TimeOfDay.fromDateTime(newDateTime);
-                                    widget.controller.text = _timeFormat.format(
+                                    final formattedTime = _timeFormat.format(
                                         DateTime(0, 0, 0, _timeOfDay!.hour,
                                             _timeOfDay!.minute));
+                                    widget.controller.text = formattedTime;
                                   });
                                 },
                               ),

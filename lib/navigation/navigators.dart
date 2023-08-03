@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
-import 'package:motiv8_ai/navigation/navigation_enums.dart';
 
 class NavigationPath {
   final String path;

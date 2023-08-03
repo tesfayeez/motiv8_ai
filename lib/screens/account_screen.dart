@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:motiv8_ai/commons/auth_text_field.dart';
 import 'package:motiv8_ai/commons/snack_bar_provider.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
@@ -11,7 +10,6 @@ import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/account_textfields.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
-import 'package:motiv8_ai/widgets/custom_platform_specific_date_picker.dart';
 import 'package:motiv8_ai/widgets/logout_confirmation_dialog.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {

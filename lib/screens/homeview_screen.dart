@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/constants.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 
@@ -23,9 +22,10 @@ class _HomeViewScreenState extends ConsumerState<HomeViewScreen> {
   final List<String> tabAssets = [
     'assets/Home.svg',
     'assets/mygoals.svg',
-    'assets/Setting.svg',
     'assets/quotes.svg',
-    'assets/Profile.svg',
+    'assets/Setting.svg',
+
+    // 'assets/Profile.svg',
   ];
 
   void onPageChange(int index) {
@@ -89,11 +89,12 @@ class _HomeViewScreenState extends ConsumerState<HomeViewScreen> {
       case 1:
         return 'My Goals';
       case 2:
-        return 'Settings';
-      case 3:
         return 'Quotes';
-      case 4:
-        return 'Profile';
+      case 3:
+        return 'Settings';
+
+      // case 4:
+      //   return 'Profile';
       default:
         return '';
     }

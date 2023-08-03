@@ -8,7 +8,6 @@ import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
-import 'package:motiv8_ai/screens/new_Screen_for_special_someone.dart';
 import 'package:motiv8_ai/screens/userwalk_through_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

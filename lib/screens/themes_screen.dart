@@ -22,7 +22,7 @@ class ThemeScreen extends ConsumerWidget {
         isBackPresent: isDirectNavigation
             ? false
             : ModalRoute.of(context)?.canPop ?? false,
-        isBottomLinePresent: true,
+        isBottomLinePresent: false,
         isCenterTitle: true,
       ),
       body: SingleChildScrollView(
@@ -123,6 +123,9 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
       case AppTheme.dark:
         state = themeData1Dark;
         break;
+      case AppTheme.purple:
+        state = themeData1Purple;
+        break;
     }
     saveThemeToPrefs(theme);
   }
@@ -152,6 +155,7 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
         CupertinoThemeData().copyWith(brightness: Brightness.light),
     snackBarTheme: const SnackBarThemeData(
       showCloseIcon: true,
+      closeIconColor: Colors.white,
       backgroundColor: const Color(0xFF1988FF),
       behavior: SnackBarBehavior.floating,
       elevation: 8.0,
@@ -185,6 +189,7 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
     cupertinoOverrideTheme:
         CupertinoThemeData().copyWith(brightness: Brightness.dark),
     snackBarTheme: SnackBarThemeData(
+      closeIconColor: Colors.white,
       showCloseIcon: true,
       contentTextStyle: GoogleFonts.poppins(color: Colors.white),
       backgroundColor: const Color(0xFF1988FF),
@@ -195,9 +200,43 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
       ),
     ),
   );
+  static final ThemeData themeData1Purple = ThemeData.from(
+    colorScheme: ColorScheme.light(
+        primary: const Color(0xFF512888), // Dodger Blue
+        tertiary: Colors.white,
+        onTertiary: const Color(0xD1D1D1D1),
+        primaryContainer: const Color(0x00000040),
+        secondary: const Color(0xFFBA9CE2), // Tangerine for contrast
+        surface: Colors.white,
+        background: const Color(0xFF202124),
+        error: Colors
+            .red[700]!, // We assume this exists in the Material Color Reds
+        onPrimary: const Color(0xFF512888),
+        onSecondary: Colors.black,
+        onSurface: const Color(0xFF202124),
+        onBackground: Colors.white,
+        onError: Colors.white,
+        brightness: Brightness.dark,
+        tertiaryContainer: const Color(0xFFF1EBF9),
+        onSecondaryContainer: const Color.fromRGBO(170, 170, 170, 0.15)),
+  ).copyWith(
+    cupertinoOverrideTheme:
+        CupertinoThemeData().copyWith(brightness: Brightness.dark),
+    snackBarTheme: SnackBarThemeData(
+      showCloseIcon: true,
+      closeIconColor: Colors.white,
+      contentTextStyle: GoogleFonts.poppins(color: Colors.white),
+      backgroundColor: const Color(0xFF512888),
+      behavior: SnackBarBehavior.floating,
+      elevation: 8.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
+    ),
+  );
 }
 
-enum AppTheme { light, dark }
+enum AppTheme { light, dark, purple }
 
 class ThemeButton extends StatelessWidget {
   const ThemeButton({
@@ -274,6 +313,3 @@ class ThemeButton extends StatelessWidget {
     );
   }
 }
-
-// child: Text,
-//         style: Theme.of(context).textTheme.button,

@@ -13,15 +13,22 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final bool isCenterTitle;
   final bool isBottomLinePresent;
   final bool isCloseOnTheRight;
+  final bool isTralingPresent;
+  final VoidCallback? onSave;
+  final VoidCallback? onBackTapped;
 
-  CustomAppBar(
-      {required this.title,
-      this.backgroundColor = Colors.white,
-      this.isBackPresent = true,
-      this.isClosePresent = false,
-      this.isCenterTitle = false,
-      this.isBottomLinePresent = false,
-      this.isCloseOnTheRight = false});
+  CustomAppBar({
+    required this.title,
+    this.backgroundColor = Colors.white,
+    this.isBackPresent = true,
+    this.isClosePresent = false,
+    this.isCenterTitle = false,
+    this.isBottomLinePresent = false,
+    this.isCloseOnTheRight = false,
+    this.isTralingPresent = false,
+    this.onSave,
+    this.onBackTapped,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,6 +39,18 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       elevation: 0.0,
       actions: [
+        if (isTralingPresent && onSave != null) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 20),
+            child: GestureDetector(
+              child: Text(
+                'Save',
+                style: GoogleFonts.poppins(color: theme.colorScheme.primary),
+              ),
+              onTap: onSave,
+            ),
+          )
+        ],
         if (isCloseOnTheRight) ...[
           GestureDetector(
             child: Icon(
@@ -66,7 +85,9 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 color: theme.colorScheme.onTertiary,
                 size: 30,
               ),
-              onTap: () => Navigator.of(context).pop(),
+              onTap: isTralingPresent == false && onBackTapped == null
+                  ? () => Navigator.of(context).pop()
+                  : onBackTapped,
             )
           : isClosePresent
               ? GestureDetector(

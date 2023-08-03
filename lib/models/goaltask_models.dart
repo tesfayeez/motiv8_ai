@@ -62,7 +62,7 @@ class GoalTask {
     final dateTime = DateTime.fromMillisecondsSinceEpoch(map['date'] as int);
     final dateOnly = DateTime(dateTime.year, dateTime.month, dateTime.day);
     print(
-        'task reminde time ${DateTime.fromMillisecondsSinceEpoch(map['taskReminderTime'] as int)}');
+        'task reminder time ${DateTime.fromMillisecondsSinceEpoch(map['taskReminderTime'] as int)}');
     return GoalTask(
       id: map['id'] as String,
       name: map['name'] as String,

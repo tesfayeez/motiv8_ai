@@ -113,7 +113,7 @@ class GoalTaskCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'From: ${goal!.startDate != null ? DateFormat.yMMMd().format(goal!.startDate!) : ''}',
+                      'From: ${goal!.startDate != null ? DateFormat.yMMMd().format(goal!.startDate) : ''}',
                       style:
                           GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
                     ),
@@ -121,7 +121,7 @@ class GoalTaskCard extends StatelessWidget {
                     const Icon(Icons.arrow_forward, color: Colors.grey),
                     const SizedBox(width: 8),
                     Text(
-                      'To: ${goal!.endDate != null ? DateFormat.yMMMd().format(goal!.endDate!) : ''}',
+                      'To: ${goal!.endDate != null ? DateFormat.yMMMd().format(goal!.endDate) : ''}',
                       style:
                           GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
                     ),

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +8,8 @@ import 'package:motiv8_ai/api/local_notifications_api.dart';
 
 import 'package:motiv8_ai/commons/global_providers.dart';
 import 'package:motiv8_ai/commons/loader.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
-import 'package:motiv8_ai/controllers/chat_controllers.dart';
 
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
@@ -59,6 +57,10 @@ void main() async {
   bool isFirstTime =
       await checkIfFirstTime(); // Add your logic to determine if it's the first time launching the app
 
+  final userid = await loadUserIdFromPrefs();
+
+  print('the user id $userid');
+
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final navigatorKey = GlobalKey<NavigatorState>();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -85,6 +87,7 @@ class MyApp extends ConsumerWidget {
     final themeData = ref.watch(themeProvider);
     final isDark = themeData.colorScheme.brightness == Brightness.dark;
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
       theme: themeData,

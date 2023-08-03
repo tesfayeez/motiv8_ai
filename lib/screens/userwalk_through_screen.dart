@@ -4,9 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
-import 'package:motiv8_ai/widgets/account_textfields.dart';
 import 'package:motiv8_ai/widgets/presenting_animation_widget.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 

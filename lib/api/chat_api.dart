@@ -94,7 +94,7 @@ class ChatAPI implements IChatAPI {
         {
           "role": "user",
           "content":
-              "Timeline: Start Date: ${goal.startDate?.toIso8601String()}, End Date: ${goal.endDate?.toIso8601String()}"
+              "Timeline: Start Date: ${goal.startDate.toIso8601String()}, End Date: ${goal.endDate.toIso8601String()}"
         },
         {"role": "user", "content": "Milestones: ${goal.milestones}"},
         // {"role": "user", "content": "Challenges: ${goal.challenges}"},

@@ -10,6 +10,7 @@ import 'package:motiv8_ai/screens/signup_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
+import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/social_login_button.dart';
 
 class GeneralLoginScreen extends ConsumerStatefulWidget {
@@ -33,7 +34,7 @@ class _GeneralLoginScreenState extends ConsumerState<GeneralLoginScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.onBackground,
       body: isLoading
-          ? const Loader()
+          ? CustomProgressIndicator()
           : SafeArea(
               child: SingleChildScrollView(
                 child: Padding(

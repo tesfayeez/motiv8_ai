@@ -8,7 +8,6 @@ import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
-import 'package:motiv8_ai/screens/task_view_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/add_goals_text_field.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
@@ -17,6 +16,7 @@ import 'package:motiv8_ai/widgets/custom_date_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class AddGoalScreen extends ConsumerStatefulWidget {
+  final GoalTask? task;
   static Route route() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) =>
@@ -30,7 +30,10 @@ class AddGoalScreen extends ConsumerStatefulWidget {
     );
   }
 
-  const AddGoalScreen({Key? key}) : super(key: key);
+  const AddGoalScreen({
+    Key? key,
+    this.task,
+  }) : super(key: key);
 
   @override
   _AddGoalScreenState createState() => _AddGoalScreenState();
@@ -58,6 +61,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
+    final isTask = widget.task != null;
     if (ref.watch(currentUserProvider) != null) {
       // currentUser = ref.watch(currentUserProvider);
     }
@@ -99,7 +103,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
         isClosePresent: false,
         isCloseOnTheRight: true,
         isBackPresent: false,
-        title: 'Add Task',
+        title: isTask ? 'Edit Task' : 'Add Task',
         isCenterTitle: true,
       ),
       body: SafeArea(
@@ -154,16 +158,18 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
               SectionWidget(
                 title: 'Name',
                 controller: titleController,
-                hintText: 'Enter Task name',
+                hintText: isTask ? widget.task!.name : 'Enter Task name',
               ),
               SectionWidget(
                 title: 'Description',
                 controller: descriptionController,
-                hintText: 'Enter Task Description',
+                hintText: isTask
+                    ? widget.task!.description
+                    : 'Enter Task Description',
                 isHeightGrow: true,
               ),
               SectionWidget(
-                hintText: 'Select Date',
+                hintText: isTask ? widget.task!.date.toString() : 'Select Date',
                 title: 'Task Date',
                 controller: targetDateController,
                 isDatePicker: true,
@@ -397,7 +403,7 @@ class GoalsDropdown extends StatelessWidget {
             value: value,
             child: Text(
               capitalize(value.name),
-              style: Theme.of(context).textTheme.bodyText1,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           );
         }).toList(),

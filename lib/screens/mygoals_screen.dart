@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/screens/goal_creation_screen.dart';
 import 'package:motiv8_ai/screens/task_view_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
+import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/goal_card_widget.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 
@@ -30,7 +32,7 @@ class MyGoalsScreen extends ConsumerWidget {
             : ModalRoute.of(context)?.canPop ?? false,
         isCenterTitle: true,
         isClosePresent: false,
-        isBottomLinePresent: true,
+        isBottomLinePresent: false,
       ),
       body: SingleChildScrollView(
           child: ref
@@ -80,9 +82,7 @@ class MyGoalsScreen extends ConsumerWidget {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.of(context).push(
-                                  GoalCreationScreen.route(
-                                      showBackButton: true));
+                              showAddGoalModal(context);
                             },
                             child: SvgPicture.asset('assets/nogoals.svg',
                                 semanticsLabel: 'Acme Logo'),

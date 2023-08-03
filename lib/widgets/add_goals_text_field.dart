@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 
@@ -12,6 +11,8 @@ class GoalsTextField extends ConsumerWidget {
   final TextEditingController controller;
   final bool isHeightGrow;
   final FocusNode? focusNode;
+
+  final String? value;
 
   // The custom border to be used by the text field.
   static const OutlineInputBorder customBorder = OutlineInputBorder(
@@ -25,6 +26,7 @@ class GoalsTextField extends ConsumerWidget {
     required this.controller,
     this.isHeightGrow = false,
     this.focusNode,
+    this.value,
   });
 
   @override

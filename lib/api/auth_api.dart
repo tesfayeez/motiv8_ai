@@ -5,6 +5,7 @@ import 'package:motiv8_ai/api/user_api.dart';
 import 'package:motiv8_ai/commons/global_providers.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:motiv8_ai/commons/typedef.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/user_model.dart';
 
 final authAPIProvider = Provider((ref) {
@@ -96,6 +97,7 @@ class AuthAPI implements IAuthAPI {
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
+      saveUserIdToPrefs(userCredential.user!.uid);
       return right(userCredential);
     } on FirebaseAuthException catch (e, stackTrace) {
       return left(
@@ -113,7 +115,7 @@ class AuthAPI implements IAuthAPI {
     try {
       await _auth.signOut();
       _userApi.clearCache();
-
+      saveUserIdToPrefs('');
       return right(null);
     } on FirebaseAuthException catch (e, stackTrace) {
       return left(
@@ -150,6 +152,7 @@ class AuthAPI implements IAuthAPI {
       }
 
       final googleAuthCredential = await _getGoogleAuthCredential(googleUser);
+
       final userCredential =
           await _auth.signInWithCredential(googleAuthCredential);
       await _userApi.createUser(UserModel(
@@ -159,6 +162,7 @@ class AuthAPI implements IAuthAPI {
           profilePic: googleUser.photoUrl ??
               '' // You'll need to get the interests from somewhere
           ));
+      saveUserIdToPrefs(userCredential.user!.uid);
       return right(userCredential);
     } catch (e, stackTrace) {
       return left(Failure(e.toString(), stackTrace));

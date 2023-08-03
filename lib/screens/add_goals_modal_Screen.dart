@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
-import 'package:motiv8_ai/controllers/chat_controllers.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/screens/goal_task_screen.dart';
@@ -247,6 +246,7 @@ class _AddGoalsModalScreenState extends ConsumerState<AddGoalsModalScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 5),
                       child: TaskBreakdownWidget(
+                        color: theme.colorScheme.primary,
                         controller: taskBreakdownPreferenceController,
                       ),
                     ),

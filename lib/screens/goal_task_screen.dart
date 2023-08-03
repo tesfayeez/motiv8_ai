@@ -6,8 +6,6 @@ import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
-import 'package:motiv8_ai/widgets/animated_loading_indicator.dart';
-import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/time_line_widget.dart';
@@ -54,7 +52,6 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ... your code
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: SizedBox(
@@ -69,7 +66,6 @@ class _GoalTasksScreenState extends ConsumerState<GoalTasksScreen> {
                 ),
               ),
               const SizedBox(height: 25),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Text(

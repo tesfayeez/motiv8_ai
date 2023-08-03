@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/chat_controllers.dart';
-import 'package:motiv8_ai/controllers/goal_controllers.dart';
 
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';

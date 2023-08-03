@@ -76,8 +76,9 @@ enum TaskBreakdown { daily, weekly, milestones }
 
 class TaskBreakdownWidget extends StatefulWidget {
   final TextEditingController controller;
+  final Color color;
 
-  TaskBreakdownWidget({required this.controller});
+  TaskBreakdownWidget({required this.controller, required this.color});
 
   @override
   _TaskBreakdownWidgetState createState() => _TaskBreakdownWidgetState();
@@ -92,7 +93,7 @@ class _TaskBreakdownWidgetState extends State<TaskBreakdownWidget> {
       spacing: 25.0, // space between the chips
       children: TaskBreakdown.values.map((TaskBreakdown taskBreakdown) {
         return ChoiceChip(
-          selectedColor: Colors.blue,
+          selectedColor: widget.color,
           label: Text(
             taskBreakdown.toString().split('.').last,
             style: GoogleFonts.poppins(

@@ -624,6 +624,7 @@ class SectionWidget extends StatelessWidget {
         else if (isRadioButton)
           SizedBox(
             child: TaskBreakdownWidget(
+              color: Colors.blue,
               controller: controller,
             ),
           )

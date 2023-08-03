@@ -1,21 +1,18 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
-import 'package:motiv8_ai/commons/loader.dart';
-import 'package:motiv8_ai/commons/pallete_colors.dart';
 import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/main.dart';
 import 'package:motiv8_ai/screens/login_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
-import 'package:motiv8_ai/screens/userwalk_through_screen.dart';
 import 'package:motiv8_ai/widgets/custom_button.dart';
 import 'package:motiv8_ai/widgets/horizontal_with_text_widget.dart';
 import 'package:motiv8_ai/widgets/platform_specific_progress_indicator.dart';
 import 'package:motiv8_ai/widgets/social_login_button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Import any other required classes and widgets here
@@ -43,7 +40,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     passwordController.dispose();
   }
 
+  void onLoginWithGoogle() {
+    ref.read(authControllerProvider.notifier).onLoginWithGoogle(context);
+  }
+
   void onSignUp() {
+    HapticFeedback.selectionClick();
     setState(() {
       emailError = InputValidator.validateEmail(emailController.text);
       passwordError = InputValidator.validatePassword(passwordController.text);
@@ -219,7 +221,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 ),
                 SocialLoginButton(
                   text: 'Sign up With Google',
-                  onPressed: () {},
+                  onPressed: () {
+                    onLoginWithGoogle();
+                  },
                   svgAssetName: 'assets/google_logo.svg',
                 ),
                 const SizedBox(

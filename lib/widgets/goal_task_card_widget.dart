@@ -4,10 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:motiv8_ai/commons/utils.dart';
-import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
-import 'package:motiv8_ai/widgets/time_line_widget.dart';
 
 class GoalTaskCardWidget extends ConsumerWidget {
   final GoalTask? goalTask;

@@ -6,10 +6,6 @@ import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 
 import 'package:step_progress_indicator/step_progress_indicator.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:confetti/confetti.dart';
-import 'package:intl/intl.dart';
 
 class GoalCard extends StatefulWidget {
   final Goal goalModel;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:motiv8_ai/main.dart';
 
 class SnackbarController extends StateNotifier<bool> {
   SnackbarController() : super(false);

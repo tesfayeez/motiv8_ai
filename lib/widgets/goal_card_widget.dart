@@ -1,10 +1,8 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:motiv8_ai/api/local_notifications_api.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
@@ -109,19 +107,14 @@ class _GoalCardState extends ConsumerState<GoalCard> {
             if (widget.goalTaskModel != null)
               SimpleDialogOption(
                 onPressed: () {
-                  ref.read(notificationServiceProvider).showNotificationAtTime(
-                        id: Random().nextInt(63),
-                        title: 'Hey!did you complete your task?',
-                        body: widget.goalTaskModel!.description,
-                        scheduledTime: widget.goalTaskModel!.taskReminderTime,
-                      );
-
                   Navigator.of(context).pop();
+                  showAddReminderModal(
+                      context: context, task: widget.goalTaskModel!);
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Add Reminder', style: GoogleFonts.poppins()),
+                    Text('Update Reminder', style: GoogleFonts.poppins()),
                     const Icon(Icons.notifications),
                   ],
                 ),
@@ -177,10 +170,12 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                 onPressed: () {
                   // Edit goal
                   // Perform the action for editing the goal here
-                  showDialog(
-                    context: context,
-                    builder: (context) => AddTaskDialog(),
-                  );
+
+                  showAddGoalTaskModal(context, widget.goalTaskModel);
+                  // showDialog(
+                  //   context: context,
+                  //   builder: (context) => AddTaskDialog(),
+                  // );
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -198,6 +193,8 @@ class _GoalCardState extends ConsumerState<GoalCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.goalTaskModel != null)
+      print(widget.goalTaskModel!.taskReminderTime);
     double width = MediaQuery.of(context).size.width * 0.93;
     int percentage;
     final theme = ref.watch(themeProvider);
@@ -232,8 +229,7 @@ class _GoalCardState extends ConsumerState<GoalCard> {
         onTap: () {
           widget.onTap();
           HapticFeedback.lightImpact();
-
-          print("Clicked $name");
+          print("clicked $name");
         },
         child: SizedBox(
           width: width,
@@ -304,39 +300,31 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                   ),
                                 ),
                                 const SizedBox(height: 5.0),
-                                widget.goalModel != null
-                                    ? Row(
-                                        children: [
-                                          Text(
-                                            DateFormat.yMMMd().format(
-                                                widget.goalModel!.startDate),
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 13,
-                                              color: theme.colorScheme.tertiary,
-                                            ),
-                                          ),
-                                          Icon(
-                                            Icons.arrow_forward,
-                                            color: theme.colorScheme.onTertiary,
-                                          ),
-                                          Text(
-                                            DateFormat.yMMMd().format(
-                                                widget.goalModel!.endDate),
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 13,
-                                              color: theme.colorScheme.tertiary,
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    : Text(
-                                        'Task Date: ${DateFormat.yMMMd().format(widget.goalDate)}',
+                                if (widget.goalModel != null)
+                                  Row(
+                                    children: [
+                                      Text(
+                                        DateFormat.yMMMd().format(
+                                            widget.goalModel!.startDate),
                                         style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                          color: theme.colorScheme.tertiary
-                                              .withOpacity(0.8),
+                                          fontSize: 13,
+                                          color: theme.colorScheme.tertiary,
                                         ),
                                       ),
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        color: theme.colorScheme.onTertiary,
+                                      ),
+                                      Text(
+                                        DateFormat.yMMMd()
+                                            .format(widget.goalModel!.endDate),
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 13,
+                                          color: theme.colorScheme.tertiary,
+                                        ),
+                                      )
+                                    ],
+                                  )
                               ],
                             ),
                           ),
@@ -394,42 +382,34 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                         color: theme.colorScheme.tertiary,
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Chip(
-                          //   autofocus: true,
-                          //   label: Text(
-                          //     'High Priority',
-                          //     style: GoogleFonts.poppins(
-                          //       color: Colors.red,
-                          //       fontWeight: FontWeight.w500,
-                          //     ),
-                          //   ),
-                          // ),
                           Row(
                             children: [
-                              // Icon(
-                              //   Icons.alarm,
-                              //   color: theme.colorScheme.primary,
-                              //   size: 18,
-                              // ),
-                              // const SizedBox(
-                              //   width: 2,
-                              // ),
-                              // Text(
-                              //   widget.alarmTime,
-                              //   style: GoogleFonts.poppins(
-                              //       fontSize: 12,
-                              //       color: theme.colorScheme.tertiary),
-                              // ),
-                              // const SizedBox(width: 8.0),
-
+                              SvgPicture.asset(
+                                "assets/uit_calender.svg",
+                                color: theme.colorScheme.primary,
+                                height: 20,
+                              ),
+                              const SizedBox(
+                                width: 3,
+                              ),
+                              Text(
+                                DateFormat.yMMMd().format(widget.goalDate),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: theme.colorScheme.tertiary
+                                      .withOpacity(0.8),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
                               SvgPicture.asset(
                                 'assets/alarm.svg',
                                 width: 12,
                                 color: theme.colorScheme.primary,
                               ),
-
                               const SizedBox(
                                 width: 3,
                               ),
@@ -442,14 +422,37 @@ class _GoalCardState extends ConsumerState<GoalCard> {
                                     : widget.goalModel!.reminderTime
                                         .format(context),
                                 style: GoogleFonts.poppins(
-                                    fontSize: 11,
-                                    color: theme.colorScheme.tertiary),
-                              ),
-                              const SizedBox(
-                                width: 4,
+                                  fontSize: 11,
+                                  color: theme.colorScheme.tertiary
+                                      .withOpacity(0.8),
+                                ),
                               ),
                             ],
-                          )
+                          ),
+                          GestureDetector(
+                            onTap: () => showAddReminderModal(
+                                context: context,
+                                task: widget.goalTaskModel!,
+                                isitReschedule: true),
+                            child: Container(
+                              padding: EdgeInsets.all(5),
+                              margin: EdgeInsets.all(2),
+                              decoration: cardBoxDecoration(
+                                  theme.colorScheme.primary, isDark),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Reschedule",
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: isDark
+                                            ? theme.colorScheme.tertiary
+                                            : Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(width: 10.0),

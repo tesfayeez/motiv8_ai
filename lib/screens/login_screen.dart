@@ -1,10 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/auth_text_field.dart';
-import 'package:motiv8_ai/commons/pallete_colors.dart';
-import 'package:motiv8_ai/commons/validators.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
 import 'package:motiv8_ai/screens/forgot_password.screen.dart';
 import 'package:motiv8_ai/screens/signup_screen.dart';
@@ -42,6 +41,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void onLogin() {
+    HapticFeedback.selectionClick();
     ref.read(authControllerProvider.notifier).login(
           email: emailController.text,
           password: passwordController.text,
@@ -126,13 +126,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextButton(
                         onPressed: () {
                           Navigator.of(context).push(
-                            UserWalkthroughScreen.route(),
+                            ForgotPasswordScreen.route(),
                           );
                         },
                         child: Text(
                           'Forgot Password?',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w300,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
                             color: theme.colorScheme.primary,
                           ),
                         )),

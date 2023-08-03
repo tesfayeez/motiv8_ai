@@ -200,7 +200,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -322,7 +321,8 @@ class CalendarView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ThemeData themeData = ref.watch(themeProvider);
     final calendarData = ref.watch(calendarStateProvider);
-
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Select Date',
@@ -334,7 +334,7 @@ class CalendarView extends ConsumerWidget {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
         child: TableCalendar(
-          firstDay: DateTime.utc(2023, 04, 16),
+          firstDay: today,
           lastDay: DateTime.utc(2030, 3, 14),
           focusedDay: calendarData.focusedDay,
           availableCalendarFormats: const {CalendarFormat.month: 'Month'},

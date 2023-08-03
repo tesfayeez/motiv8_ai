@@ -1,11 +1,17 @@
+import 'dart:ui' as ui;
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:motiv8_ai/commons/ThemeData.dart';
 import 'package:motiv8_ai/commons/utils.dart';
+import 'package:motiv8_ai/controllers/quotes_controllers.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
-import 'dart:math';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
+GlobalKey _globalKey = GlobalKey();
 
 class MotivationalQuotesScreen extends ConsumerWidget {
   MotivationalQuotesScreen({Key? key}) : super(key: key);
@@ -32,51 +38,96 @@ class MotivationalQuotesScreen extends ConsumerWidget {
     "Your time is limited, don't waste it living someone else's life. - Steve Jobs",
     "Don't let the fear of losing be greater than the excitement of winning. - Robert Kiyosaki",
   ];
+  Future<void> shareQuote() async {
+    try {
+      final boundary = _globalKey.currentContext!.findRenderObject()
+          as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final tempPath = tempDir.path;
+      final imageFile = File('$tempPath/quote.png');
+      await imageFile.writeAsBytes(pngBytes);
+
+      final xFile = XFile(imageFile.path);
+      await Share.shareXFiles([xFile]);
+    } catch (e) {
+      print('Error sharing quote: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
     final isDark = theme.colorScheme.brightness == Brightness.dark;
-    return Scaffold(
-      body: Stack(
-        children: [
-          GridView.count(
-            crossAxisCount: 2,
-            children: List.generate(8, (index) {
-              return Opacity(
-                opacity: index < 6 ? 0.3 : 0.3,
-                child: SvgPicture.asset('assets/logo_svg.svg'),
-              );
-            }),
-          ),
-          PageView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: quotes.length,
-            itemBuilder: (context, index) {
-              return Align(
-                alignment: Alignment.center,
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  width: MediaQuery.of(context).size.height * 0.4,
-                  decoration: goalCardDecoration(theme.colorScheme
-                          .background // Customize the background color if needed
-                      ),
-                  child: Center(
-                    child: Text(
-                      quotes[index],
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: theme.colorScheme
-                            .tertiary, // Customize the text color if needed
+    final quotesController = ref.watch(quotesControllerProvider);
+    return RepaintBoundary(
+      key: _globalKey,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            GridView.count(
+              crossAxisCount: 2,
+              children: List.generate(8, (index) {
+                return Opacity(
+                  opacity: index < 6 ? 0.3 : 0.3,
+                  child: SvgPicture.asset('assets/logo_svg.svg'),
+                );
+              }),
+            ),
+            PageView.builder(
+              scrollDirection: Axis.vertical,
+              itemCount: quotes.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        height: MediaQuery.of(context).size.height * 0.3,
+                        width: MediaQuery.of(context).size.height * 0.4,
+                        decoration: goalCardDecoration(theme.colorScheme
+                                .background // Customize the background color if needed
+                            ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              quotes[index],
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: theme.colorScheme
+                                    .tertiary, // Customize the text color if needed
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.03,
+                    ),
+                    FloatingActionButton(
+                      backgroundColor: theme.colorScheme.background,
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        shareQuote();
+                      },
+                      child: Icon(
+                        Icons.adaptive.share,
+                        color: theme.colorScheme.tertiary,
+                      ),
+                    )
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

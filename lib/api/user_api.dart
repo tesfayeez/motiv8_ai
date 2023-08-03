@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:motiv8_ai/api/auth_api.dart';
 import 'package:motiv8_ai/commons/global_providers.dart';
 import 'package:motiv8_ai/commons/typedef.dart';
+import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/user_model.dart';
 
 final userApiProvider =
@@ -45,6 +46,7 @@ class UserAPI implements IUserAPI {
       final userSnapshot = await userDocument.get();
       final createdUser =
           UserModel.fromMap(userSnapshot.data()!..['id'] = userSnapshot.id);
+      saveUserIdToPrefs(userSnapshot.id);
       return right(createdUser);
     } catch (e, st) {
       return left(Failure(e.toString(), st));
@@ -56,6 +58,7 @@ class UserAPI implements IUserAPI {
     try {
       _cache.remove(userId);
       await _usersCollection.doc(userId).delete();
+      saveUserIdToPrefs('');
       return right(unit);
     } catch (e, st) {
       return left(Failure(e.toString(), st));
@@ -82,20 +85,30 @@ class UserAPI implements IUserAPI {
   Stream<UserModel> getUser(String uid) {
     // print("user id is $uid");
 
-    if (_cache.containsKey(uid)) {
-      return _cache[uid]!;
-    } else {
-      final userStream = _usersCollection.doc(uid).snapshots().map((snapshot) {
-        if (snapshot.exists) {
-          return UserModel.fromMap(snapshot.data()!..['id'] = snapshot.id);
-        } else {
-          throw Exception('User not found');
-        }
-      });
+    // if (_cache.containsKey(uid)) {
+    //   return _cache[uid]!;
+    // } else {
+    //   final userStream = _usersCollection.doc(uid).snapshots().map((snapshot) {
+    //     if (snapshot.exists) {
+    //       return UserModel.fromMap(snapshot.data()!..['id'] = snapshot.id);
+    //     } else {
+    //       throw Exception('User not found');
+    //     }
+    //   });
 
-      _cache[uid] = userStream;
-      return userStream;
-    }
+    //   _cache[uid] = userStream;
+    //   return userStream;
+    // }
+    final userStream = _usersCollection.doc(uid).snapshots().map((snapshot) {
+      if (snapshot.exists) {
+        return UserModel.fromMap(snapshot.data()!..['id'] = snapshot.id);
+      } else {
+        throw Exception('User not found');
+      }
+    });
+
+    _cache[uid] = userStream;
+    return userStream;
   }
 
   void clearCache() {
