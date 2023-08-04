@@ -10,7 +10,6 @@ import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/add_goals_modal_Screen.dart';
 import 'package:motiv8_ai/screens/add_goals_screen.dart';
 import 'package:motiv8_ai/screens/add_reminder_screen.dart';
-import 'package:motiv8_ai/screens/themes_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 bool isSameDay(DateTime? date1, DateTime? date2) {

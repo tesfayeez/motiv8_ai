@@ -171,6 +171,35 @@ class AuthController extends StateNotifier<bool> {
     );
   }
 
+  void onLoginWithApple(BuildContext context) async {
+    state = true;
+    final result = await _authAPI.signInWithApple();
+    state = false;
+
+    result.fold(
+      (failure) {
+        showSnackBar(failure.message, context);
+      },
+      (user) async {
+        String? users = user.user!.email;
+        print(" email for special $users");
+        // handle successful login
+        bool isFirstTime = await checkIfFirstTime();
+        UserWalkthroughScreen.route();
+        if (isFirstTime) {
+          print("its here at email");
+          Navigator.of(context).pushReplacement(UserWalkthroughScreen.route());
+        } else {
+          Navigator.of(context).pushReplacement(HomeViewScreen.route());
+        }
+
+        // _navigatorKey.currentState?.pushReplacement(
+        //   isFirstTime ? UserWalkthroughScreen.route() : HomeViewScreen.route(),
+        // );
+      },
+    );
+  }
+
   void showSnackBar(String message, BuildContext context) {
     final snackbarController = _ref.watch(snackbarProvider.notifier);
     snackbarController.show(context, message);

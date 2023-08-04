@@ -7,6 +7,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:motiv8_ai/commons/typedef.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/user_model.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 final authAPIProvider = Provider((ref) {
   final auth = ref.watch(firebaseAuthProvider);
@@ -30,7 +31,7 @@ abstract class IAuthAPI {
   FutureEither<UserCredential> signInWithGoogle();
   FutureEither<void> resetPassword(String email);
 
-  // FutureEither<UserCredential> signInWithApple();
+  FutureEither<UserCredential> signInWithApple();
   // Future<UserModel?> getCurrentUser();
   User? getCurrentUser();
 }
@@ -51,16 +52,6 @@ class AuthAPI implements IAuthAPI {
   Stream<User?> currentUserAccount() {
     return _auth.authStateChanges();
   }
-
-  // @override
-  // Future<UserModel?> getCurrentUser() async {
-  //   final firebaseUser = _auth.currentUser;
-  //   if (firebaseUser != null) {
-  //     print('firebaseuser ${firebaseUser.uid}');
-  //     return await _userApi.getUser(firebaseUser.uid);
-  //   }
-  //   return null;
-  // }
 
   @override
   FutureEither<User> signup({
@@ -140,6 +131,39 @@ class AuthAPI implements IAuthAPI {
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
+  }
+
+  @override
+  FutureEither<UserCredential> signInWithApple() async {
+    try {
+      final appleIdCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oAuthProvider = OAuthProvider("apple.com");
+      final credential = oAuthProvider.credential(
+        idToken: appleIdCredential.identityToken,
+        accessToken: appleIdCredential.authorizationCode,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      await _userApi.createUser(UserModel(
+          id: userCredential.user!.uid,
+          name: appleIdCredential.givenName ?? '',
+          email: appleIdCredential.email ?? '',
+          profilePic: ''
+          // You'll need to get the interests from somewhere
+          ));
+      saveUserIdToPrefs(userCredential.user!.uid);
+      return right(userCredential);
+    } catch (e, stackTrace) {
+      return left(
+        Failure(e.toString(), stackTrace),
+      );
+    }
   }
 
   @override
