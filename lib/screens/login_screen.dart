@@ -54,6 +54,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         passwordController.text.isNotEmpty;
   }
 
+  void onLoginWithApple() {
+    ref.read(authControllerProvider.notifier).onLoginWithApple(context);
+  }
+
   void onLoginWithGoogle() {
     ref.read(authControllerProvider.notifier).onLoginWithGoogle(context);
   }
@@ -168,7 +172,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 SocialLoginButton(
                   text: 'Sign in With Apple',
-                  onPressed: () {},
+                  onPressed: onLoginWithApple,
                   svgAssetName: 'assets/apple_logo.svg',
                 ),
                 const SizedBox(
