@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
+import 'package:motiv8_ai/screens/notifications_screen.dart';
 import 'package:motiv8_ai/widgets/goal_header_time_line.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
 
@@ -86,15 +87,17 @@ class TaskListConsumer extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            capitalize(isGoalPresent ? 'Your Tasks 🎯 😄' : ''),
-            style: GoogleFonts.poppins(
-              fontSize: 22,
-              color: color,
+          ExpandableTile(
+            leading: Text(
+              capitalize(isGoalPresent ? 'Your Tasks 🎯 😄' : ''),
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                color: color,
+              ),
             ),
+            contentBuilder: () => GoalHeaderTimeline(tasks: goalTaskList),
           ),
           const SizedBox(height: 5),
-          GoalHeaderTimeline(tasks: goalTaskList),
         ],
       );
     } else {

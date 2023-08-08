@@ -155,14 +155,33 @@ class GoalController extends StateNotifier<bool> {
     state = false;
   }
 
-  Stream<List<Goal>> getGoalsStream(String userID, DateTime? selectedDate) {
-    // print("here at getGoalsStream $userID");
-    // print("here at getGoalsStream $selectedDate");
+  // Stream<List<Goal>> getGoalsStream(String userID, DateTime? selectedDate) {
+  //   // print("here at getGoalsStream $userID");
+  //   // print("here at getGoalsStream $selectedDate");
 
-    return _goalAPI.goalsStream(userID).map((snapshot) {
-      List<Goal> goals = snapshot.docs
-          .map((doc) => Goal.fromMap(doc.data()..['id'] = doc.id))
-          .where((goal) {
+  //   return _goalAPI.goalsStream(userID).map((snapshot) {
+  //     List<Goal> goals = snapshot.docs
+  //         .map((doc) => Goal.fromMap(doc.data()..['id'] = doc.id))
+  //         .where((goal) {
+  //       if (selectedDate != null) {
+  //         return goal.startDate.day == selectedDate.day &&
+  //             goal.startDate.month == selectedDate.month &&
+  //             goal.startDate.year == selectedDate.year;
+  //       } else {
+  //         // Handle the case when selectedDate is null
+  //         // For example, you can choose to include all goals
+  //         return true;
+  //       }
+  //     }).toList();
+
+  //     goals.forEach((goal) => print(goal)); // Print each goal
+
+  //     return goals;
+  //   });
+  // }
+  Stream<List<Goal>> getGoalsStream(String userID, DateTime? selectedDate) {
+    return _goalAPI.goalsStream(userID).map((goals) {
+      return goals.where((goal) {
         if (selectedDate != null) {
           return goal.startDate.day == selectedDate.day &&
               goal.startDate.month == selectedDate.month &&
@@ -173,46 +192,76 @@ class GoalController extends StateNotifier<bool> {
           return true;
         }
       }).toList();
-
-      goals.forEach((goal) => print(goal)); // Print each goal
-
-      return goals;
     });
   }
 
-  Stream<List<Goal>> getAllGoalsStream(String userID) {
-    return _goalAPI.goalsStream(userID).map((snapshot) {
-      List<Goal> goals = snapshot.docs
-          .map((doc) => Goal.fromMap(doc.data()..['id'] = doc.id))
-          .toList();
+  // Stream<List<Goal>> getAllGoalsStream(String userID) {
+  //   return _goalAPI.goalsStream(userID).map((snapshot) {
+  //     List<Goal> goals = snapshot.docs
+  //         .map((doc) => Goal.fromMap(doc.data()..['id'] = doc.id))
+  //         .toList();
 
+  //     goals.sort((a, b) => a.startDate.compareTo(b.startDate));
+
+  //     goals.forEach((goal) => print(goal)); // Print each goal
+
+  //     return goals;
+  //   });
+  // }
+  Stream<List<Goal>> getAllGoalsStream(String userID) {
+    return _goalAPI.goalsStream(userID).map((goals) {
       goals.sort((a, b) => a.startDate.compareTo(b.startDate));
 
-      goals.forEach((goal) => print(goal)); // Print each goal
-
       return goals;
     });
   }
 
+  // Stream<List<GoalTask>> getGoalTaskStream(
+  //     String userID, DateTime? selectedDate) {
+  //   return _goalAPI.goalsStream(userID).map((snapshot) {
+  //     List<GoalTask> goalTasks = [];
+
+  //     snapshot.docs.forEach((doc) {
+  //       final goal = Goal.fromMap(doc.data()..['id'] = doc.id);
+  //       final tasks = goal.tasks ?? []; // Retrieve the tasks from the goal
+
+  //       final filteredTasks = tasks.where((task) =>
+  //           task.date.day == selectedDate?.day &&
+  //           task.date.month == selectedDate?.month &&
+  //           task.date.year == selectedDate?.year);
+
+  //       goalTasks
+  //           .addAll(filteredTasks); // Add filtered tasks to the goalTasks list
+  //     });
+
+  //     goalTasks.forEach((goalTask) => print(goalTask)); // Print each goal task
+
+  //     return goalTasks;
+  //   });
+  // }
   Stream<List<GoalTask>> getGoalTaskStream(
       String userID, DateTime? selectedDate) {
-    return _goalAPI.goalsStream(userID).map((snapshot) {
+    return _goalAPI.goalsStream(userID).map((goals) {
       List<GoalTask> goalTasks = [];
 
-      snapshot.docs.forEach((doc) {
-        final goal = Goal.fromMap(doc.data()..['id'] = doc.id);
+      goals.forEach((goal) {
         final tasks = goal.tasks ?? []; // Retrieve the tasks from the goal
 
-        final filteredTasks = tasks.where((task) =>
-            task.date.day == selectedDate?.day &&
-            task.date.month == selectedDate?.month &&
-            task.date.year == selectedDate?.year);
+        final filteredTasks = tasks.where((task) {
+          if (selectedDate != null) {
+            return task.date.day == selectedDate.day &&
+                task.date.month == selectedDate.month &&
+                task.date.year == selectedDate.year;
+          } else {
+            // Handle the case when selectedDate is null
+            // For example, you can choose to include all tasks
+            return true;
+          }
+        });
 
         goalTasks
             .addAll(filteredTasks); // Add filtered tasks to the goalTasks list
       });
-
-      goalTasks.forEach((goalTask) => print(goalTask)); // Print each goal task
 
       return goalTasks;
     });
@@ -390,20 +439,60 @@ class GoalController extends StateNotifier<bool> {
   }
 
   // state = false;
+  // Stream<GoalProgress> getGoalTaskProgressStream(
+  //     String userID, DateTime? selectedDate) {
+  //   return _goalAPI.goalsStream(userID).map((snapshot) {
+  //     List<GoalTask> goalTasks = [];
+  //     int completedTaskCount = 0;
+
+  //     snapshot.docs.forEach((doc) {
+  //       final goal = Goal.fromMap(doc.data()..['id'] = doc.id);
+  //       final tasks = goal.tasks ?? []; // Retrieve the tasks from the goal
+
+  //       final filteredTasks = tasks.where((task) =>
+  //           task.date.day == selectedDate?.day &&
+  //           task.date.month == selectedDate?.month &&
+  //           task.date.year == selectedDate?.year);
+
+  //       goalTasks
+  //           .addAll(filteredTasks); // Add filtered tasks to the goalTasks list
+
+  //       // Increment the completedTaskCount if the task is completed
+  //       filteredTasks.forEach((task) {
+  //         if (task.isCompleted == true) {
+  //           completedTaskCount++;
+  //         }
+  //       });
+  //     });
+
+  //     // goalTasks.forEach((goalTask) => print(goalTask)); // Print each goal task
+
+  //     return GoalProgress(
+  //         total: goalTasks.length,
+  //         tasks: goalTasks,
+  //         completedTaskCount: completedTaskCount);
+  //   });
+  // }
   Stream<GoalProgress> getGoalTaskProgressStream(
       String userID, DateTime? selectedDate) {
-    return _goalAPI.goalsStream(userID).map((snapshot) {
+    return _goalAPI.goalsStream(userID).map((goals) {
       List<GoalTask> goalTasks = [];
       int completedTaskCount = 0;
 
-      snapshot.docs.forEach((doc) {
-        final goal = Goal.fromMap(doc.data()..['id'] = doc.id);
+      goals.forEach((goal) {
         final tasks = goal.tasks ?? []; // Retrieve the tasks from the goal
 
-        final filteredTasks = tasks.where((task) =>
-            task.date.day == selectedDate?.day &&
-            task.date.month == selectedDate?.month &&
-            task.date.year == selectedDate?.year);
+        final filteredTasks = tasks.where((task) {
+          if (selectedDate != null) {
+            return task.date.day == selectedDate.day &&
+                task.date.month == selectedDate.month &&
+                task.date.year == selectedDate.year;
+          } else {
+            // Handle the case when selectedDate is null
+            // For example, you can choose to include all tasks
+            return true;
+          }
+        });
 
         goalTasks
             .addAll(filteredTasks); // Add filtered tasks to the goalTasks list
@@ -415,8 +504,6 @@ class GoalController extends StateNotifier<bool> {
           }
         });
       });
-
-      // goalTasks.forEach((goalTask) => print(goalTask)); // Print each goal task
 
       return GoalProgress(
           total: goalTasks.length,
@@ -430,181 +517,6 @@ class GoalController extends StateNotifier<bool> {
     snackbarController.show(context, message);
   }
 }
-
-// import 'package:flutter/material.dart';
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:motiv8_ai/api/goal_api.dart';
-// import 'package:motiv8_ai/commons/snack_bar_provider.dart';
-// import 'package:motiv8_ai/controllers/chat_controllers.dart';
-// import 'package:motiv8_ai/main.dart';
-// import 'package:motiv8_ai/models/goals_model.dart';
-// import 'package:motiv8_ai/models/goaltask_models.dart';
-// import 'package:motiv8_ai/widgets/caledarView_widget.dart';
-// import 'package:uuid/uuid.dart';
-
-// final selectedTaskProvider = StateProvider<GoalTask?>((ref) => null);
-// final getGoalProgressStreamProvider =
-//     StreamProvider.autoDispose.family<GoalProgress, String>((ref, userID) {
-//   final goalController = ref.watch(goalControllerProvider.notifier);
-//   final selectedDate = ref.watch(calendarStateProvider).selectedDay;
-//   return goalController.getGoalTaskProgressStream(userID, selectedDate);
-// });
-
-// final goalControllerProvider =
-//     StateNotifierProvider<GoalController, bool>((ref) {
-//   return GoalController(
-//     ref: ref,
-//     goalAPI: ref.watch(goalApiProvider),
-//     scaffoldMessengerKey: ref.watch(scaffoldMessengerKeyProvider),
-//     navigatorKey: ref.watch(navigatorKeyProvider),
-//   );
-// });
-
-// final getGoalsStreamProvider =
-//     StreamProvider.autoDispose.family<List<Goal>, String>((ref, userID) {
-//   final goalController = ref.watch(goalControllerProvider.notifier);
-//   return goalController.getGoalsStream(userID);
-// });
-
-// final getAllGoalsStreamProvider =
-//     StreamProvider.autoDispose.family<List<Goal>, String>((ref, userID) {
-//   final goalController = ref.watch(goalControllerProvider.notifier);
-//   return goalController.getAllGoalsStream(userID);
-// });
-
-// final getGoalTaskStreamProvider =
-//     StreamProvider.autoDispose.family<List<GoalTask>, String>((ref, goalID) {
-//   final goalController = ref.watch(goalControllerProvider.notifier);
-//   return goalController.getGoalTaskStream(goalID);
-// });
-
-// final getSingleGoalsStreamProvider =
-//     StreamProvider.autoDispose.family<Goal, String>((ref, goalID) {
-//   final goalController = ref.watch(goalControllerProvider.notifier);
-//   return goalController.getSingleGoalsStream(goalID);
-// });
-
-// final getGoalTaskSubtasksProvider =
-//     FutureProvider.autoDispose.family<List<String>, String>((ref, goalID) {
-//   final goalController = ref.watch(goalControllerProvider.notifier);
-//   return goalController.getGoalTaskSubtasks(goalID);
-// });
-
-// class GoalController extends StateNotifier<bool> {
-//   final ProviderReference ref;
-//   final IGoalAPI goalAPI;
-//   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
-//   final GlobalKey<NavigatorState> navigatorKey;
-
-//   GoalController({
-//     required this.ref,
-//     required this.goalAPI,
-//     required this.scaffoldMessengerKey,
-//     required this.navigatorKey,
-//   }) : super(false);
-
-//   Future<void> createGoal(Goal goal) async {
-//     final result = await goalAPI.createGoal(goal);
-//     result.fold(
-//       (failure) => ref.read(snackbarProvider).show(failure.message),
-//       (goal) => {},
-//     );
-//   }
-
-//   Future<void> deleteGoal(String goalId) async {
-//     final result = await goalAPI.deleteGoal(goalId);
-//     result.fold(
-//       (failure) => ref.read(snackbarProvider).show(failure.message),
-//       (_) => {},
-//     );
-//   }
-
-//   Future<void> updateGoal(Goal goal) async {
-//     final result = await goalAPI.updateGoal(goal);
-//     result.fold(
-//       (failure) => ref.read(snackbarProvider).show(failure.message),
-//       (_) => {},
-//     );
-//   }
-
-//   Stream<List<Goal>> getGoalsStream(String userID) {
-//     return goalAPI.goalsStream(userID).map(
-//           (querySnapshot) => querySnapshot.docs
-//               .map(
-//                 (doc) => Goal.fromMap(doc.data()..['id'] = doc.id),
-//               )
-//               .toList(),
-//         );
-//   }
-
-//   Stream<List<Goal>> getAllGoalsStream(String userID) {
-//     return goalAPI.goalsStream(userID).map(
-//           (querySnapshot) => querySnapshot.docs
-//               .map(
-//                 (doc) => Goal.fromMap(doc.data()..['id'] = doc.id),
-//               )
-//               .toList(),
-//         );
-//   }
-
-//   Stream<Goal> getSingleGoalsStream(String goalID) {
-//     return goalAPI.singleGoalStream(goalID).map(
-//           (doc) => Goal.fromMap(doc.data()..['id'] = doc.id),
-//         );
-//   }
-
-//   Stream<List<GoalTask>> getGoalTaskStream(String goalID) {
-//     return getSingleGoalsStream(goalID).map(
-//       (goal) => goal.tasks,
-//     );
-//   }
-
-//   Future<List<String>> getGoalTaskSubtasks(String goalID) async {
-//     final result = await goalAPI.getGoal(goalID);
-//     return result.fold(
-//       (failure) {
-//         ref.read(snackbarProvider).show(failure.message);
-//         return [];
-//       },
-//       (goal) => goal.tasks.first.subtasks,
-//     );
-//   }
-
-//   Stream<GoalProgress> getGoalTaskProgressStream(String userID, DateTime date) {
-//     return getGoalsStream(userID).map(
-//       (goals) {
-//         final tasks = goals
-//             .expand((goal) => goal.tasks)
-//             .where((task) => task.dueDate.toDate().isAtSameMomentAs(date))
-//             .toList();
-//         final completedTasks = tasks.where((task) => task.completed).toList();
-//         return GoalProgress(
-//           tasks: completedTaskCount,
-//           completedTaskCount: completedTasks.length,
-//           total: tasks.length,
-//         );
-//       },
-//     );
-//   }
-
-//   Future<void> createGoalTask(String goalId, GoalTask task) async {
-//     final result = await goalAPI.createGoalTask(goalId, task);
-//     result.fold(
-//       (failure) => ref.read(snackbarProvider).show(failure.message),
-//       (_) => {},
-//     );
-//   }
-
-//   Future<void> updateGoalTaskSubtasks(
-//       String goalId, String taskId, List<String> subtasks) async {
-//     final result =
-//         await goalAPI.updateGoalTaskSubtasks(goalId, taskId, subtasks);
-//     result.fold(
-//       (failure) => ref.read(snackbarProvider).show(failure.message),
-//       (_) => {},
-//     );
-//   }
-// }
 
 class GoalProgress {
   final List<GoalTask> tasks;

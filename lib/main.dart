@@ -4,20 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:motiv8_ai/api/local_notifications_api.dart';
 
 import 'package:motiv8_ai/commons/global_providers.dart';
 import 'package:motiv8_ai/commons/loader.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/controllers/auth_controllers.dart';
+import 'package:motiv8_ai/models/goals_model.dart';
+import 'package:motiv8_ai/models/goaltask_models.dart';
 
 import 'package:motiv8_ai/screens/general_login_screen.dart';
 import 'package:motiv8_ai/screens/homeview_screen.dart';
 
 import 'package:motiv8_ai/screens/onboarding_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stack_trace/stack_trace.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 // final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -34,6 +39,21 @@ final navigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final appDocumentDirectory = await getApplicationDocumentsDirectory();
+  print('app document directory $appDocumentDirectory');
+
+  Hive.init(appDocumentDirectory.path);
+
+  Hive.registerAdapter(GoalAdapter());
+  Hive.registerAdapter(GoalTaskAdapter());
+  if (!Hive.isBoxOpen('goals')) {
+    await Hive.openBox<Goal>('goals');
+  }
+  if (!Hive.isBoxOpen('goalTasks')) {
+    await Hive.openBox<GoalTask>('goalTasks');
+  }
+
+  WidgetsBinding.instance?.addObserver(LifecycleObserver());
   final container = ProviderContainer();
 
   await container.read(firebaseInitializerProvider);
@@ -41,6 +61,21 @@ void main() async {
   tz.initializeTimeZones();
   FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+  FlutterError.demangleStackTrace = (StackTrace stack) {
+    if (stack is Trace) {
+      print(stack.vmTrace);
+      return stack.vmTrace;
+    }
+
+    if (stack is Chain) {
+      print(stack.toTrace().vmTrace);
+
+      return stack.toTrace().vmTrace;
+    }
+
+    return stack;
+  };
 
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
@@ -175,4 +210,13 @@ Future<bool> checkIfFirstTime() async {
   }
 
   return isFirstTime;
+}
+
+class LifecycleObserver with WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached) {
+      Hive.close();
+    }
+  }
 }

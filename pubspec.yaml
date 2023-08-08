@@ -76,6 +76,8 @@ dependencies:
   share_plus: ^7.0.2
   firebase_messaging: ^14.6.5
   sign_in_with_apple: ^5.0.0
+  hive: ^2.2.3
+  stack_trace: ^1.11.0
   
   
 

@@ -7,6 +7,7 @@ import 'package:motiv8_ai/controllers/goal_controllers.dart';
 import 'package:motiv8_ai/models/goals_model.dart';
 import 'package:motiv8_ai/models/goaltask_models.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
+import 'package:motiv8_ai/widgets/caledarView_widget.dart';
 import 'package:motiv8_ai/widgets/custom_appbar.dart';
 import 'package:motiv8_ai/widgets/goal%20header%20widgets/goal_header_master_widget.dart';
 import 'package:motiv8_ai/widgets/goal_header_widget.dart';
@@ -45,47 +46,62 @@ class GoalOrTaskScreen extends ConsumerWidget {
           child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(left: 5.0, right: 5, top: 5),
-          child: Column(children: [
-            StyledContainer(
-                child: PaddedColumn(children: [
-                  HeaderRow(
-                    title: isGoal ? 'Your Goal 🎯' : goalTask!.name,
-                    actionButtonColor: theme.colorScheme.primary,
-                    showSubTask: isGoalTask,
-                    showAddTask: isGoal,
-                    showAddGoal: false,
-                    showMarkComplete: isGoalTask,
+          child: Column(
+            children: [
+              StyledContainer(
+                  child: PaddedColumn(
+                    children: [
+                      HeaderRow(
+                        title: isGoal ? 'Your Goal 🎯' : goalTask!.name,
+                        actionButtonColor: theme.colorScheme.primary,
+                        showSubTask: isGoalTask,
+                        showAddTask: isGoal,
+                        showAddGoal: false,
+                        showMarkComplete: isGoalTask,
+                      ),
+                      const SizedBox(height: 8.0),
+                      GoalDescriptionText(
+                        description:
+                            isGoal ? goal!.description : goalTask!.description,
+                        isGoalPresent: isGoal,
+                        color: theme.colorScheme.tertiary,
+                      ),
+                      const SizedBox(height: 10),
+                      if (isGoal) ...[
+                        GoalDateRow(
+                          startDate: goal!.startDate,
+                          endDate: goal!.endDate,
+                        ),
+                      ],
+                      const SizedBox(height: 10),
+                      if (isGoal) ...[
+                        TaskListConsumer(
+                          goalTaskList: goal!.tasks!,
+                          isGoalPresent: isGoal,
+                          color: theme.colorScheme.tertiary,
+                        ),
+                      ],
+                      if (isGoalTask) ...[
+                        SubtaskGenerator(
+                          goalTask: goalTask!,
+                        )
+                      ],
+                      if (isGoal) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 5.0, right: 5, top: 5),
+                          child: Container(
+                            width: double.infinity,
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            child: CalendarView(),
+                          ),
+                        ),
+                      ]
+                    ],
                   ),
-                  const SizedBox(height: 8.0),
-                  GoalDescriptionText(
-                    description:
-                        isGoal ? goal!.description : goalTask!.description,
-                    isGoalPresent: isGoal,
-                    color: theme.colorScheme.tertiary,
-                  ),
-                  const SizedBox(height: 10),
-                  if (isGoal) ...[
-                    GoalDateRow(
-                      startDate: goal!.startDate,
-                      endDate: goal!.endDate,
-                    ),
-                  ],
-                  const SizedBox(height: 10),
-                  if (isGoal) ...[
-                    TaskListConsumer(
-                      goalTaskList: goal!.tasks!,
-                      isGoalPresent: isGoal,
-                      color: theme.colorScheme.tertiary,
-                    ),
-                  ],
-                  if (isGoalTask) ...[
-                    SubtaskGenerator(
-                      goalTask: goalTask!,
-                    )
-                  ]
-                ]),
-                color: theme.colorScheme.onSecondaryContainer)
-          ]),
+                  color: theme.colorScheme.onSecondaryContainer),
+            ],
+          ),
         ),
       )),
     );

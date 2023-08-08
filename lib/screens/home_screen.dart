@@ -93,7 +93,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final goalTaskProgress =
         ref.watch(getGoalProgressStreamProvider(currentUser!.uid));
 
-    int tasks = goalTaskProgress.value?.tasks.length ?? 0;
+    // int tasks = goalTaskProgress.value?.tasks.length ?? 0;
+    int tasks = 10;
 
     int completedTaskCount = goalTaskProgress.value?.completedTaskCount ?? 0;
 

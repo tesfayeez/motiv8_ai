@@ -2,19 +2,31 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 import 'package:motiv8_ai/models/goaltask_models.dart';
 
+@HiveType(typeId: 0)
 class Goal {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String name;
+  @HiveField(2)
   final String userID;
+  @HiveField(3)
   final String description;
+  @HiveField(4)
   final DateTime startDate;
+  @HiveField(5)
   final DateTime endDate;
+  @HiveField(6)
   final TimeOfDay reminderTime;
+  @HiveField(7)
   final String reminderFrequency;
+  @HiveField(8)
   final List<GoalTask>? tasks;
+
   final String? milestones;
   final String? taskBreakdownPreference;
   final String? definitionOfSuccess;
@@ -190,5 +202,53 @@ class Goal {
         timeCommitment.hashCode ^
         totalTasks.hashCode ^
         completedTasks.hashCode;
+  }
+}
+
+class GoalAdapter extends TypeAdapter<Goal> {
+  @override
+  final typeId = 0;
+
+  @override
+  Goal read(BinaryReader reader) {
+    final taskCount = reader.read();
+    final goalTaskAdapter = GoalTaskAdapter();
+    final tasks = List<GoalTask>.generate(
+        taskCount, (index) => goalTaskAdapter.read(reader));
+
+    return Goal(
+      id: reader.readString(),
+      name: reader.readString(),
+      userID: reader.readString(),
+      description: reader.readString(),
+      startDate: DateTime.parse(reader.readString()),
+      endDate: DateTime.parse(reader.readString()),
+      reminderTime: TimeOfDay.fromDateTime(DateTime.parse(reader.readString())),
+      reminderFrequency: reader.readString(),
+      tasks: tasks,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Goal obj) {
+    writer.writeString(obj.id);
+    writer.writeString(obj.name);
+    writer.writeString(obj.userID);
+    writer.writeString(obj.description);
+    writer.writeString(obj.startDate.toIso8601String());
+    writer.writeString(obj.endDate.toIso8601String());
+
+    // Convert TimeOfDay to a 24-hour format string
+    final String reminderTime24HourFormat =
+        "${obj.reminderTime.hour.toString().padLeft(2, '0')}:${obj.reminderTime.minute.toString().padLeft(2, '0')}";
+    writer.writeString(reminderTime24HourFormat);
+
+    writer.writeString(obj.reminderFrequency);
+    final tasks = obj.tasks ?? [];
+    writer.write(tasks.length);
+    final goalTaskAdapter = GoalTaskAdapter();
+    for (final task in tasks) {
+      goalTaskAdapter.write(writer, task);
+    }
   }
 }
