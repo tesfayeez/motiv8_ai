@@ -73,7 +73,7 @@ function generateUniqueNotificationIdId(): string {
 exports.sendTestNotification  = functions.https.onCall(async (data, context) => {
 
     const notificationMessage = `Test notification: ${data.message}`;
-    const notificationTopic = NotificationTopics.twelveAmTopic;
+    const notificationTopic = NotificationTopics.twelvePmTopic;
     const notificationId = generateUniqueNotificationIdId();
     const resultBool : Boolean = await sendNotificationToTopic(notificationMessage, notificationId, notificationTopic);
     if (resultBool) {

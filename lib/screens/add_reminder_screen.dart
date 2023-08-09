@@ -154,12 +154,12 @@ class AddReminderScreen extends ConsumerWidget {
           reschedule: false,
         );
       } else {
-        ref.read(notificationServiceProvider).showNotificationAtTime(
-              id: Random().nextInt(63),
-              title: 'Hey! Did you complete your task?',
-              body: goalTask.description,
-              scheduledTime: selectedDateTime.toLocal(),
-            );
+        // ref.read(notificationServiceProvider).showNotificationAtTime(
+        //       id: Random().nextInt(63),
+        //       title: 'Hey! Did you complete your task?',
+        //       body: goalTask.description,
+        //       scheduledTime: selectedDateTime.toLocal(),
+        //     );
       }
     } else {
       onReschedule(
@@ -168,11 +168,11 @@ class AddReminderScreen extends ConsumerWidget {
         ref,
         context,
       );
-      ref.read(notificationServiceProvider).showNotificationAtTime(
-          id: Random().nextInt(63),
-          title: 'Hey! Did you complete your task?',
-          body: goalTask.description,
-          scheduledTime: selectedDateTime.toLocal());
+      // ref.read(notificationServiceProvider).showNotificationAtTime(
+      //     id: Random().nextInt(63),
+      //     title: 'Hey! Did you complete your task?',
+      //     body: goalTask.description,
+      //     scheduledTime: selectedDateTime.toLocal());
     }
   }
 }

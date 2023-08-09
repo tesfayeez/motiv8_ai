@@ -16,6 +16,7 @@ import 'package:motiv8_ai/screens/homeview_screen.dart';
 
 import 'package:motiv8_ai/screens/onboarding_screen.dart';
 import 'package:motiv8_ai/screens/themes_screen.dart';
+import 'package:motiv8_ai/services/notifications_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -50,8 +51,8 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
-  final localNotificationService = container.read(notificationServiceProvider);
-  localNotificationService.initNotification();
+  // final localNotificationService = container.read(notificationServiceProvider);
+  // localNotificationService.initNotification();
   // NotificationServices().initNotification();
 
   bool isFirstTime =
@@ -95,6 +96,7 @@ class MyApp extends ConsumerWidget {
       home: ref.watch(currentUserProviderStream).when(
             data: (user) {
               if (user != null) {
+                NotificationService().init();
                 return const HomeViewScreen();
               }
               return const GeneralLoginScreen();
@@ -130,41 +132,41 @@ class ErrorPage extends StatelessWidget {
   }
 }
 
-class NotificationServices {
-  final FlutterLocalNotificationsPlugin notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+// class NotificationServices {
+//   final FlutterLocalNotificationsPlugin notificationsPlugin =
+//       FlutterLocalNotificationsPlugin();
 
-  Future<void> initNotification() async {
-    AndroidInitializationSettings initializationSettingsAndroid =
-        const AndroidInitializationSettings('flutter_logo');
+//   Future<void> initNotification() async {
+//     AndroidInitializationSettings initializationSettingsAndroid =
+//         const AndroidInitializationSettings('flutter_logo');
 
-    var initializationSettingsIOS = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-        onDidReceiveLocalNotification:
-            (int id, String? title, String? body, String? payload) async {});
+//     var initializationSettingsIOS = DarwinInitializationSettings(
+//         requestAlertPermission: true,
+//         requestBadgePermission: true,
+//         requestSoundPermission: true,
+//         onDidReceiveLocalNotification:
+//             (int id, String? title, String? body, String? payload) async {});
 
-    var initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    await notificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse:
-            (NotificationResponse notificationResponse) async {});
-  }
+//     var initializationSettings = InitializationSettings(
+//         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+//     await notificationsPlugin.initialize(initializationSettings,
+//         onDidReceiveNotificationResponse:
+//             (NotificationResponse notificationResponse) async {});
+//   }
 
-  notificationDetails() {
-    return const NotificationDetails(
-        android: AndroidNotificationDetails('channelId', 'channelName',
-            importance: Importance.max),
-        iOS: DarwinNotificationDetails());
-  }
+//   notificationDetails() {
+//     return const NotificationDetails(
+//         android: AndroidNotificationDetails('channelId', 'channelName',
+//             importance: Importance.max),
+//         iOS: DarwinNotificationDetails());
+//   }
 
-  Future showNotification(
-      {int id = 0, String? title, String? body, String? payLoad}) async {
-    return notificationsPlugin.show(
-        id, title, body, await notificationDetails());
-  }
-}
+//   Future showNotification(
+//       {int id = 0, String? title, String? body, String? payLoad}) async {
+//     return notificationsPlugin.show(
+//         id, title, body, await notificationDetails());
+//   }
+// }
 
 Future<bool> checkIfFirstTime() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -6,4 +6,5 @@ export class NotificationTopics {
   static ninePmTopic:string  = "nine_pm_topic";
   static twelveAmTopic:string  = "twelve_am_topic";
   static threeAmTopic:string  = "three_am_topic";
+  static sixAmTopic:string  = "six_am_topic";
 }

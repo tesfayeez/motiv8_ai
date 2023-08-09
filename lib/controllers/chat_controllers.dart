@@ -123,7 +123,7 @@ final generateGoalTaskSubtasksControllerProvider =
 
 final motivationalQuotesProvider =
     FutureProvider.family<List<String>, String>((ref, goalName) async {
-  final notificationService = ref.read(notificationServiceProvider);
+  // final notificationService = ref.read(notificationServiceProvider);
   final quotesAsyncValue = ref.watch(getMotivationalQuotesProvider(goalName));
 
   final quotes = quotesAsyncValue.maybeWhen(
@@ -135,23 +135,23 @@ final motivationalQuotesProvider =
   var firstNotificationTime = now.add(Duration(minutes: 1));
   var secondNotificationTime = now.add(Duration(minutes: 2));
 
-  if (quotes.isNotEmpty) {
-    notificationService.showNotificationAtTime(
-      id: 1,
-      title: 'Motiv8-AI',
-      body: quotes[0],
-      scheduledTime: firstNotificationTime,
-    );
-  }
+  // if (quotes.isNotEmpty) {
+  //   notificationService.showNotificationAtTime(
+  //     id: 1,
+  //     title: 'Motiv8-AI',
+  //     body: quotes[0],
+  //     scheduledTime: firstNotificationTime,
+  //   );
+  // }
 
-  if (quotes.length > 1) {
-    notificationService.showNotificationAtTime(
-      id: 2,
-      title: 'Motiv8-AI',
-      body: quotes[1],
-      scheduledTime: secondNotificationTime,
-    );
-  }
+  // if (quotes.length > 1) {
+  //   notificationService.showNotificationAtTime(
+  //     id: 2,
+  //     title: 'Motiv8-AI',
+  //     body: quotes[1],
+  //     scheduledTime: secondNotificationTime,
+  //   );
+  // }
 
   return quotes; // Return the quotes
 });

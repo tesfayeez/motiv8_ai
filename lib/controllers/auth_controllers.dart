@@ -105,7 +105,7 @@ class AuthController extends StateNotifier<bool> {
 
   void logout(BuildContext context) async {
     final res = await _authAPI.signoutUser();
-    GoogleSignIn().signOut();
+    await GoogleSignIn().signOut();
 
     res.fold((l) => null, (r) {
       printNavigationStack(context);

@@ -11,7 +11,7 @@ class GlobalFunctions {
   Future<void> showNotification(
     RemoteMessage message,
   ) async {
-    String title = message.notification?.title ?? "Gooseneck";
+    String title = message.notification?.title ?? "Motivational Quote";
     String description = message.notification?.body ?? "New Notification";
     final androidPlatformChannelSpecific = AndroidNotificationDetails(
         'basic_channel', title,
@@ -42,6 +42,7 @@ class GlobalFunctions {
 
       await flutterLocalNotificationsPlugin.initialize(
         initializationSettings,
+        
       );
     } catch (e) {
       log(e.toString());

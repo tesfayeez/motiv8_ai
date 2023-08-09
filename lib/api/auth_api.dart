@@ -7,6 +7,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:motiv8_ai/commons/typedef.dart';
 import 'package:motiv8_ai/commons/utils.dart';
 import 'package:motiv8_ai/models/user_model.dart';
+import 'package:motiv8_ai/services/notifications_service.dart';
 
 final authAPIProvider = Provider((ref) {
   final auth = ref.watch(firebaseAuthProvider);
@@ -75,7 +76,14 @@ class AuthAPI implements IAuthAPI {
           id: userCredential.user!.uid,
           name: username, // You'll need to get the name from somewhere
           email: email,
-          profilePic: ''
+          profilePic: '',
+          userSettings: UserSettings(
+              fcmToken: null,
+              goalCheckUpReminderTime: null,
+              motivationalQuoteEndTime: null,
+              motivationalQuoteReminderFrequency: 3,
+              motivationalQuoteStartTime: null,
+              taskCheckUpReminderTime: null)
           // You'll need to get the interests from somewhere
           ));
       return right(userCredential.user!);
@@ -98,6 +106,7 @@ class AuthAPI implements IAuthAPI {
       final userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       saveUserIdToPrefs(userCredential.user!.uid);
+      await NotificationService().init();
       return right(userCredential);
     } on FirebaseAuthException catch (e, stackTrace) {
       return left(
@@ -116,6 +125,8 @@ class AuthAPI implements IAuthAPI {
       await _auth.signOut();
       _userApi.clearCache();
       saveUserIdToPrefs('');
+      await NotificationService().unsubscribeFromAllTopics();
+      await NotificationService().removeFCMTokenFromFirebase();
       return right(null);
     } on FirebaseAuthException catch (e, stackTrace) {
       return left(
@@ -160,8 +171,14 @@ class AuthAPI implements IAuthAPI {
           name: userCredential.user!.displayName ?? '',
           email: userCredential.user!.email ?? '',
           profilePic: googleUser.photoUrl ??
-              '' // You'll need to get the interests from somewhere
-          ));
+              '', // You'll need to get the interests from somewhere,
+          userSettings: UserSettings(
+              fcmToken: null,
+              goalCheckUpReminderTime: null,
+              motivationalQuoteEndTime: null,
+              motivationalQuoteReminderFrequency: 3,
+              motivationalQuoteStartTime: null,
+              taskCheckUpReminderTime: null)));
       saveUserIdToPrefs(userCredential.user!.uid);
       return right(userCredential);
     } catch (e, stackTrace) {

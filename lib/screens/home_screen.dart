@@ -20,6 +20,8 @@ import 'package:motiv8_ai/widgets/goal_card_widget.dart';
 import 'package:motiv8_ai/widgets/home_screen_appbar.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
+import '../services/firebase_callable_functions.dart';
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -68,12 +70,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         var scheduledTime = DateTime.now().add(Duration(minutes: 1 * i));
 
         // Schedule the notification
-        await ref.read(notificationServiceProvider).showNotificationAtTime(
-              id: i,
-              title: 'Motivational Quote',
-              body: quote,
-              scheduledTime: scheduledTime,
-            );
+        // await ref.read(notificationServiceProvider).showNotificationAtTime(
+        //       id: i,
+        //       title: 'Motivational Quote',
+        //       body: quote,
+        //       scheduledTime: scheduledTime,
+        //     );
       }
     });
   }
@@ -114,7 +116,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           backgroundColor: theme.colorScheme.primary,
-          onPressed: () {
+          onPressed: () async {
+            // await FirebaseCallableFunctions()
+            //     .sendTestNotification(message: "Test notification");
             // Add your onPressed code here!
 
             HapticFeedback.heavyImpact();

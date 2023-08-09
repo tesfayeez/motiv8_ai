@@ -40,8 +40,15 @@ class UserAPI implements IUserAPI {
   @override
   FutureEither<UserModel> createUser(UserModel user) async {
     try {
-      final userDocument =
-          _usersCollection.doc(user.id); // Use user.id as the document ID
+      final userDocument = _usersCollection.doc(user.id);
+      user.copyWith(
+          userSettings: UserSettings(
+              fcmToken: null,
+              goalCheckUpReminderTime: null,
+              motivationalQuoteEndTime: null,
+              motivationalQuoteReminderFrequency: 3,
+              motivationalQuoteStartTime: null,
+              taskCheckUpReminderTime: null)); // Use user.id as the document ID
       await userDocument.set(user.toMap()); // Set the document data
       final userSnapshot = await userDocument.get();
       final createdUser =
