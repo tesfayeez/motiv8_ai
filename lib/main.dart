@@ -53,7 +53,7 @@ void main() async {
     await Hive.openBox<GoalTask>('goalTasks');
   }
 
-  WidgetsBinding.instance?.addObserver(LifecycleObserver());
+  WidgetsBinding.instance.addObserver(LifecycleObserver());
   final container = ProviderContainer();
 
   await container.read(firebaseInitializerProvider);

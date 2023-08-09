@@ -321,8 +321,8 @@ class _DateCardState extends ConsumerState<DateCard> {
               isDarkTheme,
               theme.colorScheme.onSecondaryContainer,
             ),
-            width: 120,
-            height: 120,
+            width: 100,
+            height: 100,
             child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Column(

@@ -45,7 +45,7 @@ class GoalOrTaskScreen extends ConsumerWidget {
       body: SafeArea(
           child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(left: 5.0, right: 5, top: 5),
+          padding: const EdgeInsets.only(left: 10.0, right: 10, top: 5),
           child: Column(
             children: [
               StyledContainer(
@@ -86,20 +86,25 @@ class GoalOrTaskScreen extends ConsumerWidget {
                           goalTask: goalTask!,
                         )
                       ],
-                      if (isGoal) ...[
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 5.0, right: 5, top: 5),
-                          child: Container(
-                            width: double.infinity,
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            child: CalendarView(),
-                          ),
-                        ),
-                      ]
                     ],
                   ),
                   color: theme.colorScheme.onSecondaryContainer),
+              SizedBox(
+                height: 10,
+              ),
+              if (isGoal) ...[
+                StyledContainer(
+                  color: theme.colorScheme.onSecondaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 5, top: 5),
+                    child: Container(
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height * 0.45,
+                      child: GoalCalendarView(),
+                    ),
+                  ),
+                ),
+              ]
             ],
           ),
         ),
